@@ -1,0 +1,90 @@
+﻿<UserControl
+    x:Class="MediaFinder_v2.Views.Executors.ViewResults"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:MediaFinder_v2.Views.Executors"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:mde="clr-namespace:MaterialDesignExtensions.Controls;assembly=MaterialDesignExtensions"
+    d:DataContext="{d:DesignInstance Type=local:SearchExecutorViewModel,
+                                     IsDesignTimeCreatable=False}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid>
+        <StackPanel>
+            <TextBlock Text="Review discovered files and select a directory to export selected files to." />
+            <mde:TextBoxOpenDirectory
+                Margin="0,8,0,0"
+                DialogHostName="DialogHost"
+                Directory="{Binding ExportDirectory, Mode=TwoWay}">
+                <mde:TextBoxOpenDirectory.DialogArgs>
+                    <mde:OpenDirectoryDialogArguments Width="600" Height="500" />
+                </mde:TextBoxOpenDirectory.DialogArgs>
+                <mde:TextBoxOpenDirectory.TextBoxStyle>
+                    <Style BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}" TargetType="TextBox">
+                        <Setter Property="materialDesign:HintAssist.Hint" Value="Choose an export directory" />
+                    </Style>
+                </mde:TextBoxOpenDirectory.TextBoxStyle>
+            </mde:TextBoxOpenDirectory>
+            <DataGrid
+                AutoGenerateColumns="False"
+                CanUserAddRows="False"
+                ItemsSource="{Binding DiscoveredFiles, Mode=TwoWay}"
+                SelectionUnit="FullRow">
+                <DataGrid.Columns>
+                    <DataGridCheckBoxColumn
+                        Binding="{Binding ShouldExport}"
+                        Header="Export"
+                        IsReadOnly="False" />
+                    <DataGridTextColumn
+                        Binding="{Binding FileName}"
+                        Header="Name"
+                        IsReadOnly="True" />
+                    <DataGridTextColumn
+                        Binding="{Binding FileSize}"
+                        Header="Size"
+                        IsReadOnly="True" />
+                    <DataGridCheckBoxColumn
+                        Binding="{Binding IsImage}"
+                        Header="Is Image"
+                        IsReadOnly="True" />
+                    <DataGridCheckBoxColumn
+                        Binding="{Binding IsVideo}"
+                        Header="Is Video"
+                        IsReadOnly="True" />
+                    <DataGridCheckBoxColumn
+                        Binding="{Binding IsArchive}"
+                        Header="Is Archive"
+                        IsReadOnly="True" />
+                </DataGrid.Columns>
+            </DataGrid>
+            <StackPanel
+                Margin="0,8,0,0"
+                HorizontalAlignment="Right"
+                Orientation="Horizontal">
+                <Button Margin="0,0,8,0" Command="{Binding ExportFilesCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon
+                            Width="15"
+                            Height="15"
+                            Margin="0,3,8,0"
+                            Kind="Export" />
+                        <TextBlock Text="Export" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding ExportFilesCancelCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon
+                            Width="15"
+                            Height="15"
+                            Margin="0,3,8,0"
+                            Kind="Cancel" />
+                        <TextBlock Text="Cancel" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </StackPanel>
+    </Grid>
+</UserControl>

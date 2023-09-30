@@ -6,6 +6,8 @@ using CommunityToolkit.Mvvm.Messaging;
 
 using MaterialDesignExtensions.Controls;
 
+using MaterialDesignThemes.Wpf;
+
 using MediaFinder_v2.DataAccessLayer;
 using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.Messages;
@@ -16,6 +18,8 @@ public partial class AddSearchSettingViewModel : ObservableObject
 {
     private readonly AppDbContext _dbContext;
     private readonly IMessenger _messenger;
+    
+    public ISnackbarMessageQueue MessageQueue { get; }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
@@ -45,10 +49,11 @@ public partial class AddSearchSettingViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(RemoveSearchDirectoryCommand))]
     private string? _selectedDirectory;
 
-    public AddSearchSettingViewModel(AppDbContext appDbContext, IMessenger messenger)
+    public AddSearchSettingViewModel(AppDbContext appDbContext, IMessenger messenger, ISnackbarMessageQueue snackbarMessageQueue)
     {
         _dbContext = appDbContext;
         _messenger = messenger;
+        MessageQueue = snackbarMessageQueue;
     }
 
     [RelayCommand]
@@ -90,6 +95,7 @@ public partial class AddSearchSettingViewModel : ObservableObject
         await _dbContext.SaveChangesAsync();
         OnClearForm();
         _messenger.Send(SearchSettingUpdated.Create(newSettings));
+        MessageQueue.Enqueue("New search configuration saved");
     }
 
     private bool CanSubmit()

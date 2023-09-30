@@ -18,6 +18,6 @@ public partial class MainWindowsViewModel : ObservableObject, IRecipient<SearchS
 
     public void Receive(SearchSettingLoaded message)
     {
-        SearchSettings = message.settings;
+        SearchSettings = message.Settings;
     }
 }

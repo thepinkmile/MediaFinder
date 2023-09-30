@@ -2,7 +2,7 @@
 
 namespace MediaFinder_v2.Messages;
 
-public record SearchSettingUpdated(SearchSettingItemViewModel searchSetting)
+public record SearchSettingUpdated(SearchSettingItemViewModel SearchSetting)
 {
     public static SearchSettingUpdated Create(DataAccessLayer.Models.SearchSettings settings)
         => Create(new SearchSettingItemViewModel(settings));

@@ -6,7 +6,7 @@ public class FileDetails
 
     public string ParentPath { get; set; } = null!;
 
-    public string FileNamae { get; set; } = null!;
+    public string FileName { get; set; } = null!;
 
     public string MD5_Hash { get; set; } = null!;
 

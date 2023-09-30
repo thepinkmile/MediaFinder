@@ -2,7 +2,7 @@
 
 namespace MediaFinder_v2.Messages;
 
-public record SearchSettingLoaded(SearchSettingItemViewModel settings)
+public record SearchSettingLoaded(SearchSettingItemViewModel Settings)
 {
     public static SearchSettingLoaded Create(SearchSettingItemViewModel settings)
         => new(settings);

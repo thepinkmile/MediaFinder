@@ -1,10 +1,11 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows;
 using System.Windows.Data;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+
+using MaterialDesignThemes.Wpf;
 
 using MediaFinder_v2.DataAccessLayer;
 using MediaFinder_v2.Messages;
@@ -18,6 +19,8 @@ public partial class SearchSettingsViewModel : ObservableObject, IRecipient<Sear
     private readonly AppDbContext _dbContext;
     private readonly IMessenger _messenger;
 
+    public ISnackbarMessageQueue MessageQueue { get; }
+
     [ObservableProperty]
     private ObservableCollection<SearchSettingItemViewModel> _configurations = new();
 
@@ -26,11 +29,12 @@ public partial class SearchSettingsViewModel : ObservableObject, IRecipient<Sear
     [NotifyCanExecuteChangedFor(nameof(LoadSearchSettingCommand))]
     private SearchSettingItemViewModel? _selectedConfig;
 
-    public SearchSettingsViewModel(AppDbContext appDbContext, IMessenger messenger)
+    public SearchSettingsViewModel(AppDbContext appDbContext, IMessenger messenger, ISnackbarMessageQueue snackbarMessageQueue)
     {
         _dbContext = appDbContext ?? throw new ArgumentNullException(nameof(appDbContext));
         _messenger = messenger;
         _messenger.RegisterAll(this);
+        MessageQueue = snackbarMessageQueue;
         BindingOperations.EnableCollectionSynchronization(Configurations, new());
     }
 
@@ -49,17 +53,11 @@ public partial class SearchSettingsViewModel : ObservableObject, IRecipient<Sear
         }
     }
 
-    [RelayCommand]
-    private async Task OnAddSearchSetting()
-    {
-        await Task.Delay(1000);
-        // TODO: open AddSearchSetting Dialog
-    }
-
     [RelayCommand(CanExecute = nameof(CanRemoveSearchSetting))]
     private async Task OnRemoveSearchSetting()
     {
-        var entity = await _dbContext.SearchSettings.FirstOrDefaultAsync(x => x.Id == SelectedConfig!.Id);
+        var config = SelectedConfig!;
+        var entity = await _dbContext.SearchSettings.FirstOrDefaultAsync(x => x.Id == config.Id);
         if (entity is null)
         {
             return;
@@ -67,7 +65,8 @@ public partial class SearchSettingsViewModel : ObservableObject, IRecipient<Sear
 
         _dbContext.SearchSettings.Remove(entity);
         await _dbContext.SaveChangesAsync();
-        _messenger.Send(SearchSettingUpdated.Create(SelectedConfig!));
+        _messenger.Send(SearchSettingUpdated.Create(config));
+        MessageQueue.Enqueue($"Removed configuration: {config.Name}");
     }
 
     private bool CanRemoveSearchSetting()
@@ -77,7 +76,7 @@ public partial class SearchSettingsViewModel : ObservableObject, IRecipient<Sear
     private void OnLoadSearchSetting()
     {
         _messenger.Send(SearchSettingLoaded.Create(SelectedConfig!));
-        MessageBox.Show($"{SelectedConfig!.Name} configuration has been set.", "Configuration Loaded", MessageBoxButton.OK, MessageBoxImage.Information, MessageBoxResult.OK);
+        MessageQueue.Enqueue($"{SelectedConfig!.Name} configuration has been set");
     }
 
     public async void Receive(SearchSettingUpdated message)

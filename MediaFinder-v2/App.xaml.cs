@@ -3,6 +3,7 @@
 using MaterialDesignThemes.Wpf;
 
 using MediaFinder_v2.DataAccessLayer;
+using MediaFinder_v2.Views.Executors;
 using MediaFinder_v2.Views.SearchSettings;
 
 using Microsoft.EntityFrameworkCore;
@@ -47,15 +48,16 @@ public partial class App : Application
         {
             services.AddDbContext<AppDbContext>();
 
-            services.AddSingleton<MainWindow>();
+            services.AddScoped<MainWindow>();
             services.AddSingleton<MainWindowsViewModel>();
-            services.AddTransient<SearchSettingsViewModel>();
-            services.AddTransient<AddSearchSettingViewModel>();
+            services.AddSingleton<SearchSettingsViewModel>();
+            services.AddSingleton<AddSearchSettingViewModel>();
+            services.AddSingleton<SearchExecutorViewModel>();
 
-            services.AddSingleton<WeakReferenceMessenger>();
-            services.AddSingleton<IMessenger, WeakReferenceMessenger>(provider => provider.GetRequiredService<WeakReferenceMessenger>());
+            services.AddScoped<WeakReferenceMessenger>();
+            services.AddScoped<IMessenger, WeakReferenceMessenger>(provider => provider.GetRequiredService<WeakReferenceMessenger>());
 
-            services.AddSingleton(_ => Current.Dispatcher);
+            services.AddScoped(_ => Current.Dispatcher);
 
             services.AddTransient<ISnackbarMessageQueue>(provider =>
             {

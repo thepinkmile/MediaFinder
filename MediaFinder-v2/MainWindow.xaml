@@ -3,13 +3,14 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:executors="clr-namespace:MediaFinder_v2.Views.Executors"
     xmlns:local="clr-namespace:MediaFinder_v2"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:searchSettings="clr-namespace:MediaFinder_v2.Views.SearchSettings"
     Title="Demo App"
     Width="800"
-    Height="450"
+    Height="600"
     d:DataContext="{d:DesignInstance Type=local:MainWindowsViewModel,
                                      IsDesignTimeCreatable=False}"
     Style="{StaticResource MaterialDesignWindow}"
@@ -74,7 +75,7 @@
                             TextWrapping="Wrap" />
                     </StackPanel>
                 </TabItem.Header>
-                <Grid Width="100" />
+                <executors:SearchExecutor x:Name="Executor" />
             </TabItem>
         </TabControl>
         <materialDesign:DialogHost
