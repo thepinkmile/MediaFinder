@@ -1,0 +1,101 @@
+﻿<UserControl
+    x:Class="MediaFinder_v2.Views.SearchSettings.AddSearchSetting"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:MediaFinder_v2.Views.SearchSettings"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type=local:AddSearchSettingViewModel,
+                                     IsDesignTimeCreatable=False}"
+    d:DesignWidth="800"
+    mc:Ignorable="d">
+    <Grid>
+        <materialDesign:Card Margin="15">
+            <ScrollViewer
+                Width="{Binding Path=ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=materialDesign:Card}}"
+                Height="{Binding Path=ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=materialDesign:Card}}"
+                HorizontalAlignment="Left"
+                VerticalAlignment="Top"
+                VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <TextBox
+                        Height="60"
+                        Margin="4"
+                        VerticalAlignment="Top"
+                        materialDesign:HintAssist.Hint="Configuration Name"
+                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        Text="{Binding SettingName, UpdateSourceTrigger=PropertyChanged}"
+                        TextWrapping="Wrap" />
+                    <TextBox
+                        Height="120"
+                        Margin="4"
+                        VerticalAlignment="Top"
+                        materialDesign:HintAssist.Hint="Configuration Description"
+                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        Text="{Binding SettingDescription, UpdateSourceTrigger=PropertyChanged}"
+                        TextWrapping="Wrap"
+                        VerticalScrollBarVisibility="Auto" />
+                    <CheckBox
+                        Margin="4"
+                        Content="Recursive Search"
+                        IsChecked="{Binding SettingRecursive, UpdateSourceTrigger=PropertyChanged}" />
+                    <CheckBox
+                        Margin="4"
+                        Content="Extract Archives"
+                        IsChecked="{Binding SettingExtractArchives, UpdateSourceTrigger=PropertyChanged}" />
+                    <CheckBox
+                        Margin="4"
+                        Content="Perform Deep Analysis"
+                        IsChecked="{Binding SettingPerformDeepAnalysis, UpdateSourceTrigger=PropertyChanged}" />
+                    <Border
+                        HorizontalAlignment="Stretch"
+                        BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                        BorderThickness="1"
+                        ClipToBounds="True">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <materialDesign:ColorZone Effect="{DynamicResource MaterialDesignShadowDepth5}" Mode="PrimaryMid">
+                                <TextBlock Margin="16" Text="Directories" />
+                            </materialDesign:ColorZone>
+                            <Button
+                                Grid.Row="0"
+                                Margin="0,0,80,0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Command="{Binding AddSearchDirectoryCommand}"
+                                Content="{materialDesign:PackIcon Kind=Plus,
+                                                                  Size=22}"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}" />
+                            <Button
+                                Grid.Row="0"
+                                Margin="0,0,20,0"
+                                HorizontalAlignment="Right"
+                                VerticalAlignment="Center"
+                                Command="{Binding RemoveSearchDirectoryCommand}"
+                                Content="{materialDesign:PackIcon Kind=Minus,
+                                                                  Size=22}"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}" />
+                            <ListBox
+                                x:Name="DirectoriesList"
+                                Grid.Row="1"
+                                ItemsSource="{Binding SettingsDirectories, UpdateSourceTrigger=PropertyChanged}"
+                                SelectedItem="{Binding SelectedDirectory}" />
+                        </Grid>
+                    </Border>
+                    <Button
+                        Command="{Binding SubmitCommand}"
+                        Content="_Add"
+                        Style="{StaticResource MaterialDesignRaisedDarkButton}" />
+                    <Button
+                        Command="{Binding ClearFormCommand}"
+                        Content="_Clear"
+                        Style="{StaticResource MaterialDesignRaisedDarkButton}" />
+                </StackPanel>
+            </ScrollViewer>
+        </materialDesign:Card>
+    </Grid>
+</UserControl>

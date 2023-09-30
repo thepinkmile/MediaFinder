@@ -1,8 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+
 using MaterialDesignThemes.Wpf;
+
+using MediaFinder_v2.DataAccessLayer;
+using MediaFinder_v2.Views.SearchSettings;
+
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+
 using System.Windows;
 using System.Windows.Threading;
 
@@ -19,6 +26,12 @@ public partial class App : Application
         using IHost host = CreateHostBuilder(args).Build();
         host.Start();
 
+        using (var scope = host.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
+        using (var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>())
+        {
+            ctx.Database.Migrate();
+        }
+
         App app = new();
         app.InitializeComponent();
         app.MainWindow = host.Services.GetRequiredService<MainWindow>();
@@ -32,8 +45,12 @@ public partial class App : Application
             => configurationBuilder.AddUserSecrets(typeof(App).Assembly))
         .ConfigureServices((hostContext, services) =>
         {
+            services.AddDbContext<AppDbContext>();
+
             services.AddSingleton<MainWindow>();
-            services.AddSingleton<MainWindowViewModel>();
+            services.AddSingleton<MainWindowsViewModel>();
+            services.AddTransient<SearchSettingsViewModel>();
+            services.AddTransient<AddSearchSettingViewModel>();
 
             services.AddSingleton<WeakReferenceMessenger>();
             services.AddSingleton<IMessenger, WeakReferenceMessenger>(provider => provider.GetRequiredService<WeakReferenceMessenger>());

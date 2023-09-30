@@ -1,5 +1,7 @@
 ﻿using System.Windows.Input;
 
+using MediaFinder_v2.Views.SearchSettings;
+
 namespace MediaFinder_v2;
 
 /// <summary>
@@ -7,10 +9,13 @@ namespace MediaFinder_v2;
 /// </summary>
 public partial class MainWindow
 {
-    public MainWindow(MainWindowViewModel viewModel)
+    public MainWindow(MainWindowsViewModel mainWindowViewModel ,SearchSettingsViewModel searchSettingsViewModel, AddSearchSettingViewModel addSearchSettingViewModel)
     {
-        DataContext = viewModel;
+        DataContext = mainWindowViewModel;
         InitializeComponent();
+
+        AddSearchSettingsView.DataContext = addSearchSettingViewModel;
+        SearchSettingsView.DataContext = searchSettingsViewModel;
 
         CommandBindings.Add(new CommandBinding(ApplicationCommands.Close, OnClose));
     }

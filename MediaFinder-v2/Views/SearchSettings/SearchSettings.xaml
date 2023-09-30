@@ -1,0 +1,108 @@
+﻿<UserControl
+    x:Class="MediaFinder_v2.Views.SearchSettings.SearchSettings"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="clr-namespace:MediaFinder_v2.Converters"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:MediaFinder_v2.Views.SearchSettings"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DataContext="{d:DesignInstance Type=local:SearchSettingsViewModel,
+                                     IsDesignTimeCreatable=False}"
+    d:DesignHeight="450"
+    d:DesignWidth="800"
+    Loaded="UserControl_Loaded"
+    mc:Ignorable="d">
+    <UserControl.Resources>
+        <converters:BoolToStringConverter
+            x:Key="BooleanToStringConverter"
+            FalseValue="No"
+            TrueValue="Yes" />
+        <converters:StringsToContentConverter x:Key="ListToStringConverter" Delimeter="\n" />
+        <materialDesign:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </UserControl.Resources>
+    <Grid>
+        <materialDesign:Card Margin="15">
+            <Border
+                HorizontalAlignment="Stretch"
+                BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                BorderThickness="1"
+                ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <materialDesign:ColorZone Effect="{DynamicResource MaterialDesignShadowDepth5}" Mode="PrimaryMid">
+                        <TextBlock Margin="16" Text="Configurations" />
+                    </materialDesign:ColorZone>
+                    <Button
+                        Grid.Row="0"
+                        Margin="0,0,140,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Command="{Binding LoadSearchSettingCommand}"
+                        Content="{materialDesign:PackIcon Kind=Check,
+                                                          Size=22}"
+                        Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryLightButton}" />
+                    <Button
+                        Grid.Row="0"
+                        Margin="0,0,80,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Command="{Binding AddSearchSettingCommand}"
+                        Content="{materialDesign:PackIcon Kind=Plus,
+                                                          Size=22}"
+                        Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}" />
+                    <Button
+                        Grid.Row="0"
+                        Margin="0,0,20,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Command="{Binding RemoveSearchSettingCommand}"
+                        Content="{materialDesign:PackIcon Kind=Minus,
+                                                          Size=22}"
+                        Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}" />
+                    <DataGrid
+                        Grid.Row="1"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        IsReadOnly="True"
+                        ItemsSource="{Binding Configurations}"
+                        SelectedItem="{Binding SelectedConfig}"
+                        SelectionUnit="FullRow">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Binding="{Binding Id}" Header="ID" />
+                            <DataGridTextColumn Binding="{Binding Name}" Header="Name" />
+                            <DataGridTextColumn
+                                Binding="{Binding Description}"
+                                CanUserSort="False"
+                                Header="Description" />
+                            <DataGridTextColumn
+                                Binding="{Binding Recursive, Converter={StaticResource BooleanToStringConverter}}"
+                                CanUserSort="False"
+                                Header="Recursive" />
+                            <DataGridTextColumn
+                                Binding="{Binding ExtractArchives, Converter={StaticResource BooleanToStringConverter}}"
+                                CanUserSort="False"
+                                Header="Extract Archives" />
+                            <DataGridTextColumn
+                                Binding="{Binding PerformDeepAnalysis, Converter={StaticResource BooleanToStringConverter}}"
+                                CanUserSort="False"
+                                Header="Perform Deep Analysis" />
+                            <DataGridTextColumn
+                                Binding="{Binding Directories, Converter={StaticResource ListToStringConverter}}"
+                                CanUserSort="False"
+                                Header="Directories" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </materialDesign:Card>
+        <ProgressBar
+            IsIndeterminate="True"
+            Style="{StaticResource MaterialDesignCircularProgressBar}"
+            Visibility="{Binding LoadConfigurationsCommand.IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"
+            Value="0" />
+    </Grid>
+</UserControl>
