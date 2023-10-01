@@ -50,7 +50,7 @@
                         SelectionUnit="FullRow">
                         <DataGrid.Columns>
                             <DataGridCheckBoxColumn
-                                Binding="{Binding ShouldExport}"
+                                Binding="{Binding ShouldExport, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                                 Header="Export"
                                 IsReadOnly="False" />
                             <DataGridTextColumn

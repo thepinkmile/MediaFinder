@@ -1,24 +1,34 @@
-﻿using MediaFinder_v2.DataAccessLayer.Models;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+
+using MediaFinder_v2.DataAccessLayer.Models;
 
 namespace MediaFinder_v2.Views.Executors;
 
-public class MediaFile
+public partial class MediaFile : ObservableObject
 {
-    public int Id { get; set; }
+    [ObservableProperty]
+    private int _id;
 
-    public string ParentPath { get; set; }
+    [ObservableProperty]
+    private string _parentPath;
 
-    public string FileName { get; set; }
+    [ObservableProperty]
+    private string _fileName;
 
-    public long FileSize { get; set; }
+    [ObservableProperty]
+    private long _fileSize;
 
-    public bool ShouldExport { get; set; } = true;
+    [ObservableProperty]
+    private bool _shouldExport = true;
 
-    public bool IsImage { get; set; }
+    [ObservableProperty]
+    private bool _isImage;
 
-    public bool IsVideo { get; set; }
+    [ObservableProperty]
+    private bool _isVideo;
 
-    public bool IsArchive { get; set; }
+    [ObservableProperty]
+    private bool _isArchive;
 
     public MediaFile(FileDetails file)
     {

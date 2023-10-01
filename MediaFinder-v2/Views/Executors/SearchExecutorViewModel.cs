@@ -1,17 +1,18 @@
 ﻿using System.Collections.ObjectModel;
-using System.Windows.Controls;
+using System.ComponentModel;
 using System.Windows.Data;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
-using MaterialDesignThemes.Wpf;
 using MaterialDesignThemes.Wpf.Transitions;
 
 using MediaFinder_v2.DataAccessLayer;
 using MediaFinder_v2.Messages;
 using MediaFinder_v2.Views.SearchSettings;
+
+using Microsoft.EntityFrameworkCore;
 
 namespace MediaFinder_v2.Views.Executors;
 
@@ -26,6 +27,27 @@ public partial class SearchExecutorViewModel : ObservableObject
         _messenger = messenger;
         BindingOperations.EnableCollectionSynchronization(Configurations, new());
         BindingOperations.EnableCollectionSynchronization(DiscoveredFiles, new());
+        DiscoveredFiles.ListChanged += DiscoveredFiles_ListChanged;
+    }
+
+    private async void DiscoveredFiles_ListChanged(object? sender, ListChangedEventArgs e)
+    {
+        if (e.ListChangedType is ListChangedType.ItemChanged)
+        {
+            var item = DiscoveredFiles.ElementAt(e.OldIndex);
+            var entity = await _dbContext.FileDetails.FindAsync(item.Id);
+            if (entity is not null && e.PropertyDescriptor is not null)
+            {
+                var entityPropertyDescriptor = TypeDescriptor.GetProperties(entity)[e.PropertyDescriptor.Name];
+                if (entityPropertyDescriptor is not null)
+                {
+                    entityPropertyDescriptor!.SetValue(entity, e.PropertyDescriptor.GetValue(item));
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+        }
+
+        ExportFilesCommand.NotifyCanExecuteChanged();
     }
 
     #region Step1 - Set Working Directory
@@ -62,8 +84,26 @@ public partial class SearchExecutorViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(WorkingDirectoryIsSet), IncludeCancelCommand = true)]
     public async Task OnPerformSearch(CancellationToken cancellationToken)
     {
+        // TODO: implement me properly
+
         _messenger.Send(ShowProgressBar.Create("Performing Search..."));
+        await _dbContext.FileDetails.ExecuteDeleteAsync(cancellationToken);
         await Task.Delay(500, cancellationToken);
+        // TEST DATA
+        _dbContext.FileDetails.Add(new DataAccessLayer.Models.FileDetails
+        {
+            Id = 0,
+            FileName = "Test.zip",
+            ParentPath = "C:\\",
+            FileSize = 10,
+            FileType = DataAccessLayer.Models.MultiMediaType.Archive,
+            MD5_Hash = "MD5",
+            SHA256_Hash = "SHA256",
+            SHA512_Hash = "SHA512",
+            ShouldExport = true
+        });
+        // ~TEST DATA
+
         try
         {
             _messenger.Send(UpdateProgressBarStatus.Create("Discovering Files..."));
@@ -82,24 +122,14 @@ public partial class SearchExecutorViewModel : ObservableObject
                 await Task.Delay(5_000, cancellationToken);
             }
 
+            // save all database items
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
             _messenger.Send(UpdateProgressBarStatus.Create("Populating Results..."));
-            await Task.Delay(5_000, cancellationToken);
             await foreach (var file in _dbContext.FileDetails.AsAsyncEnumerable())
             {
                 DiscoveredFiles.Add(new MediaFile(file));
             }
-            DiscoveredFiles.Add(new MediaFile(new DataAccessLayer.Models.FileDetails
-            {
-                Id = 0,
-                FileName = "Test.zip",
-                ParentPath = "C:\\",
-                FileSize = 10,
-                FileType = DataAccessLayer.Models.MultiMediaType.Archive,
-                MD5_Hash = "MD5",
-                SHA256_Hash = "SHA256",
-                SHA512_Hash = "SHA512",
-                ShouldExport = true
-            }));
             Transitioner.MoveNextCommand.Execute(null, null);
         }
         catch (TaskCanceledException)
@@ -119,7 +149,7 @@ public partial class SearchExecutorViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExportFilesCommand))]
-    private ObservableCollection<MediaFile> _discoveredFiles = new();
+    private BindingList<MediaFile> _discoveredFiles = new();
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExportFilesCommand))]
@@ -129,9 +159,10 @@ public partial class SearchExecutorViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(BackCommand))]
     private bool _isExporting;
 
-    [RelayCommand(CanExecute = nameof(CanNavigateBack))]
-    public void OnBack()
+    [RelayCommand(CanExecute = nameof(CanNavigateBack), IncludeCancelCommand = true)]
+    public async Task OnBack(CancellationToken cancellationToken)
     {
+        await _dbContext.FileDetails.ExecuteDeleteAsync(cancellationToken);
         Transitioner.MoveFirstCommand.Execute(null, null);
     }
 
@@ -145,6 +176,7 @@ public partial class SearchExecutorViewModel : ObservableObject
         _messenger.Send(ShowProgressBar.Create("Exporting Files..."));
         try
         {
+            // TODO: Implement export feature
             await Task.Delay(20_000, cancellationToken);
 
             _messenger.Send(SnackBarMessage.Create("Export completed successfully"));
@@ -171,14 +203,16 @@ public partial class SearchExecutorViewModel : ObservableObject
     #region Step3 - Complete
 
     [RelayCommand]
-    public void OnBackToExport()
+    public static void OnBackToExport()
     {
         Transitioner.MovePreviousCommand.Execute(null, null);
     }
 
-    [RelayCommand]
-    public static void Finish()
+    [RelayCommand(IncludeCancelCommand = true)]
+    public async Task Finish(CancellationToken cancellationToken)
     {
+        // TODO: Perform Cleanup
+        await _dbContext.FileDetails.ExecuteDeleteAsync(cancellationToken);
         Transitioner.MoveFirstCommand.Execute(null, null);
     }
 
