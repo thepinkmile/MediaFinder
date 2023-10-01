@@ -41,8 +41,8 @@
                         Margin="0,0,80,0"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        Command="{Binding LoadSearchSettingCommand}"
-                        Content="{materialDesign:PackIcon Kind=Check,
+                        Command="{Binding AddSearchSettingCommand}"
+                        Content="{materialDesign:PackIcon Kind=Plus,
                                                           Size=22}"
                         Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryLightButton}" />
                     <Button
@@ -90,14 +90,5 @@
                 </Grid>
             </Border>
         </materialDesign:Card>
-        <ProgressBar
-            IsIndeterminate="True"
-            Style="{StaticResource MaterialDesignCircularProgressBar}"
-            Visibility="{Binding LoadConfigurationsCommand.IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"
-            Value="0" />
-        <materialDesign:Snackbar
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Bottom"
-            MessageQueue="{Binding MessageQueue}" />
     </Grid>
 </UserControl>

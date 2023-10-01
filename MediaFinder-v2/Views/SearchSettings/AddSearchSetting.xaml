@@ -11,14 +11,14 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <Grid>
-        <materialDesign:Card Margin="15" Padding="4">
+        <materialDesign:Card Margin="15">
             <ScrollViewer
                 Width="{Binding Path=ActualWidth, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=materialDesign:Card}}"
                 Height="{Binding Path=ActualHeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType=materialDesign:Card}}"
                 HorizontalAlignment="Left"
                 VerticalAlignment="Top"
                 VerticalScrollBarVisibility="Auto">
-                <StackPanel>
+                <StackPanel Margin="4">
                     <TextBox
                         Height="60"
                         Margin="4"
@@ -104,9 +104,5 @@
                 </StackPanel>
             </ScrollViewer>
         </materialDesign:Card>
-        <materialDesign:Snackbar
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Bottom"
-            MessageQueue="{Binding MessageQueue}" />
     </Grid>
 </UserControl>

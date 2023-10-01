@@ -15,31 +15,11 @@
         <materialDesign:Card Margin="15" Padding="4">
             <StackPanel>
                 <materialDesign:Transitioner AutoApplyTransitionOrigins="True" SelectedIndex="0">
-                    <materialDesign:Transitioner.InputBindings>
-                        <KeyBinding Key="Left" Command="{x:Static materialDesign:Transitioner.MovePreviousCommand}" />
-                        <KeyBinding Key="Right" Command="{x:Static materialDesign:Transitioner.MoveNextCommand}" />
-                    </materialDesign:Transitioner.InputBindings>
-
                     <local:SelectWorkingDirectory DataContext="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext}" />
-
                     <local:ViewResults DataContext="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext}" />
-
+                    <local:ProcessComplete DataContext="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext}" />
                 </materialDesign:Transitioner>
             </StackPanel>
         </materialDesign:Card>
-        <ProgressBar
-            IsIndeterminate="True"
-            Style="{StaticResource MaterialDesignCircularProgressBar}"
-            Visibility="{Binding PerformSearchCommand.IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"
-            Value="0" />
-        <ProgressBar
-            IsIndeterminate="True"
-            Style="{StaticResource MaterialDesignCircularProgressBar}"
-            Visibility="{Binding ExportFilesCommand.IsRunning, Converter={StaticResource BooleanToVisibilityConverter}}"
-            Value="0" />
-        <materialDesign:Snackbar
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Bottom"
-            MessageQueue="{Binding MessageQueue}" />
     </Grid>
 </UserControl>

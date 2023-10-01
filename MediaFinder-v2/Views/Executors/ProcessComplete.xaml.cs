@@ -3,11 +3,11 @@
 namespace MediaFinder_v2.Views.Executors
 {
     /// <summary>
-    /// Interaction logic for ViewResults.xaml
+    /// Interaction logic for ProcessComplete.xaml
     /// </summary>
-    public partial class ViewResults : UserControl
+    public partial class ProcessComplete : UserControl
     {
-        public ViewResults()
+        public ProcessComplete()
         {
             InitializeComponent();
         }

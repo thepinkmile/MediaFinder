@@ -15,6 +15,14 @@
                                      IsDesignTimeCreatable=False}"
     Style="{StaticResource MaterialDesignWindow}"
     mc:Ignorable="d">
+    <Window.Resources>
+        <Style
+            x:Key="CircularProgressBar"
+            BasedOn="{StaticResource MaterialDesignCircularProgressBar}"
+            TargetType="{x:Type ProgressBar}">
+            <Setter Property="Foreground" Value="{DynamicResource PrimaryHueDarkForegroundBrush}" />
+        </Style>
+    </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition />
@@ -25,8 +33,9 @@
             Grid.Row="0"
             materialDesign:ColorZoneAssist.Mode="PrimaryMid"
             materialDesign:ElevationAssist.Elevation="Dp0"
+            SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}"
             Style="{StaticResource MaterialDesignNavigationRailTabControl}">
-            <TabItem>
+            <TabItem Visibility="Collapsed">
                 <TabItem.Header>
                     <StackPanel>
                         <materialDesign:PackIcon
@@ -43,7 +52,7 @@
                 </TabItem.Header>
                 <searchSettings:AddSearchSetting x:Name="AddSearchSettingsView" />
             </TabItem>
-            <TabItem Selector.IsSelected="True">
+            <TabItem>
                 <TabItem.Header>
                     <StackPanel>
                         <materialDesign:PackIcon
@@ -53,7 +62,7 @@
                             Kind="CogClockwise" />
                         <TextBlock
                             HorizontalAlignment="Center"
-                            Text="Select Config"
+                            Text="Manage Configs"
                             TextAlignment="Center"
                             TextWrapping="Wrap" />
                     </StackPanel>
@@ -82,5 +91,32 @@
             x:Name="m_dialogHost"
             DialogTheme="Inherit"
             Identifier="DialogHost" />
+        <materialDesign:Card
+            Width="Auto"
+            Height="Auto"
+            Margin="15"
+            Padding="15"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Background="{DynamicResource PrimaryHueMidBrush}"
+            Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
+            UniformCornerRadius="6"
+            Visibility="{Binding ProgressBarVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                <ProgressBar
+                    VerticalAlignment="Center"
+                    IsIndeterminate="True"
+                    Style="{StaticResource CircularProgressBar}"
+                    Value="0" />
+                <TextBlock
+                    Margin="8,0,0,0"
+                    VerticalAlignment="Center"
+                    Text="{Binding ProgressBarStatus}" />
+            </StackPanel>
+        </materialDesign:Card>
+        <materialDesign:Snackbar
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Bottom"
+            MessageQueue="{Binding MessageQueue}" />
     </Grid>
 </Window>

@@ -18,8 +18,6 @@ public partial class AddSearchSettingViewModel : ObservableObject
 {
     private readonly AppDbContext _dbContext;
     private readonly IMessenger _messenger;
-    
-    public ISnackbarMessageQueue MessageQueue { get; }
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
@@ -49,11 +47,10 @@ public partial class AddSearchSettingViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(RemoveSearchDirectoryCommand))]
     private string? _selectedDirectory;
 
-    public AddSearchSettingViewModel(AppDbContext appDbContext, IMessenger messenger, ISnackbarMessageQueue snackbarMessageQueue)
+    public AddSearchSettingViewModel(AppDbContext appDbContext, IMessenger messenger)
     {
         _dbContext = appDbContext;
         _messenger = messenger;
-        MessageQueue = snackbarMessageQueue;
     }
 
     [RelayCommand]
@@ -67,6 +64,7 @@ public partial class AddSearchSettingViewModel : ObservableObject
         {
             SettingsDirectories.Add(dialogResult.Directory);
         }
+        SubmitCommand.NotifyCanExecuteChanged();
     }
 
     [RelayCommand(CanExecute = nameof(CanRemoveSearchDirectory))]
@@ -74,6 +72,7 @@ public partial class AddSearchSettingViewModel : ObservableObject
     {
         var item = SelectedDirectory!;
         SettingsDirectories.Remove(item);
+        SubmitCommand.NotifyCanExecuteChanged();
     }
 
     private bool CanRemoveSearchDirectory()
@@ -93,13 +92,15 @@ public partial class AddSearchSettingViewModel : ObservableObject
         };
         _dbContext.SearchSettings.Add(newSettings);
         await _dbContext.SaveChangesAsync();
-        OnClearForm();
-        _messenger.Send(SearchSettingUpdated.Create(newSettings));
-        MessageQueue.Enqueue("New search configuration saved");
+
+        ClearFormCommand.Execute(null);
+        _messenger.Send(SnackBarMessage.Create("New search configuration saved"));
+
+        _messenger.Send(ChangeTab.ToViewSettingsTab());
     }
 
     private bool CanSubmit()
-        => !string.IsNullOrEmpty(SettingName) && SettingsDirectories.Count != 0;
+        => !string.IsNullOrEmpty(SettingName) && SettingsDirectories.Any();
 
     [RelayCommand]
     private void OnClearForm()

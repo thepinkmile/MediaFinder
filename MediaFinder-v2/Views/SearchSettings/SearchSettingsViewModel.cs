@@ -19,38 +19,42 @@ public partial class SearchSettingsViewModel : ObservableObject, IRecipient<Sear
     private readonly AppDbContext _dbContext;
     private readonly IMessenger _messenger;
 
-    public ISnackbarMessageQueue MessageQueue { get; }
-
     [ObservableProperty]
     private ObservableCollection<SearchSettingItemViewModel> _configurations = new();
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(RemoveSearchSettingCommand))]
-    [NotifyCanExecuteChangedFor(nameof(LoadSearchSettingCommand))]
     private SearchSettingItemViewModel? _selectedConfig;
 
-    public SearchSettingsViewModel(AppDbContext appDbContext, IMessenger messenger, ISnackbarMessageQueue snackbarMessageQueue)
+    public SearchSettingsViewModel(AppDbContext appDbContext, IMessenger messenger)
     {
         _dbContext = appDbContext ?? throw new ArgumentNullException(nameof(appDbContext));
         _messenger = messenger;
-        _messenger.RegisterAll(this);
-        MessageQueue = snackbarMessageQueue;
+        messenger.RegisterAll(this);
         BindingOperations.EnableCollectionSynchronization(Configurations, new());
     }
 
     [RelayCommand]
     public async Task LoadConfigurations()
     {
+        _messenger.Send(ShowProgressBar.Create("Loading..."));
         Configurations.Clear();
 
 #if DEBUG
-        await Task.Delay(2000);
+        await Task.Delay(2_000);
 #endif
 
         await foreach (var config in _dbContext.SearchSettings.AsAsyncEnumerable())
         {
             Configurations.Add(new SearchSettingItemViewModel(config));
         }
+        _messenger.Send(HideProgressBar.Create());
+    }
+
+    [RelayCommand]
+    private void OnAddSearchSetting()
+    {
+        _messenger.Send(ChangeTab.ToAddSettingTab());
     }
 
     [RelayCommand(CanExecute = nameof(CanRemoveSearchSetting))]
@@ -66,21 +70,17 @@ public partial class SearchSettingsViewModel : ObservableObject, IRecipient<Sear
         _dbContext.SearchSettings.Remove(entity);
         await _dbContext.SaveChangesAsync();
         _messenger.Send(SearchSettingUpdated.Create(config));
-        MessageQueue.Enqueue($"Removed configuration: {config.Name}");
+        _messenger.Send(SnackBarMessage.Create($"Removed configuration: {config.Name}"));
     }
 
     private bool CanRemoveSearchSetting()
         => SelectedConfig is not null;
 
-    [RelayCommand(CanExecute = nameof(CanRemoveSearchSetting))]
-    private void OnLoadSearchSetting()
-    {
-        _messenger.Send(SearchSettingLoaded.Create(SelectedConfig!));
-        MessageQueue.Enqueue($"{SelectedConfig!.Name} configuration has been set");
-    }
-
     public async void Receive(SearchSettingUpdated message)
     {
+        if (LoadConfigurationsCommand.IsRunning)
+            return;
+
         await LoadConfigurationsCommand.ExecuteAsync(null);
     }
 }

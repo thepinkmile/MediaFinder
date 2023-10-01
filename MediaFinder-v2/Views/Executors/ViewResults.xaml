@@ -28,48 +28,75 @@
                     </Style>
                 </mde:TextBoxOpenDirectory.TextBoxStyle>
             </mde:TextBoxOpenDirectory>
-            <DataGrid
-                AutoGenerateColumns="False"
-                CanUserAddRows="False"
-                ItemsSource="{Binding DiscoveredFiles, Mode=TwoWay}"
-                SelectionUnit="FullRow">
-                <DataGrid.Columns>
-                    <DataGridCheckBoxColumn
-                        Binding="{Binding ShouldExport}"
-                        Header="Export"
-                        IsReadOnly="False" />
-                    <DataGridTextColumn
-                        Binding="{Binding FileName}"
-                        Header="Name"
-                        IsReadOnly="True" />
-                    <DataGridTextColumn
-                        Binding="{Binding FileSize}"
-                        Header="Size"
-                        IsReadOnly="True" />
-                    <DataGridCheckBoxColumn
-                        Binding="{Binding IsImage}"
-                        Header="Is Image"
-                        IsReadOnly="True" />
-                    <DataGridCheckBoxColumn
-                        Binding="{Binding IsVideo}"
-                        Header="Is Video"
-                        IsReadOnly="True" />
-                    <DataGridCheckBoxColumn
-                        Binding="{Binding IsArchive}"
-                        Header="Is Archive"
-                        IsReadOnly="True" />
-                </DataGrid.Columns>
-            </DataGrid>
+            <Border
+                Margin="0,8,0,0"
+                HorizontalAlignment="Stretch"
+                BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                BorderThickness="1"
+                ClipToBounds="True">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <materialDesign:ColorZone Effect="{DynamicResource MaterialDesignShadowDepth5}" Mode="PrimaryMid">
+                        <TextBlock Margin="16" Text="Detected Files" />
+                    </materialDesign:ColorZone>
+                    <DataGrid
+                        Grid.Row="1"
+                        AutoGenerateColumns="False"
+                        CanUserAddRows="False"
+                        ItemsSource="{Binding DiscoveredFiles, Mode=TwoWay}"
+                        SelectionUnit="FullRow">
+                        <DataGrid.Columns>
+                            <DataGridCheckBoxColumn
+                                Binding="{Binding ShouldExport}"
+                                Header="Export"
+                                IsReadOnly="False" />
+                            <DataGridTextColumn
+                                Binding="{Binding FileName}"
+                                Header="Name"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding FileSize}"
+                                Header="Size"
+                                IsReadOnly="True" />
+                            <DataGridCheckBoxColumn
+                                Binding="{Binding IsImage}"
+                                Header="Is Image"
+                                IsReadOnly="True" />
+                            <DataGridCheckBoxColumn
+                                Binding="{Binding IsVideo}"
+                                Header="Is Video"
+                                IsReadOnly="True" />
+                            <DataGridCheckBoxColumn
+                                Binding="{Binding IsArchive}"
+                                Header="Is Archive"
+                                IsReadOnly="True" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
             <StackPanel
                 Margin="0,8,0,0"
                 HorizontalAlignment="Right"
                 Orientation="Horizontal">
+                <Button Margin="0,0,8,0" Command="{Binding BackCommand}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon
+                            Width="15"
+                            Height="15"
+                            Margin="0,0,8,0"
+                            Kind="Undo" />
+                        <TextBlock Text="Back" />
+                    </StackPanel>
+                </Button>
                 <Button Margin="0,0,8,0" Command="{Binding ExportFilesCommand}">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon
                             Width="15"
                             Height="15"
-                            Margin="0,3,8,0"
+                            Margin="0,1,8,0"
                             Kind="Export" />
                         <TextBlock Text="Export" />
                     </StackPanel>
@@ -79,7 +106,7 @@
                         <materialDesign:PackIcon
                             Width="15"
                             Height="15"
-                            Margin="0,3,8,0"
+                            Margin="0,1,8,0"
                             Kind="Cancel" />
                         <TextBlock Text="Cancel" />
                     </StackPanel>
