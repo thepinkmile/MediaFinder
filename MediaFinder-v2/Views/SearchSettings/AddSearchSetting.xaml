@@ -9,6 +9,7 @@
     d:DataContext="{d:DesignInstance Type=local:AddSearchSettingViewModel,
                                      IsDesignTimeCreatable=False}"
     d:DesignWidth="800"
+    Loaded="UserControl_Loaded"
     mc:Ignorable="d">
     <Grid>
         <materialDesign:Card Margin="15">
@@ -24,7 +25,9 @@
                         Margin="4"
                         VerticalAlignment="Top"
                         materialDesign:HintAssist.Hint="Configuration Name"
-                        Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                        materialDesign:TextFieldAssist.HasClearButton="True"
+                        SpellCheck.IsEnabled="True"
+                        Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                         Text="{Binding SettingName, UpdateSourceTrigger=PropertyChanged}"
                         TextWrapping="Wrap" />
                     <TextBox
@@ -32,6 +35,9 @@
                         Margin="4"
                         VerticalAlignment="Top"
                         materialDesign:HintAssist.Hint="Configuration Description"
+                        materialDesign:TextFieldAssist.HasClearButton="True"
+                        AcceptsReturn="True"
+                        SpellCheck.IsEnabled="True"
                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
                         Text="{Binding SettingDescription, UpdateSourceTrigger=PropertyChanged}"
                         TextWrapping="Wrap"
@@ -44,6 +50,32 @@
                         Margin="4"
                         Content="Extract Archives"
                         IsChecked="{Binding SettingExtractArchives, UpdateSourceTrigger=PropertyChanged}" />
+                    <DockPanel Margin="6,0,6,0" VerticalAlignment="Center">
+                        <TextBlock
+                            VerticalAlignment="Center"
+                            DockPanel.Dock="Left"
+                            Text="Extraction Depth" />
+                        <TextBox
+                            Width="40"
+                            VerticalAlignment="Center"
+                            DockPanel.Dock="Right"
+                            Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                            Text="{Binding ElementName=ExtractDepth, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                            TextAlignment="Right"
+                            TextWrapping="NoWrap" />
+                        <Slider
+                            x:Name="ExtractDepth"
+                            Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=StackPanel}}"
+                            Margin="8,0,8,0"
+                            VerticalAlignment="Center"
+                            IsEnabled="{Binding SettingExtractArchives}"
+                            IsSnapToTickEnabled="True"
+                            Maximum="20"
+                            Minimum="1"
+                            Style="{StaticResource MaterialDesignDiscreteSlider}"
+                            TickPlacement="BottomRight"
+                            Value="{Binding SettingExtractionDepth}" />
+                    </DockPanel>
                     <CheckBox
                         Margin="4"
                         Content="Perform Deep Analysis"

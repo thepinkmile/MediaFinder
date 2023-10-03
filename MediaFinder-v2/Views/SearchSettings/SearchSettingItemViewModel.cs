@@ -16,6 +16,8 @@ public class SearchSettingItemViewModel
 
     public bool PerformDeepAnalysis { get; }
 
+    public string? WorkingDirectory { get; set; }
+
     public SearchSettingItemViewModel(DataAccessLayer.Models.SearchSettings item)
     {
         Id = item.Id;

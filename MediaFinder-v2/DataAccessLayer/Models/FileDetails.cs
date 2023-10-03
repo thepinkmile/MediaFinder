@@ -19,4 +19,6 @@ public class FileDetails
     public bool ShouldExport { get; set; } = true;
 
     public MultiMediaType FileType { get; set; }
+
+    public virtual ICollection<FileProperty> FileProperties { get; set; } = new List<FileProperty>();
 }

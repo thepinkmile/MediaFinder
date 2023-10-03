@@ -6,8 +6,6 @@ using CommunityToolkit.Mvvm.Messaging;
 
 using MaterialDesignExtensions.Controls;
 
-using MaterialDesignThemes.Wpf;
-
 using MediaFinder_v2.DataAccessLayer;
 using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.Messages;
@@ -34,6 +32,10 @@ public partial class AddSearchSettingViewModel : ObservableObject
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
     private bool _settingExtractArchives;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
+    private int _settingExtractionDepth;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
@@ -88,6 +90,7 @@ public partial class AddSearchSettingViewModel : ObservableObject
             Directories = SettingsDirectories.Select(p => new SearchDirectory { Path = p }).ToList(),
             Recursive = SettingRecursive,
             ExtractArchives = SettingExtractArchives,
+            ExtractionDepth = SettingExtractArchives ? SettingExtractionDepth : null,
             PerformDeepAnalysis = SettingPerformDeepAnalysis
         };
         _dbContext.SearchSettings.Add(newSettings);
@@ -110,6 +113,7 @@ public partial class AddSearchSettingViewModel : ObservableObject
         SettingsDirectories.Clear();
         SettingRecursive = false;
         SettingExtractArchives = false;
+        SettingExtractionDepth = 5;
         SettingPerformDeepAnalysis = false;
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Windows.Data;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -28,26 +29,6 @@ public partial class SearchExecutorViewModel : ObservableObject
         BindingOperations.EnableCollectionSynchronization(Configurations, new());
         BindingOperations.EnableCollectionSynchronization(DiscoveredFiles, new());
         DiscoveredFiles.ListChanged += DiscoveredFiles_ListChanged;
-    }
-
-    private async void DiscoveredFiles_ListChanged(object? sender, ListChangedEventArgs e)
-    {
-        if (e.ListChangedType is ListChangedType.ItemChanged)
-        {
-            var item = DiscoveredFiles.ElementAt(e.OldIndex);
-            var entity = await _dbContext.FileDetails.FindAsync(item.Id);
-            if (entity is not null && e.PropertyDescriptor is not null)
-            {
-                var entityPropertyDescriptor = TypeDescriptor.GetProperties(entity)[e.PropertyDescriptor.Name];
-                if (entityPropertyDescriptor is not null)
-                {
-                    entityPropertyDescriptor!.SetValue(entity, e.PropertyDescriptor.GetValue(item));
-                    await _dbContext.SaveChangesAsync();
-                }
-            }
-        }
-
-        ExportFilesCommand.NotifyCanExecuteChanged();
     }
 
     #region Step1 - Set Working Directory
@@ -85,6 +66,10 @@ public partial class SearchExecutorViewModel : ObservableObject
     public async Task OnPerformSearch(CancellationToken cancellationToken)
     {
         // TODO: implement me properly
+        _messenger.Send(ShowProgressBar.Create("Preparing Working Directory..."));
+        var workingDirectory = Path.Combine(WorkingDirectory!, Guid.NewGuid().ToString());
+        Directory.CreateDirectory(workingDirectory);
+        SelectedConfig!.WorkingDirectory = workingDirectory;
 
         _messenger.Send(ShowProgressBar.Create("Performing Search..."));
         await _dbContext.FileDetails.ExecuteDeleteAsync(cancellationToken);
@@ -198,6 +183,26 @@ public partial class SearchExecutorViewModel : ObservableObject
         => !string.IsNullOrEmpty(ExportDirectory) &&
             DiscoveredFiles.Any(x => x.ShouldExport);
 
+    private async void DiscoveredFiles_ListChanged(object? sender, ListChangedEventArgs e)
+    {
+        if (e.ListChangedType is ListChangedType.ItemChanged)
+        {
+            var item = DiscoveredFiles.ElementAt(e.OldIndex);
+            var entity = await _dbContext.FileDetails.FindAsync(item.Id);
+            if (entity is not null && e.PropertyDescriptor is not null)
+            {
+                var entityPropertyDescriptor = TypeDescriptor.GetProperties(entity)[e.PropertyDescriptor.Name];
+                if (entityPropertyDescriptor is not null)
+                {
+                    entityPropertyDescriptor!.SetValue(entity, e.PropertyDescriptor.GetValue(item));
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+        }
+
+        ExportFilesCommand.NotifyCanExecuteChanged();
+    }
+
     #endregion
 
     #region Step3 - Complete
@@ -211,8 +216,8 @@ public partial class SearchExecutorViewModel : ObservableObject
     [RelayCommand(IncludeCancelCommand = true)]
     public async Task Finish(CancellationToken cancellationToken)
     {
-        // TODO: Perform Cleanup
         await _dbContext.FileDetails.ExecuteDeleteAsync(cancellationToken);
+        Directory.Delete(SelectedConfig!.WorkingDirectory!, true);
         Transitioner.MoveFirstCommand.Execute(null, null);
     }
 

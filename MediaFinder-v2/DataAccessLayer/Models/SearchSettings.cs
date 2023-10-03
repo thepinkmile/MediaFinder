@@ -14,5 +14,7 @@ public record SearchSettings
 
     public bool ExtractArchives { get; set; }
 
+    public int? ExtractionDepth { get; set; }
+
     public bool PerformDeepAnalysis { get; set; }
 }

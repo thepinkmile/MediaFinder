@@ -3,6 +3,7 @@ using System;
 using MediaFinder_v2.DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediaFinder_v2.DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231002114526_AddingExtendedFilePropertiesAndExtractionDepthSetting")]
+    partial class AddingExtendedFilePropertiesAndExtractionDepthSetting
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -32,7 +35,7 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
 
                     b.HasKey("Key");
 
-                    b.ToTable("AppSettings", (string)null);
+                    b.ToTable("AppSettings");
                 });
 
             modelBuilder.Entity("MediaFinder_v2.DataAccessLayer.Models.FileDetails", b =>
@@ -72,7 +75,7 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("FileDetails", (string)null);
+                    b.ToTable("FileDetails");
                 });
 
             modelBuilder.Entity("MediaFinder_v2.DataAccessLayer.Models.FileProperty", b =>
@@ -96,7 +99,7 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
 
                     b.HasIndex("FileDetailsId");
 
-                    b.ToTable("FileProperty", (string)null);
+                    b.ToTable("FileProperty");
                 });
 
             modelBuilder.Entity("MediaFinder_v2.DataAccessLayer.Models.SearchDirectory", b =>
@@ -116,7 +119,7 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
 
                     b.HasIndex("SettingsId");
 
-                    b.ToTable("SearchDirectory", (string)null);
+                    b.ToTable("SearchDirectory");
                 });
 
             modelBuilder.Entity("MediaFinder_v2.DataAccessLayer.Models.SearchSettings", b =>
@@ -146,7 +149,7 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("SearchSettings", (string)null);
+                    b.ToTable("SearchSettings");
                 });
 
             modelBuilder.Entity("MediaFinder_v2.DataAccessLayer.Models.FileProperty", b =>
