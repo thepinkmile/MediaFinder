@@ -32,6 +32,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Bogus" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="MaterialDesignExtensions" />
     <PackageReference Include="MaterialDesignThemes" />
@@ -41,5 +42,6 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="SevenZipExtractor" />
   </ItemGroup>
 </Project>

@@ -15,103 +15,137 @@
     Loaded="UserControl_Loaded"
     mc:Ignorable="d">
     <UserControl.Resources>
-        <converters:BoolToStringConverter
+        <converters:BooleanToStringConverter
             x:Key="BooleanToStringConverter"
             FalseValue="No"
             TrueValue="Yes" />
         <converters:StringsToContentConverter x:Key="ListToStringConverter" Delimeter="\n" />
-        <materialDesign:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+        <materialDesign:BooleanToVisibilityConverter
+            x:Key="BooleanToVisibilityConverter"
+            FalseValue="Collapsed"
+            TrueValue="Visible" />
+        <materialDesign:BooleanToVisibilityConverter
+            x:Key="BooleanToOppositeVisibilityConverter"
+            FalseValue="Visible"
+            TrueValue="Collapsed" />
     </UserControl.Resources>
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
         <StackPanel>
             <TextBlock Text="Select a working directory and configuration for the search." />
             <mde:TextBoxOpenDirectory
                 Margin="0,8,0,0"
                 DialogHostName="DialogHost"
                 Directory="{Binding WorkingDirectory, Mode=TwoWay}">
-                <mde:TextBoxOpenDirectory.DialogArgs>
+                <!-- mde:TextBoxOpenDirectory.DialogArgs>
                     <mde:OpenDirectoryDialogArguments Width="600" Height="500" />
-                </mde:TextBoxOpenDirectory.DialogArgs>
+                </mde:TextBoxOpenDirectory.DialogArgs-->
                 <mde:TextBoxOpenDirectory.TextBoxStyle>
                     <Style BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}" TargetType="TextBox">
                         <Setter Property="materialDesign:HintAssist.Hint" Value="Choose a directory" />
                     </Style>
                 </mde:TextBoxOpenDirectory.TextBoxStyle>
             </mde:TextBoxOpenDirectory>
-            <Border
-                Margin="0,8,0,0"
-                HorizontalAlignment="Stretch"
-                BorderBrush="{DynamicResource PrimaryHueMidBrush}"
-                BorderThickness="1"
-                ClipToBounds="True">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <materialDesign:ColorZone Effect="{DynamicResource MaterialDesignShadowDepth5}" Mode="PrimaryMid">
-                        <TextBlock Margin="16" Text="Configurations" />
-                    </materialDesign:ColorZone>
-                    <DataGrid
-                        Grid.Row="1"
-                        AutoGenerateColumns="False"
-                        CanUserAddRows="False"
-                        IsReadOnly="True"
-                        ItemsSource="{Binding Configurations}"
-                        SelectedItem="{Binding SelectedConfig}"
-                        SelectionUnit="FullRow">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Binding="{Binding Id}" Header="ID" />
-                            <DataGridTextColumn Binding="{Binding Name}" Header="Name" />
-                            <DataGridTextColumn
-                                Binding="{Binding Description}"
-                                CanUserSort="False"
-                                Header="Description" />
-                            <DataGridTextColumn
-                                Binding="{Binding Recursive, Converter={StaticResource BooleanToStringConverter}}"
-                                CanUserSort="False"
-                                Header="Recursive" />
-                            <DataGridTextColumn
-                                Binding="{Binding ExtractArchives, Converter={StaticResource BooleanToStringConverter}}"
-                                CanUserSort="False"
-                                Header="Extract Archives" />
-                            <DataGridTextColumn
-                                Binding="{Binding PerformDeepAnalysis, Converter={StaticResource BooleanToStringConverter}}"
-                                CanUserSort="False"
-                                Header="Perform Deep Analysis" />
-                            <DataGridTextColumn
-                                Binding="{Binding Directories, Converter={StaticResource ListToStringConverter}}"
-                                CanUserSort="False"
-                                Header="Directories" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                </Grid>
-            </Border>
-            <StackPanel
-                Margin="0,8,0,0"
-                HorizontalAlignment="Right"
-                Orientation="Horizontal">
-                <Button Margin="0,0,8,0" Command="{Binding PerformSearchCommand}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon
-                            Width="15"
-                            Height="15"
-                            Margin="0,0,8,0"
-                            Kind="RunFast" />
-                        <TextBlock Text="Run" />
-                    </StackPanel>
-                </Button>
-                <Button Command="{Binding PerformSearchCancelCommand}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon
-                            Width="15"
-                            Height="15"
-                            Margin="0,1,8,0"
-                            Kind="Cancel" />
-                        <TextBlock Text="Cancel" />
-                    </StackPanel>
-                </Button>
-            </StackPanel>
+        </StackPanel>
+        <Border
+            Grid.Row="1"
+            Margin="0,8,0,0"
+            HorizontalAlignment="Stretch"
+            BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+            BorderThickness="1"
+            ClipToBounds="True"
+            CornerRadius="8,8,0,0">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <materialDesign:ColorZone
+                    CornerRadius="8,8,0,0"
+                    Effect="{DynamicResource MaterialDesignShadowDepth5}"
+                    Mode="PrimaryMid">
+                    <TextBlock Margin="16" Text="Configurations" />
+                </materialDesign:ColorZone>
+                <DataGrid
+                    Grid.Row="1"
+                    AutoGenerateColumns="False"
+                    CanUserAddRows="False"
+                    IsReadOnly="True"
+                    ItemsSource="{Binding Configurations}"
+                    SelectedItem="{Binding SelectedConfig}"
+                    SelectionUnit="FullRow">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Binding="{Binding Id}" Header="ID" />
+                        <DataGridTextColumn Binding="{Binding Name}" Header="Name" />
+                        <DataGridTextColumn
+                            Binding="{Binding Description}"
+                            CanUserSort="False"
+                            Header="Description" />
+                        <DataGridTextColumn
+                            Binding="{Binding Recursive, Converter={StaticResource BooleanToStringConverter}}"
+                            CanUserSort="False"
+                            Header="Recursive" />
+                        <DataGridTextColumn
+                            Binding="{Binding ExtractArchives, Converter={StaticResource BooleanToStringConverter}}"
+                            CanUserSort="False"
+                            Header="Extract Archives" />
+                        <DataGridTextColumn
+                            Binding="{Binding PerformDeepAnalysis, Converter={StaticResource BooleanToStringConverter}}"
+                            CanUserSort="False"
+                            Header="Perform Deep Analysis" />
+                        <DataGridTextColumn
+                            Binding="{Binding Directories, Converter={StaticResource ListToStringConverter}}"
+                            CanUserSort="False"
+                            Header="Directories" />
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </Border>
+        <StackPanel
+            Grid.Row="2"
+            Margin="0,8,0,0"
+            HorizontalAlignment="Right"
+            Orientation="Horizontal">
+            <Button
+                Margin="0,0,8,0"
+                Command="{Binding PerformSearchCommand}"
+                Visibility="{Binding SearchComplete, Converter={StaticResource BooleanToOppositeVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon
+                        Width="15"
+                        Height="15"
+                        Margin="0,0,8,0"
+                        Kind="RunFast" />
+                    <TextBlock Text="Run" />
+                </StackPanel>
+            </Button>
+            <Button Command="{Binding PerformSearchCancelCommand}" Visibility="{Binding SearchComplete, Converter={StaticResource BooleanToOppositeVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon
+                        Width="15"
+                        Height="15"
+                        Margin="0,1,8,0"
+                        Kind="Cancel" />
+                    <TextBlock Text="Cancel" />
+                </StackPanel>
+            </Button>
+            <Button
+                Margin="0,0,8,0"
+                Command="{Binding MoveToReviewCommand}"
+                Visibility="{Binding SearchComplete, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon
+                        Width="15"
+                        Height="15"
+                        Margin="0,0,8,0"
+                        Kind="NavigateNext" />
+                    <TextBlock Text="Next" />
+                </StackPanel>
+            </Button>
         </StackPanel>
     </Grid>
 </UserControl>

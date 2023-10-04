@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Security.Cryptography;
 using System.Windows.Data;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -10,10 +11,14 @@ using CommunityToolkit.Mvvm.Messaging;
 using MaterialDesignThemes.Wpf.Transitions;
 
 using MediaFinder_v2.DataAccessLayer;
+using MediaFinder_v2.Helpers;
 using MediaFinder_v2.Messages;
+using MediaFinder_v2.Services;
 using MediaFinder_v2.Views.SearchSettings;
 
 using Microsoft.EntityFrameworkCore;
+
+using SevenZipExtractor;
 
 namespace MediaFinder_v2.Views.Executors;
 
@@ -31,6 +36,24 @@ public partial class SearchExecutorViewModel : ObservableObject
         DiscoveredFiles.ListChanged += DiscoveredFiles_ListChanged;
     }
 
+    private async Task ShowProgressIndicator(string message, CancellationToken cancellationToken = default)
+    {
+        _messenger.Send(ShowProgressBar.Create(message));
+        await Task.Delay(500, cancellationToken);
+    }
+
+    private async Task UpdateProgressIndicator(string message, CancellationToken cancellationToken = default)
+    {
+        _messenger.Send(UpdateProgressBarStatus.Create(message));
+        await Task.Delay(500, cancellationToken);
+    }
+
+    private async Task HideProgressIndicator()
+    {
+        _messenger.Send(HideProgressBar.Create());
+        await Task.Yield();
+    }
+
     #region Step1 - Set Working Directory
 
     [ObservableProperty]
@@ -44,89 +67,262 @@ public partial class SearchExecutorViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
     private SearchSettingItemViewModel? _selectedConfig;
 
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(MoveToReviewCommand))]
+    private bool _searchComplete;
+
+    partial void OnWorkingDirectoryChanged(string? value)
+    {
+        SearchComplete = false;
+    }
+
+    partial void OnSelectedConfigChanged(SearchSettingItemViewModel? value)
+    {
+        SearchComplete = false;
+    }
+
     public bool WorkingDirectoryIsSet()
         => !string.IsNullOrEmpty(WorkingDirectory) &&
-            SelectedConfig is not null;
-
+            SelectedConfig is not null &&
+            !SearchComplete;
 
     [RelayCommand]
     public async Task LoadConfigurations()
     {
-        _messenger.Send(ShowProgressBar.Create("Loading..."));
-        Configurations.Clear();
+        await ShowProgressIndicator("Loading...");
 
+        Configurations.Clear();
         await foreach (var config in _dbContext.SearchSettings.AsAsyncEnumerable())
         {
             Configurations.Add(new SearchSettingItemViewModel(config));
         }
-        _messenger.Send(HideProgressBar.Create());
+
+        await HideProgressIndicator();
+
+        if (SearchComplete)
+        {
+            MoveToReviewCommand.Execute(null);
+        }
     }
 
     [RelayCommand(CanExecute = nameof(WorkingDirectoryIsSet), IncludeCancelCommand = true)]
     public async Task OnPerformSearch(CancellationToken cancellationToken)
     {
-        // TODO: implement me properly
-        _messenger.Send(ShowProgressBar.Create("Preparing Working Directory..."));
+        if (SelectedConfig is null)
+        {
+            _messenger.Send(SnackBarMessage.Create("No configuration selected"));
+            return;
+        }
+
+        if (WorkingDirectory is null)
+        {
+            _messenger.Send(SnackBarMessage.Create("No working directory selected"));
+            return;
+        }
+
+
+        await ShowProgressIndicator("Preparing Working Directory...", cancellationToken);
         var workingDirectory = Path.Combine(WorkingDirectory!, Guid.NewGuid().ToString());
         Directory.CreateDirectory(workingDirectory);
-        SelectedConfig!.WorkingDirectory = workingDirectory;
-
-        _messenger.Send(ShowProgressBar.Create("Performing Search..."));
-        await _dbContext.FileDetails.ExecuteDeleteAsync(cancellationToken);
-        await Task.Delay(500, cancellationToken);
-        // TEST DATA
-        _dbContext.FileDetails.Add(new DataAccessLayer.Models.FileDetails
-        {
-            Id = 0,
-            FileName = "Test.zip",
-            ParentPath = "C:\\",
-            FileSize = 10,
-            FileType = DataAccessLayer.Models.MultiMediaType.Archive,
-            MD5_Hash = "MD5",
-            SHA256_Hash = "SHA256",
-            SHA512_Hash = "SHA512",
-            ShouldExport = true
-        });
-        // ~TEST DATA
+        SelectedConfig.WorkingDirectory = workingDirectory;
 
         try
         {
-            _messenger.Send(UpdateProgressBarStatus.Create("Discovering Files..."));
-            DiscoveredFiles.Clear();
-            await Task.Delay(5_000, cancellationToken);
+            await _dbContext.FileDetails.ExecuteDeleteAsync(cancellationToken);
 
-            if (SelectedConfig is not null && SelectedConfig.ExtractArchives)
+            await UpdateProgressIndicator("Performing Search...", cancellationToken);
+            await foreach (var file in MediaLocator.Search(SelectedConfig.Directories, recursive: SelectedConfig.Recursive, cancellationToken: cancellationToken))
             {
-                _messenger.Send(UpdateProgressBarStatus.Create("Extracting Archives..."));
-                await Task.Delay(5_000, cancellationToken);
+                _dbContext.FileDetails.Add(file);
             }
-
-            if (SelectedConfig is not null && SelectedConfig.PerformDeepAnalysis)
-            {
-                _messenger.Send(UpdateProgressBarStatus.Create("Analysing Files..."));
-                await Task.Delay(5_000, cancellationToken);
-            }
-
-            // save all database items
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            _messenger.Send(UpdateProgressBarStatus.Create("Populating Results..."));
-            await foreach (var file in _dbContext.FileDetails.AsAsyncEnumerable())
+            if (SelectedConfig.ExtractArchives && false)
             {
-                DiscoveredFiles.Add(new MediaFile(file));
+                await UpdateProgressIndicator("Extracting Archives...", cancellationToken);
+
+                var extractionDepth = 0;
+                bool filesExtracted;
+                do
+                {
+                    extractionDepth++;
+                    filesExtracted = false;
+
+                    var archiveCount = await _dbContext.FileDetails.CountAsync(f => f.FileType == DataAccessLayer.Models.MultiMediaType.Archive && !f.Extracted, cancellationToken);
+                    var currentArchive = 0;
+                    await foreach (var archive in _dbContext.FileDetails.Where(f => f.FileType == DataAccessLayer.Models.MultiMediaType.Archive && !f.Extracted).AsAsyncEnumerable())
+                    {
+                        cancellationToken.ThrowIfCancellationRequested();
+
+                        var filePath = Path.Combine(archive.ParentPath, archive.FileName);
+                        await UpdateProgressIndicator($"Extracting Archives ...\nIteration: {extractionDepth}\nExtracting {++currentArchive} of {archiveCount}\nFile: {filePath}", cancellationToken);
+                        var destDir = Path.Combine(workingDirectory, $"Extracted_{archive.FileName}");
+
+                        archive.Extracted = await Task.Factory.StartNew((state) =>
+                        {
+                            if (state is not ExtractionState extractionState)
+                            {
+                                return false;
+                            }
+
+                            var result = false;
+                            try
+                            {
+                                using var extractor = new ArchiveFile(extractionState.Source);
+                                extractor.Extract(extractionState.Destination);
+                                result = true;
+                            }
+                            catch
+                            {
+                                // do nothing
+                            }
+                            return result;
+                        }, ExtractionState.Create(filePath, destDir));
+
+                        await foreach (var file in MediaLocator.Search(destDir, recursive: SelectedConfig.Recursive, cancellationToken: cancellationToken))
+                        {
+                            filesExtracted = true;
+                            _dbContext.FileDetails.Add(file);
+                        }
+                    }
+                    await _dbContext.SaveChangesAsync(cancellationToken);
+                }
+                while (filesExtracted && extractionDepth <= SelectedConfig.ExtractionDepth);
             }
-            Transitioner.MoveNextCommand.Execute(null, null);
+
+            if (SelectedConfig.PerformDeepAnalysis)
+            {
+                await UpdateProgressIndicator("Analysing Files...", cancellationToken);
+                // TODO: Deep File Analysis for media types
+                await _dbContext.SaveChangesAsync(cancellationToken);
+            }
+
+            await UpdateProgressIndicator("Calculating Hashes...", cancellationToken);
+            var total = await _dbContext.FileDetails
+                .CountAsync(f => f.FileType != DataAccessLayer.Models.MultiMediaType.Archive, cancellationToken);
+            var current = 0;
+            await foreach (var file in _dbContext.FileDetails
+                .Where(f => f.FileType != DataAccessLayer.Models.MultiMediaType.Archive)
+                .AsAsyncEnumerable())
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                var filePath = Path.Combine(file.ParentPath, file.FileName);
+                await UpdateProgressIndicator($"Calculating Hash {++current} of {total}\nFile: {filePath}", cancellationToken);
+                var fileInfo = new FileInfo(filePath);
+
+                using var fileStream = fileInfo.Open(FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
+                using var hashStream = new HashStream(fileStream, HashAlgorithmName.MD5, HashAlgorithmName.SHA256, HashAlgorithmName.SHA512);
+                using var streamReader = new StreamReader(hashStream);
+
+                _ = await streamReader.ReadToEndAsync(cancellationToken);
+
+                file.MD5_Hash = Convert.ToHexString(hashStream.Hash(HashAlgorithmName.MD5));
+                file.SHA256_Hash = Convert.ToHexString(hashStream.Hash(HashAlgorithmName.SHA256));
+                file.SHA512_Hash = Convert.ToHexString(hashStream.Hash(HashAlgorithmName.SHA512));
+            }
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            await UpdateProgressIndicator("Saving Results...", cancellationToken);
+            await foreach (var file in _dbContext.FileDetails
+                .Where(f => f.FileType == DataAccessLayer.Models.MultiMediaType.Image || f.FileType == DataAccessLayer.Models.MultiMediaType.Video)
+                .AsAsyncEnumerable())
+            {
+                file.ShouldExport = true;
+            }
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            await UpdateProgressIndicator("Removing Duplicates...", cancellationToken);
+            var md5DupeCount = 0;
+            var md5_hashes = await _dbContext.FileDetails
+                .Where(f => f.ShouldExport && f.MD5_Hash != null)
+                .GroupBy(f => f.MD5_Hash)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToListAsync(cancellationToken);
+            await UpdateProgressIndicator($"Removing Duplicates...\nBased on MD5 Hash: {md5_hashes.Count}", cancellationToken);
+            foreach (var md5_hash in md5_hashes)
+            {
+                await foreach (var file in _dbContext.FileDetails
+                    .Where(f => f.MD5_Hash == md5_hash)
+                    .Skip(1)
+                    .AsAsyncEnumerable())
+                {
+                    file.ShouldExport = false;
+                    ++md5DupeCount;
+                }
+            }
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            var sha256DupeCount = 0;
+            var sha256_hashes = await _dbContext.FileDetails
+                .Where(f => f.ShouldExport && f.SHA256_Hash != null)
+                .GroupBy(f => f.SHA256_Hash)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToListAsync(cancellationToken);
+            await UpdateProgressIndicator($"Removing Duplicates...\nBased on SHA256 Hash: {sha256_hashes.Count}", cancellationToken);
+            foreach (var sha256_hash in sha256_hashes)
+            {
+                await foreach (var file in _dbContext.FileDetails
+                    .Where(f => f.SHA256_Hash == sha256_hash)
+                    .Skip(1)
+                    .AsAsyncEnumerable())
+                {
+                    file.ShouldExport = false;
+                    ++sha256DupeCount;
+                }
+            }
+            await _dbContext.SaveChangesAsync(cancellationToken);
+            var sha512DupeCount = 0;
+            var sha512_hashes = await _dbContext.FileDetails
+                .Where(f => f.ShouldExport && f.SHA512_Hash != null)
+                .GroupBy(f => f.SHA512_Hash)
+                .Where(g => g.Count() > 1)
+                .Select(g => g.Key)
+                .ToListAsync(cancellationToken);
+            await UpdateProgressIndicator($"Removing Duplicates...\nBased on SHA512 Hash: {sha512_hashes.Count}", cancellationToken);
+            foreach (var sha512_hash in sha512_hashes)
+            {
+                await foreach (var file in _dbContext.FileDetails
+                    .Where(f => f.SHA512_Hash == sha512_hash)
+                    .Skip(1)
+                    .AsAsyncEnumerable())
+                {
+                    file.ShouldExport = false;
+                    ++sha512DupeCount;
+                }
+            }
+            await _dbContext.SaveChangesAsync(cancellationToken);
+
+            var totalDupeCount = md5DupeCount + sha256DupeCount + sha512DupeCount;
+            await UpdateProgressIndicator($"Finalizing...\nTotal Duplicates Found: {totalDupeCount}\nMD5: {md5DupeCount}\nSHA256: {sha256DupeCount}\nSHA512: {sha512DupeCount}", cancellationToken);
+            await Task.Delay(TimeSpan.FromSeconds(5), cancellationToken);
+            SearchComplete = true;
         }
         catch (TaskCanceledException)
         {
             _messenger.Send(SnackBarMessage.Create("Search cancelled"));
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _messenger.Send(SnackBarMessage.Create($"Search failed: {ex.Message}"));
         }
-        _messenger.Send(HideProgressBar.Create());
+        finally
+        {
+            await HideProgressIndicator();
+        }
     }
+
+    [RelayCommand(CanExecute = nameof(CanMoveToReview))]
+    public async Task OnMoveToReview()
+    {
+        var reload = LoadingResultsCommand.ExecuteAsync(null);
+        Transitioner.MoveNextCommand.Execute(null, null);
+        await reload;
+    }
+
+    public bool CanMoveToReview()
+        => SearchComplete;
 
     #endregion
 
@@ -134,20 +330,37 @@ public partial class SearchExecutorViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExportFilesCommand))]
-    private BindingList<MediaFile> _discoveredFiles = new();
+    private AdvancedBindingList<MediaFile> _discoveredFiles = new();
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExportFilesCommand))]
     private string? _exportDirectory;
 
     [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(BackCommand))]
+    [NotifyCanExecuteChangedFor(nameof(BackToSearchCommand))]
     private bool _isExporting;
 
-    [RelayCommand(CanExecute = nameof(CanNavigateBack), IncludeCancelCommand = true)]
-    public async Task OnBack(CancellationToken cancellationToken)
+    [RelayCommand]
+    public async Task OnLoadingResults()
     {
-        await _dbContext.FileDetails.ExecuteDeleteAsync(cancellationToken);
+        if (!SearchComplete)
+        {
+            return;
+        }
+
+        await ShowProgressIndicator("Populating Results...");
+        DiscoveredFiles.Clear();
+        await foreach (var file in _dbContext.FileDetails
+            .AsAsyncEnumerable())
+        {
+            DiscoveredFiles.Add(new MediaFile(file));
+        }
+        await HideProgressIndicator();
+    }
+
+    [RelayCommand(CanExecute = nameof(CanNavigateBack))]
+    public static void OnBackToSearch(CancellationToken cancellationToken)
+    {
         Transitioner.MoveFirstCommand.Execute(null, null);
     }
 
@@ -175,8 +388,11 @@ public partial class SearchExecutorViewModel : ObservableObject
         {   
             _messenger.Send(SnackBarMessage.Create($"Export failed: {ex.Message}"));
         }
-        _messenger.Send(HideProgressBar.Create());
-        IsExporting = false;
+        finally
+        {
+            _messenger.Send(HideProgressBar.Create());
+            IsExporting = false;
+        }
     }
 
     public bool CanExportFiles()
@@ -216,8 +432,19 @@ public partial class SearchExecutorViewModel : ObservableObject
     [RelayCommand(IncludeCancelCommand = true)]
     public async Task Finish(CancellationToken cancellationToken)
     {
+        if (!SearchComplete)
+        {
+            return;
+        }
+
         await _dbContext.FileDetails.ExecuteDeleteAsync(cancellationToken);
-        Directory.Delete(SelectedConfig!.WorkingDirectory!, true);
+        if (SelectedConfig?.WorkingDirectory is not null
+            && Directory.Exists(SelectedConfig.WorkingDirectory))
+        {
+            Directory.Delete(SelectedConfig.WorkingDirectory, true);
+        }
+        SearchComplete = false;
+        SelectedConfig = null;
         Transitioner.MoveFirstCommand.Execute(null, null);
     }
 

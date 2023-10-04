@@ -5,8 +5,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
-using MaterialDesignThemes.Wpf;
-
 using MediaFinder_v2.DataAccessLayer;
 using MediaFinder_v2.Messages;
 

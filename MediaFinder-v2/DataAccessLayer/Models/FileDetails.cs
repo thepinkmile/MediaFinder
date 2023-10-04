@@ -1,4 +1,6 @@
-﻿namespace MediaFinder_v2.DataAccessLayer.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MediaFinder_v2.DataAccessLayer.Models;
 
 public class FileDetails
 {
@@ -8,17 +10,24 @@ public class FileDetails
 
     public string FileName { get; set; } = null!;
 
-    public string MD5_Hash { get; set; } = null!;
+    [MaxLength(32)]
+    public string? MD5_Hash { get; set; }
 
-    public string SHA256_Hash { get; set; } = null!;
+    [MaxLength(256)]
+    public string? SHA256_Hash { get; set; }
 
-    public string SHA512_Hash { get; set; } = null!;
+    [MaxLength(512)]
+    public string? SHA512_Hash { get; set; }
 
     public long FileSize { get; set; }
 
-    public bool ShouldExport { get; set; } = true;
+    public bool ShouldExport { get; set; }
 
-    public MultiMediaType FileType { get; set; }
+    public MultiMediaType FileType { get; set; } = MultiMediaType.Unknown;
 
     public virtual ICollection<FileProperty> FileProperties { get; set; } = new List<FileProperty>();
+
+    public bool Extracted { get; set; }
+
+    public DateTimeOffset Created {  get; set; }
 }

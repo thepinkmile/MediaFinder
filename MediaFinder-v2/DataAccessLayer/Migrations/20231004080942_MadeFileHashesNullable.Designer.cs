@@ -3,6 +3,7 @@ using System;
 using MediaFinder_v2.DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediaFinder_v2.DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231004080942_MadeFileHashesNullable")]
+    partial class MadeFileHashesNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -41,9 +44,6 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("TEXT");
-
                     b.Property<bool>("Extracted")
                         .HasColumnType("INTEGER");
 
@@ -58,7 +58,6 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("MD5_Hash")
-                        .HasMaxLength(32)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ParentPath")
@@ -66,11 +65,9 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SHA256_Hash")
-                        .HasMaxLength(256)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("SHA512_Hash")
-                        .HasMaxLength(512)
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("ShouldExport")

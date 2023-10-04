@@ -14,6 +14,8 @@ public class SearchSettingItemViewModel
 
     public bool ExtractArchives { get; }
 
+    public int? ExtractionDepth { get; }
+
     public bool PerformDeepAnalysis { get; }
 
     public string? WorkingDirectory { get; set; }
@@ -26,6 +28,7 @@ public class SearchSettingItemViewModel
         Directories = item.Directories.Select(x => x.Path).ToList();
         Recursive = item.Recursive;
         ExtractArchives = item.ExtractArchives;
+        ExtractionDepth = item.ExtractionDepth;
         PerformDeepAnalysis = item.PerformDeepAnalysis;
     }
 }
