@@ -1,7 +1,9 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Immutable;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Windows.Data;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -26,14 +28,22 @@ public partial class SearchExecutorViewModel : ObservableObject
 {
     private readonly AppDbContext _dbContext;
     private readonly IMessenger _messenger;
+    private readonly MediaLocator _mediaLocator;
+    private readonly IImmutableList<IMediaDetector> _mediaDetectors;
 
-    public SearchExecutorViewModel(AppDbContext dbContext, IMessenger messenger)
+    public SearchExecutorViewModel(
+        AppDbContext dbContext,
+        IMessenger messenger,
+        MediaLocator mediaLocator,
+        IEnumerable<IMediaDetector> mediaDetectors)
     {
         _dbContext = dbContext;
         _messenger = messenger;
         BindingOperations.EnableCollectionSynchronization(Configurations, new());
         BindingOperations.EnableCollectionSynchronization(DiscoveredFiles, new());
         DiscoveredFiles.ListChanged += DiscoveredFiles_ListChanged;
+        _mediaLocator = mediaLocator;
+        _mediaDetectors = mediaDetectors.ToImmutableList();
     }
 
     private async Task ShowProgressIndicator(string message, CancellationToken cancellationToken = default)
@@ -70,6 +80,14 @@ public partial class SearchExecutorViewModel : ObservableObject
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(MoveToReviewCommand))]
     private bool _searchComplete;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(FinishCommand))]
+    private bool _isSearching;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(FinishCommand))]
+    private bool _workingDirectorySet;
 
     partial void OnWorkingDirectoryChanged(string? value)
     {
@@ -120,24 +138,26 @@ public partial class SearchExecutorViewModel : ObservableObject
             return;
         }
 
+        IsSearching = true;
 
         await ShowProgressIndicator("Preparing Working Directory...", cancellationToken);
         var workingDirectory = Path.Combine(WorkingDirectory!, Guid.NewGuid().ToString());
         Directory.CreateDirectory(workingDirectory);
         SelectedConfig.WorkingDirectory = workingDirectory;
+        WorkingDirectorySet = true;
 
         try
         {
-            await _dbContext.FileDetails.ExecuteDeleteAsync(cancellationToken);
+            await TruncateFileDetailState(cancellationToken);
 
             await UpdateProgressIndicator("Performing Search...", cancellationToken);
-            await foreach (var file in MediaLocator.Search(SelectedConfig.Directories, recursive: SelectedConfig.Recursive, cancellationToken: cancellationToken))
+            await foreach (var file in _mediaLocator.Search(SelectedConfig.Directories, recursive: SelectedConfig.Recursive, performDeepAnalysis: SelectedConfig.PerformDeepAnalysis, cancellationToken: cancellationToken))
             {
                 _dbContext.FileDetails.Add(file);
             }
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            if (SelectedConfig.ExtractArchives && false)
+            if (SelectedConfig.ExtractArchives && false) // TODO: undo 'false' here...
             {
                 await UpdateProgressIndicator("Extracting Archives...", cancellationToken);
 
@@ -179,7 +199,7 @@ public partial class SearchExecutorViewModel : ObservableObject
                             return result;
                         }, ExtractionState.Create(filePath, destDir));
 
-                        await foreach (var file in MediaLocator.Search(destDir, recursive: SelectedConfig.Recursive, cancellationToken: cancellationToken))
+                        await foreach (var file in _mediaLocator.Search(destDir, recursive: SelectedConfig.Recursive, performDeepAnalysis: SelectedConfig.PerformDeepAnalysis, cancellationToken: cancellationToken))
                         {
                             filesExtracted = true;
                             _dbContext.FileDetails.Add(file);
@@ -193,7 +213,29 @@ public partial class SearchExecutorViewModel : ObservableObject
             if (SelectedConfig.PerformDeepAnalysis)
             {
                 await UpdateProgressIndicator("Analysing Files...", cancellationToken);
-                // TODO: Deep File Analysis for media types
+                var totalFiles = await _dbContext.FileDetails
+                    .CountAsync(f => f.FileType != DataAccessLayer.Models.MultiMediaType.Archive, cancellationToken);
+                var currentFile = 0;
+                await foreach (var file in _dbContext.FileDetails
+                    .Where(f => f.FileType != DataAccessLayer.Models.MultiMediaType.Archive)
+                    .AsAsyncEnumerable())
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    var filePath = Path.Combine(file.ParentPath, file.FileName);
+                    await UpdateProgressIndicator($"Analysing File {++currentFile} of {totalFiles}\nFile: {filePath}", cancellationToken);
+
+                    var detector = _mediaDetectors.SingleOrDefault(md => md.MediaType == file.FileType);
+                    if (detector is not null)
+                    {
+                        var details = detector.GetMediaProperties(filePath);
+                        file.FileProperties = details.Select(kvp => new DataAccessLayer.Models.FileProperty
+                        {
+                            Name = kvp.Key,
+                            Value = kvp.Value
+                        }).ToList();
+                    }
+                }
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
 
@@ -310,6 +352,8 @@ public partial class SearchExecutorViewModel : ObservableObject
         finally
         {
             await HideProgressIndicator();
+
+            IsSearching = false;
         }
     }
 
@@ -338,6 +382,7 @@ public partial class SearchExecutorViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(BackToSearchCommand))]
+    [NotifyCanExecuteChangedFor(nameof(FinishCommand))]
     private bool _isExporting;
 
     [RelayCommand]
@@ -429,24 +474,31 @@ public partial class SearchExecutorViewModel : ObservableObject
         Transitioner.MovePreviousCommand.Execute(null, null);
     }
 
-    [RelayCommand(IncludeCancelCommand = true)]
+    [RelayCommand(CanExecute = nameof(CanFinishSearach), IncludeCancelCommand = true)]
     public async Task Finish(CancellationToken cancellationToken)
     {
-        if (!SearchComplete)
-        {
-            return;
-        }
-
-        await _dbContext.FileDetails.ExecuteDeleteAsync(cancellationToken);
+        await TruncateFileDetailState(cancellationToken);
         if (SelectedConfig?.WorkingDirectory is not null
             && Directory.Exists(SelectedConfig.WorkingDirectory))
         {
             Directory.Delete(SelectedConfig.WorkingDirectory, true);
         }
+        WorkingDirectorySet = false;
         SearchComplete = false;
         SelectedConfig = null;
         Transitioner.MoveFirstCommand.Execute(null, null);
     }
 
+    public bool CanFinishSearach()
+        => !IsSearching
+            && !IsExporting
+            && WorkingDirectorySet;
+
     #endregion
+
+    private async Task TruncateFileDetailState(CancellationToken cancellationToken = default)
+    {
+        await _dbContext.FileProperties.ExecuteDeleteAsync(cancellationToken);
+        await _dbContext.FileDetails.ExecuteDeleteAsync(cancellationToken);
+    }
 }

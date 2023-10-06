@@ -102,7 +102,7 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
 
                     b.HasIndex("FileDetailsId");
 
-                    b.ToTable("FileProperty");
+                    b.ToTable("FileProperties");
                 });
 
             modelBuilder.Entity("MediaFinder_v2.DataAccessLayer.Models.SearchDirectory", b =>

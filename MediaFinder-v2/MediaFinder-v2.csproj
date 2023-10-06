@@ -36,12 +36,18 @@
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="MaterialDesignExtensions" />
     <PackageReference Include="MaterialDesignThemes" />
+    <PackageReference Include="MetadataExtractor" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="NReco.VideoInfo" />
     <PackageReference Include="SevenZipExtractor" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="DataAccessLayer\Migrations\" />
   </ItemGroup>
 </Project>

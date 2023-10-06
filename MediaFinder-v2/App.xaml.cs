@@ -3,6 +3,7 @@
 using MaterialDesignThemes.Wpf;
 
 using MediaFinder_v2.DataAccessLayer;
+using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.Services;
 using MediaFinder_v2.Views.Executors;
 using MediaFinder_v2.Views.SearchSettings;
@@ -54,6 +55,11 @@ public partial class App : Application
             services.AddSingleton<SearchSettingsViewModel>();
             services.AddSingleton<AddSearchSettingViewModel>();
             services.AddSingleton<SearchExecutorViewModel>();
+
+            services.AddSingleton<IMediaDetector, ArchiveDetector>();
+            services.AddSingleton<IMediaDetector, VideoDetector>();
+            services.AddSingleton<IMediaDetector, ImageDetector>();
+            services.AddSingleton<MediaLocator>();
 
             services.AddScoped<WeakReferenceMessenger>();
             services.AddScoped<IMessenger, WeakReferenceMessenger>(provider => provider.GetRequiredService<WeakReferenceMessenger>());

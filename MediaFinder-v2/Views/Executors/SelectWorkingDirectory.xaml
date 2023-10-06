@@ -41,9 +41,6 @@
                 Margin="0,8,0,0"
                 DialogHostName="DialogHost"
                 Directory="{Binding WorkingDirectory, Mode=TwoWay}">
-                <!-- mde:TextBoxOpenDirectory.DialogArgs>
-                    <mde:OpenDirectoryDialogArguments Width="600" Height="500" />
-                </mde:TextBoxOpenDirectory.DialogArgs-->
                 <mde:TextBoxOpenDirectory.TextBoxStyle>
                     <Style BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}" TargetType="TextBox">
                         <Setter Property="materialDesign:HintAssist.Hint" Value="Choose a directory" />
@@ -144,6 +141,16 @@
                         Margin="0,0,8,0"
                         Kind="NavigateNext" />
                     <TextBlock Text="Next" />
+                </StackPanel>
+            </Button>
+            <Button Command="{Binding FinishCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon
+                        Width="15"
+                        Height="15"
+                        Margin="0,2,8,0"
+                        Kind="TickCircle" />
+                    <TextBlock Text="Finish" />
                 </StackPanel>
             </Button>
         </StackPanel>

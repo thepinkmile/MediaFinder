@@ -32,9 +32,6 @@
                 Margin="0,8,0,0"
                 DialogHostName="DialogHost"
                 Directory="{Binding ExportDirectory, Mode=TwoWay}">
-                <!-- mde:TextBoxOpenDirectory.DialogArgs>
-                    <mde:OpenDirectoryDialogArguments Width="600" Height="500" />
-                </mde:TextBoxOpenDirectory.DialogArgs-->
                 <mde:TextBoxOpenDirectory.TextBoxStyle>
                     <Style BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}" TargetType="TextBox">
                         <Setter Property="materialDesign:HintAssist.Hint" Value="Choose an export directory" />
