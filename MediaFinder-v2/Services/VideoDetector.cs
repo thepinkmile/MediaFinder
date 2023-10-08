@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System.Globalization;
+using System.IO;
 
 using MediaFinder_v2.DataAccessLayer.Models;
 
@@ -31,6 +32,7 @@ public class VideoDetector : IMediaDetector
             result.Add($"FormatTag_{tag.Key}", tag.Value);
         }
 
+        var sizeDetected = false;
         foreach (var stream in videoInfo.Streams)
         {
             result.Add($"Stream_{stream.Index}_CodecType", stream.CodecType);
@@ -44,6 +46,24 @@ public class VideoDetector : IMediaDetector
             {
                 result.Add($"Stream_{stream.Index}_Tag_{tag.Key}", tag.Value);
             }
+
+            if (!sizeDetected && stream.CodecType == "video")
+            {
+                result.Add("Width", stream.Height.ToString());
+                result.Add("Height", stream.Width.ToString());
+                sizeDetected = true;
+            }
+        }
+
+        if (result.ContainsKey("File Type_Expected File Name Extension"))
+        {
+            result.Add("ExpectedExtension", videoInfo.FormatName);
+        }
+
+        var dateProperty = videoInfo.FormatTags.FirstOrDefault(k => string.Equals("creation_time", k.Key, StringComparison.OrdinalIgnoreCase));
+        if (!string.IsNullOrEmpty(dateProperty.Value) && DateTime.TryParse(dateProperty.Value, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var tmp))
+        {
+            result.Add("CreatedDate", tmp.ToUniversalTime().ToString("O"));
         }
 
         return result;
@@ -56,12 +76,11 @@ public class VideoDetector : IMediaDetector
         {
             try
             {
-                var previousResult = result;
                 var videoInfo = FFProbe.GetMediaInfo(filepath);
-                result = !(videoInfo.FormatName.StartsWith("image2")
-                            || videoInfo.FormatName.EndsWith("_pipe"));
-
-                var temp = result;
+                result = !(videoInfo.Duration == TimeSpan.Zero
+                            || videoInfo.FormatName.StartsWith("image2")
+                            || videoInfo.FormatName.EndsWith("_pipe")
+                            || videoInfo.Streams.All(s => s.CodecType == "subtitle"));
             }
             catch
             {

@@ -8,7 +8,7 @@ public record SearchSettings
 
     public string? Description { get; set; }
 
-    public virtual required ICollection<SearchDirectory> Directories { get; set; }
+    public virtual ICollection<SearchDirectory> Directories { get; set; } = null!;
 
     public bool Recursive { get; set; }
 

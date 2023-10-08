@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace MediaFinder_v2.DataAccessLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCleanSchema : Migration
+    public partial class InitialV2Schema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -71,7 +73,7 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     Name = table.Column<string>(type: "TEXT", nullable: false),
                     Value = table.Column<string>(type: "TEXT", nullable: false),
-                    FileDetailsId = table.Column<int>(type: "INTEGER", nullable: true)
+                    FileDetailsId = table.Column<int>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -80,7 +82,8 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                         name: "FK_FileProperties_FileDetails_FileDetailsId",
                         column: x => x.FileDetailsId,
                         principalTable: "FileDetails",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -101,6 +104,24 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                         principalTable: "SearchSettings",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.InsertData(
+                table: "SearchSettings",
+                columns: new[] { "Id", "Description", "ExtractArchives", "ExtractionDepth", "Name", "PerformDeepAnalysis", "Recursive" },
+                values: new object[,]
+                {
+                    { 1, null, false, null, "Default", false, true },
+                    { 2, null, true, 5, "Testing", true, true }
+                });
+
+            migrationBuilder.InsertData(
+                table: "SearchDirectory",
+                columns: new[] { "Id", "Path", "SettingsId" },
+                values: new object[,]
+                {
+                    { 1, "C:\\Users\\User\\Pictures", 1 },
+                    { 2, "C:\\TEMP\\Source", 2 }
                 });
 
             migrationBuilder.CreateIndex(

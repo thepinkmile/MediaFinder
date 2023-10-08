@@ -1,10 +1,8 @@
-﻿using System.IO;
-
-using MediaFinder_v2.Services;
+﻿using MediaFinder_v2.DataAccessLayer.Models;
 
 using SevenZipExtractor;
 
-namespace MediaFinder_v2.DataAccessLayer.Models;
+namespace MediaFinder_v2.Services;
 
 public class ArchiveDetector : IMediaDetector
 {
@@ -15,8 +13,7 @@ public class ArchiveDetector : IMediaDetector
         if (!IsPositiveDetection(filepath, true))
             return new Dictionary<string, string>();
 
-        using var fileStream = File.Open(filepath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
-        using var archive = new ArchiveFile(fileStream);
+        using var archive = new ArchiveFile(filepath);
 
         var result = new Dictionary<string, string>
         {
@@ -43,11 +40,10 @@ public class ArchiveDetector : IMediaDetector
         bool result = false;
         try
         {
-            using var fileStream = File.Open(filepath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
-            using var archive = new ArchiveFile(fileStream);
+            using var archive = new ArchiveFile(filepath);
             result = true;
         }
-        catch
+        catch(SevenZipException)
         {
             // do nothing
         }

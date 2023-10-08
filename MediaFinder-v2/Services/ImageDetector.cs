@@ -7,14 +7,13 @@ using System.Text.RegularExpressions;
 using MediaFinder_v2.DataAccessLayer.Models;
 
 using MetadataExtractor;
-using MetadataExtractor.Formats.FileType;
 
 namespace MediaFinder_v2.Services;
 
 public class ImageDetector : IMediaDetector
 {
     private static readonly string[] KnownExtensions = new[] { ".bmp", ".jpg", ".jpeg", ".jfif", ".png", ".tif", ".tiff", ".gif", ".svg" };
-    private static readonly Regex PixelsPropertyParser = new Regex("(?<pixels>(\\d+)) pixels", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.CultureInvariant);
+    private static readonly Regex PixelsPropertyParser = new("(?<pixels>(\\d+)) pixels", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.CultureInvariant);
 
     public MultiMediaType MediaType => MultiMediaType.Image;
 
@@ -59,7 +58,7 @@ public class ImageDetector : IMediaDetector
         }
 
         var dateProperty = result.Keys.FirstOrDefault(k => k.Contains("Date/Time"));
-        if (dateProperty is not null && DateTime.TryParseExact(result[dateProperty], "yyyy:MM:dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var tmp))
+        if (dateProperty is not null && DateTime.TryParseExact(result[dateProperty], "yyyy:MM:dd HH:mm:ss", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal | DateTimeStyles.AdjustToUniversal, out var tmp))
         {
             result.Add("CreatedDate", tmp.ToString("O"));
         }
@@ -76,7 +75,7 @@ public class ImageDetector : IMediaDetector
             {
                 using var fileStream = File.Open(filepath, FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
                 var img = ImageMetadataReader.ReadMetadata(fileStream);
-                result = true;
+                result = img.Count != 0;
             }
             catch
             {

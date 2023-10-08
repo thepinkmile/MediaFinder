@@ -30,6 +30,15 @@ public partial class MediaFile : ObservableObject
     [ObservableProperty]
     private bool _isArchive;
 
+    [ObservableProperty]
+    private string? _md5Hash;
+
+    [ObservableProperty]
+    private string? _sha256Hash;
+
+    [ObservableProperty]
+    private string? _sha512Hash;
+
     public MediaFile(FileDetails file)
     {
         Id = file.Id;
@@ -40,5 +49,8 @@ public partial class MediaFile : ObservableObject
         IsImage = file.FileType == MultiMediaType.Image;
         IsVideo = file.FileType == MultiMediaType.Video;
         IsArchive = file.FileType == MultiMediaType.Archive;
+        Md5Hash = file.MD5_Hash;
+        Sha256Hash = file.SHA256_Hash;
+        Sha512Hash = file.SHA512_Hash;
     }
 }

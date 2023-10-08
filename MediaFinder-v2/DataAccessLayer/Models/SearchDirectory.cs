@@ -6,5 +6,6 @@ public class SearchDirectory
 
     public required string Path { get; set; }
 
-    public virtual SearchSettings Settings { get; set; } = null!;
+    public int SettingsId { get; set; }
+    public virtual SearchSettings? Settings { get; set; }
 }

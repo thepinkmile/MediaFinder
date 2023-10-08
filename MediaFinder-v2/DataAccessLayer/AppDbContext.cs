@@ -16,5 +16,46 @@ namespace MediaFinder_v2.DataAccessLayer
             optionsBuilder.UseLazyLoadingProxies();
             base.OnConfiguring(optionsBuilder);
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<SearchSettings>(e => e.HasData(
+                    new SearchSettings
+                    {
+                        Id = 1,
+                        Name = "Default",
+                        Recursive = true,
+                        ExtractArchives = false,
+                        ExtractionDepth = null,
+                        PerformDeepAnalysis = false
+                    },
+                    new SearchSettings
+                    {
+                        Id = 2,
+                        Name = "Testing",
+                        Recursive = true,
+                        ExtractArchives = true,
+                        ExtractionDepth = 5,
+                        PerformDeepAnalysis = true
+                    }
+                    ));
+
+            modelBuilder.Entity<SearchDirectory>(e => e.HasData(
+                    new SearchDirectory
+                    {
+                        Id = 1,
+                        Path = "C:\\Users\\User\\Pictures",
+                        SettingsId = 1,
+                    },
+                    new SearchDirectory
+                    {
+                        Id = 2,
+                        Path = "C:\\TEMP\\Source",
+                        SettingsId = 2
+                    }
+                    ));
+        }
     }
 }

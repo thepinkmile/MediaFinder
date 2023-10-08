@@ -90,6 +90,18 @@
                             Binding="{Binding IsArchive, Converter={StaticResource BooleanToStringConverter}}"
                             Header="Is Archive"
                             IsReadOnly="True" />
+                        <DataGridTextColumn
+                            Binding="{Binding Md5Hash}"
+                            Header="MD5"
+                            IsReadOnly="True" />
+                        <DataGridTextColumn
+                            Binding="{Binding Sha256Hash}"
+                            Header="SHA256"
+                            IsReadOnly="True" />
+                        <DataGridTextColumn
+                            Binding="{Binding Sha512Hash}"
+                            Header="SHA512"
+                            IsReadOnly="True" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
@@ -99,7 +111,7 @@
             Margin="0,8,0,0"
             HorizontalAlignment="Right"
             Orientation="Horizontal">
-            <Button Margin="0,0,8,0" Command="{Binding BackCommand}">
+            <Button Margin="0,0,8,0" Command="{Binding BackToSearchCommand}">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon
                         Width="15"

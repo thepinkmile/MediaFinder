@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Security.Cryptography;
-using System.Threading;
 using System.Windows.Data;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -26,17 +25,20 @@ namespace MediaFinder_v2.Views.Executors;
 
 public partial class SearchExecutorViewModel : ObservableObject
 {
+    private readonly IServiceProvider _serviceProvider;
     private readonly AppDbContext _dbContext;
     private readonly IMessenger _messenger;
     private readonly MediaLocator _mediaLocator;
     private readonly IImmutableList<IMediaDetector> _mediaDetectors;
 
     public SearchExecutorViewModel(
+        IServiceProvider serviceProvider,
         AppDbContext dbContext,
         IMessenger messenger,
         MediaLocator mediaLocator,
         IEnumerable<IMediaDetector> mediaDetectors)
     {
+        _serviceProvider = serviceProvider;
         _dbContext = dbContext;
         _messenger = messenger;
         BindingOperations.EnableCollectionSynchronization(Configurations, new());
@@ -79,9 +81,12 @@ public partial class SearchExecutorViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(MoveToReviewCommand))]
+    [NotifyCanExecuteChangedFor(nameof(BackToSearchCommand))]
     private bool _searchComplete;
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
+    [NotifyCanExecuteChangedFor(nameof(MoveToReviewCommand))]
     [NotifyCanExecuteChangedFor(nameof(FinishCommand))]
     private bool _isSearching;
 
@@ -98,11 +103,6 @@ public partial class SearchExecutorViewModel : ObservableObject
     {
         SearchComplete = false;
     }
-
-    public bool WorkingDirectoryIsSet()
-        => !string.IsNullOrEmpty(WorkingDirectory) &&
-            SelectedConfig is not null &&
-            !SearchComplete;
 
     [RelayCommand]
     public async Task LoadConfigurations()
@@ -123,7 +123,13 @@ public partial class SearchExecutorViewModel : ObservableObject
         }
     }
 
-    [RelayCommand(CanExecute = nameof(WorkingDirectoryIsSet), IncludeCancelCommand = true)]
+    public bool CanPerformSearch()
+        => !string.IsNullOrEmpty(WorkingDirectory)
+            && SelectedConfig is not null
+            && !SearchComplete
+            && !IsSearching;
+
+    [RelayCommand(CanExecute = nameof(CanPerformSearch), IncludeCancelCommand = true)]
     public async Task OnPerformSearch(CancellationToken cancellationToken)
     {
         if (SelectedConfig is null)
@@ -148,7 +154,7 @@ public partial class SearchExecutorViewModel : ObservableObject
 
         try
         {
-            await TruncateFileDetailState(cancellationToken);
+            await TruncateFileDetailState(_dbContext, cancellationToken);
 
             await UpdateProgressIndicator("Performing Search...", cancellationToken);
             await foreach (var file in _mediaLocator.Search(SelectedConfig.Directories, recursive: SelectedConfig.Recursive, performDeepAnalysis: SelectedConfig.PerformDeepAnalysis, cancellationToken: cancellationToken))
@@ -157,7 +163,7 @@ public partial class SearchExecutorViewModel : ObservableObject
             }
             await _dbContext.SaveChangesAsync(cancellationToken);
 
-            if (SelectedConfig.ExtractArchives && false) // TODO: undo 'false' here...
+            if (SelectedConfig.ExtractArchives)
             {
                 await UpdateProgressIndicator("Extracting Archives...", cancellationToken);
 
@@ -217,6 +223,7 @@ public partial class SearchExecutorViewModel : ObservableObject
                     .CountAsync(f => f.FileType != DataAccessLayer.Models.MultiMediaType.Archive, cancellationToken);
                 var currentFile = 0;
                 await foreach (var file in _dbContext.FileDetails
+                    .Include(fd => fd.FileProperties)
                     .Where(f => f.FileType != DataAccessLayer.Models.MultiMediaType.Archive)
                     .AsAsyncEnumerable())
                 {
@@ -229,11 +236,13 @@ public partial class SearchExecutorViewModel : ObservableObject
                     if (detector is not null)
                     {
                         var details = detector.GetMediaProperties(filePath);
-                        file.FileProperties = details.Select(kvp => new DataAccessLayer.Models.FileProperty
-                        {
-                            Name = kvp.Key,
-                            Value = kvp.Value
-                        }).ToList();
+                        file.FileProperties = details
+                            .Where(kvp => kvp.Value != null && kvp.Key != null)
+                            .Select(kvp => new DataAccessLayer.Models.FileProperty
+                            {
+                                Name = kvp.Key,
+                                Value = kvp.Value
+                            }).ToList();
                     }
                 }
                 await _dbContext.SaveChangesAsync(cancellationToken);
@@ -255,9 +264,15 @@ public partial class SearchExecutorViewModel : ObservableObject
 
                 using var fileStream = fileInfo.Open(FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
                 using var hashStream = new HashStream(fileStream, HashAlgorithmName.MD5, HashAlgorithmName.SHA256, HashAlgorithmName.SHA512);
-                using var streamReader = new StreamReader(hashStream);
 
-                _ = await streamReader.ReadToEndAsync(cancellationToken);
+                var read = 1024;
+                var buffer = new byte[read];
+                do
+                {
+                    await Task.Yield();
+                    cancellationToken.ThrowIfCancellationRequested();
+                    read = hashStream.Read(buffer, 0, buffer.Length);
+                } while (read != 0);
 
                 file.MD5_Hash = Convert.ToHexString(hashStream.Hash(HashAlgorithmName.MD5));
                 file.SHA256_Hash = Convert.ToHexString(hashStream.Hash(HashAlgorithmName.SHA256));
@@ -366,7 +381,7 @@ public partial class SearchExecutorViewModel : ObservableObject
     }
 
     public bool CanMoveToReview()
-        => SearchComplete;
+        => SearchComplete && !IsSearching;
 
     #endregion
 
@@ -410,7 +425,8 @@ public partial class SearchExecutorViewModel : ObservableObject
     }
 
     public bool CanNavigateBack()
-        => !IsExporting;
+        => !IsExporting
+            && SearchComplete;
 
     [RelayCommand(CanExecute = nameof(CanExportFiles), IncludeCancelCommand = true)]
     public async Task OnExportFiles(CancellationToken cancellationToken)
@@ -477,15 +493,18 @@ public partial class SearchExecutorViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanFinishSearach), IncludeCancelCommand = true)]
     public async Task Finish(CancellationToken cancellationToken)
     {
-        await TruncateFileDetailState(cancellationToken);
+        await TruncateFileDetailState(_dbContext, cancellationToken);
         if (SelectedConfig?.WorkingDirectory is not null
             && Directory.Exists(SelectedConfig.WorkingDirectory))
         {
             Directory.Delete(SelectedConfig.WorkingDirectory, true);
         }
         WorkingDirectorySet = false;
-        SearchComplete = false;
-        SelectedConfig = null;
+        if (SearchComplete)
+        {
+            SearchComplete = false;
+            SelectedConfig = null;
+        }
         Transitioner.MoveFirstCommand.Execute(null, null);
     }
 
@@ -496,9 +515,9 @@ public partial class SearchExecutorViewModel : ObservableObject
 
     #endregion
 
-    private async Task TruncateFileDetailState(CancellationToken cancellationToken = default)
+    private static async Task TruncateFileDetailState(AppDbContext dbContext, CancellationToken cancellationToken = default)
     {
-        await _dbContext.FileProperties.ExecuteDeleteAsync(cancellationToken);
-        await _dbContext.FileDetails.ExecuteDeleteAsync(cancellationToken);
+        await dbContext.FileDetails.Include(fd => fd.FileProperties).ExecuteDeleteAsync(cancellationToken);
+        dbContext.ChangeTracker.Clear();
     }
 }

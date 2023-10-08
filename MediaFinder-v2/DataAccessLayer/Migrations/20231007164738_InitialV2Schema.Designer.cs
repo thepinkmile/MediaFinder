@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediaFinder_v2.DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231006211720_InitialCleanSchema")]
-    partial class InitialCleanSchema
+    [Migration("20231007164738_InitialV2Schema")]
+    partial class InitialV2Schema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -90,7 +90,7 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<int?>("FileDetailsId")
+                    b.Property<int>("FileDetailsId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
@@ -126,6 +126,20 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                     b.HasIndex("SettingsId");
 
                     b.ToTable("SearchDirectory");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Path = "C:\\Users\\User\\Pictures",
+                            SettingsId = 1
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Path = "C:\\TEMP\\Source",
+                            SettingsId = 2
+                        });
                 });
 
             modelBuilder.Entity("MediaFinder_v2.DataAccessLayer.Models.SearchSettings", b =>
@@ -156,13 +170,36 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SearchSettings");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ExtractArchives = false,
+                            Name = "Default",
+                            PerformDeepAnalysis = false,
+                            Recursive = true
+                        },
+                        new
+                        {
+                            Id = 2,
+                            ExtractArchives = true,
+                            ExtractionDepth = 5,
+                            Name = "Testing",
+                            PerformDeepAnalysis = true,
+                            Recursive = true
+                        });
                 });
 
             modelBuilder.Entity("MediaFinder_v2.DataAccessLayer.Models.FileProperty", b =>
                 {
-                    b.HasOne("MediaFinder_v2.DataAccessLayer.Models.FileDetails", null)
+                    b.HasOne("MediaFinder_v2.DataAccessLayer.Models.FileDetails", "FileDetails")
                         .WithMany("FileProperties")
-                        .HasForeignKey("FileDetailsId");
+                        .HasForeignKey("FileDetailsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("FileDetails");
                 });
 
             modelBuilder.Entity("MediaFinder_v2.DataAccessLayer.Models.SearchDirectory", b =>

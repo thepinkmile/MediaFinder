@@ -3,7 +3,6 @@
 using MaterialDesignThemes.Wpf;
 
 using MediaFinder_v2.DataAccessLayer;
-using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.Services;
 using MediaFinder_v2.Views.Executors;
 using MediaFinder_v2.Views.SearchSettings;

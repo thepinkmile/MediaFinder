@@ -26,6 +26,7 @@
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />
     <PackageVersion Include="MaterialDesignExtensions" Version="3.3.0" />
     <PackageVersion Include="MaterialDesignThemes" Version="4.9.0" />
+    <PackageVersion Include="MetadataExtractor" Version="2.8.1" />
     <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.11">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
@@ -41,6 +42,7 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
     <PackageVersion Include="Moq" Version="4.20.69" />
     <PackageVersion Include="Moq.AutoMock" Version="3.5.0" />
+    <PackageVersion Include="NReco.VideoInfo" Version="1.2.0" />
     <PackageVersion Include="SevenZipExtractor" Version="1.0.17" />
     <PackageVersion Include="SevenZipSharp.Interop" Version="19.0.2" />
     <PackageVersion Include="xunit" Version="2.5.1" />
