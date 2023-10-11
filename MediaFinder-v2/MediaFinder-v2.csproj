@@ -28,11 +28,14 @@
 
   <ItemGroup>
     <ApplicationDefinition Remove="App.xaml" />
+    <None Remove="appsettings.json" />
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Page Include="App.xaml" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Bogus" />
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="MaterialDesignExtensions" />
     <PackageReference Include="MaterialDesignThemes" />
@@ -44,6 +47,12 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="NReco.VideoInfo" />
+    <PackageReference Include="Serilog" />
+    <PackageReference Include="Serilog.Extensions.Hosting" />
+    <PackageReference Include="Serilog.Extensions.Logging" />
+    <PackageReference Include="Serilog.Settings.Configuration" />
+    <PackageReference Include="Serilog.Sinks.Console" />
+    <PackageReference Include="Serilog.Sinks.File" />
     <PackageReference Include="SevenZipExtractor" />
   </ItemGroup>
 

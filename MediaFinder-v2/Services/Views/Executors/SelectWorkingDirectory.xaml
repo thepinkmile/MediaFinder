@@ -1,5 +1,5 @@
 ﻿<UserControl
-    x:Class="MediaFinder_v2.Views.Executors.ViewResults"
+    x:Class="MediaFinder_v2.Views.Executors.SelectWorkingDirectory"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:MediaFinder_v2.Converters"
@@ -12,13 +12,22 @@
                                      IsDesignTimeCreatable=False}"
     d:DesignHeight="450"
     d:DesignWidth="800"
+    Loaded="UserControl_Loaded"
     mc:Ignorable="d">
     <UserControl.Resources>
         <converters:BooleanToStringConverter
             x:Key="BooleanToStringConverter"
             FalseValue="No"
             TrueValue="Yes" />
-        <converters:FormatKbSizeConverter x:Key="FormatKbSizeConverter" />
+        <converters:StringsToContentConverter x:Key="ListToStringConverter" Delimeter="\n" />
+        <materialDesign:BooleanToVisibilityConverter
+            x:Key="BooleanToVisibilityConverter"
+            FalseValue="Collapsed"
+            TrueValue="Visible" />
+        <materialDesign:BooleanToVisibilityConverter
+            x:Key="BooleanToOppositeVisibilityConverter"
+            FalseValue="Visible"
+            TrueValue="Collapsed" />
     </UserControl.Resources>
     <Grid>
         <Grid.RowDefinitions>
@@ -27,14 +36,14 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
         <StackPanel>
-            <TextBlock Text="Review discovered files and select a directory to export selected files to." />
+            <TextBlock Text="Select a working directory and configuration for the search." />
             <mde:TextBoxOpenDirectory
                 Margin="0,8,0,0"
                 DialogHostName="DialogHost"
-                Directory="{Binding ExportDirectory, Mode=TwoWay}">
+                Directory="{Binding WorkingDirectory, Mode=TwoWay}">
                 <mde:TextBoxOpenDirectory.TextBoxStyle>
                     <Style BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}" TargetType="TextBox">
-                        <Setter Property="materialDesign:HintAssist.Hint" Value="Choose an export directory" />
+                        <Setter Property="materialDesign:HintAssist.Hint" Value="Choose a directory" />
                     </Style>
                 </mde:TextBoxOpenDirectory.TextBoxStyle>
             </mde:TextBoxOpenDirectory>
@@ -56,52 +65,39 @@
                     CornerRadius="8,8,0,0"
                     Effect="{DynamicResource MaterialDesignShadowDepth5}"
                     Mode="PrimaryMid">
-                    <TextBlock Margin="16" Text="Detected Files" />
+                    <TextBlock Margin="16" Text="Configurations" />
                 </materialDesign:ColorZone>
                 <DataGrid
                     Grid.Row="1"
                     AutoGenerateColumns="False"
                     CanUserAddRows="False"
-                    CanUserSortColumns="True"
-                    ItemsSource="{Binding DiscoveredFiles, Mode=TwoWay}"
+                    IsReadOnly="True"
+                    ItemsSource="{Binding Configurations}"
+                    SelectedItem="{Binding SelectedConfig}"
                     SelectionUnit="FullRow">
                     <DataGrid.Columns>
-                        <DataGridCheckBoxColumn
-                            Binding="{Binding ShouldExport, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                            Header="Export"
-                            IsReadOnly="False" />
+                        <DataGridTextColumn Binding="{Binding Id}" Header="ID" />
+                        <DataGridTextColumn Binding="{Binding Name}" Header="Name" />
                         <DataGridTextColumn
-                            Binding="{Binding FileName}"
-                            Header="Name"
-                            IsReadOnly="True" />
+                            Binding="{Binding Description}"
+                            CanUserSort="False"
+                            Header="Description" />
                         <DataGridTextColumn
-                            Binding="{Binding FileSize, Converter={StaticResource FormatKbSizeConverter}}"
-                            Header="Size"
-                            IsReadOnly="True" />
+                            Binding="{Binding Recursive, Converter={StaticResource BooleanToStringConverter}}"
+                            CanUserSort="False"
+                            Header="Recursive" />
                         <DataGridTextColumn
-                            Binding="{Binding IsImage, Converter={StaticResource BooleanToStringConverter}}"
-                            Header="Is Image"
-                            IsReadOnly="True" />
+                            Binding="{Binding ExtractArchives, Converter={StaticResource BooleanToStringConverter}}"
+                            CanUserSort="False"
+                            Header="Extract Archives" />
                         <DataGridTextColumn
-                            Binding="{Binding IsVideo, Converter={StaticResource BooleanToStringConverter}}"
-                            Header="Is Video"
-                            IsReadOnly="True" />
+                            Binding="{Binding PerformDeepAnalysis, Converter={StaticResource BooleanToStringConverter}}"
+                            CanUserSort="False"
+                            Header="Perform Deep Analysis" />
                         <DataGridTextColumn
-                            Binding="{Binding IsArchive, Converter={StaticResource BooleanToStringConverter}}"
-                            Header="Is Archive"
-                            IsReadOnly="True" />
-                        <DataGridTextColumn
-                            Binding="{Binding Md5Hash}"
-                            Header="MD5"
-                            IsReadOnly="True" />
-                        <DataGridTextColumn
-                            Binding="{Binding Sha256Hash}"
-                            Header="SHA256"
-                            IsReadOnly="True" />
-                        <DataGridTextColumn
-                            Binding="{Binding Sha512Hash}"
-                            Header="SHA512"
-                            IsReadOnly="True" />
+                            Binding="{Binding Directories, Converter={StaticResource ListToStringConverter}}"
+                            CanUserSort="False"
+                            Header="Directories" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>
@@ -111,27 +107,23 @@
             Margin="0,8,0,0"
             HorizontalAlignment="Right"
             Orientation="Horizontal">
-            <Button Margin="0,0,8,0" Command="{Binding BackToSearchCommand}">
+            <Button
+                Margin="0,0,8,0"
+                Command="{Binding PerformSearchCommand}"
+                Visibility="{Binding SearchComplete, Converter={StaticResource BooleanToOppositeVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon
                         Width="15"
                         Height="15"
                         Margin="0,0,8,0"
-                        Kind="Undo" />
-                    <TextBlock Text="Back" />
+                        Kind="RunFast" />
+                    <TextBlock Text="Run" />
                 </StackPanel>
             </Button>
-            <Button Margin="0,0,8,0" Command="{Binding ExportFilesCommand}">
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon
-                        Width="15"
-                        Height="15"
-                        Margin="0,1,8,0"
-                        Kind="Export" />
-                    <TextBlock Text="Export" />
-                </StackPanel>
-            </Button>
-            <Button Margin="0,0,8,0" Command="{Binding ExportFilesCancelCommand}">
+            <Button
+                Margin="0,0,8,0"
+                Command="{Binding CancelSearchCommand}"
+                Visibility="{Binding SearchComplete, Converter={StaticResource BooleanToOppositeVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon
                         Width="15"
@@ -141,13 +133,26 @@
                     <TextBlock Text="Cancel" />
                 </StackPanel>
             </Button>
+            <Button
+                Margin="0,0,8,0"
+                Command="{Binding MoveToReviewCommand}"
+                Visibility="{Binding SearchComplete, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon
+                        Width="15"
+                        Height="15"
+                        Margin="0,0,8,0"
+                        Kind="ArrowrightBoldOutline" />
+                    <TextBlock Text="Next" />
+                </StackPanel>
+            </Button>
             <Button Command="{Binding FinishCommand}">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon
                         Width="15"
                         Height="15"
                         Margin="0,2,8,0"
-                        Kind="TickCircle" />
+                        Kind="TickCircleOutline" />
                     <TextBlock Text="Finish" />
                 </StackPanel>
             </Button>

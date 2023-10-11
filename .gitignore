@@ -481,3 +481,4 @@ $RECYCLE.BIN/
 
 # Ignore app specific design time files
 **/mediaFinder.db
+_nupkgs/

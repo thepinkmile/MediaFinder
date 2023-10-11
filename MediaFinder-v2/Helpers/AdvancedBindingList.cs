@@ -17,14 +17,14 @@ public class AdvancedBindingList<T> : BindingList<T>
     protected override PropertyDescriptor? SortPropertyCore => _sortProperty;
     private PropertyDescriptor? _sortProperty;
 
-    private static readonly Dictionary<Type, IComparer?> _comparerCache = new();
+    private static readonly Dictionary<Type, IComparer?> ComparerCache = new();
 
     protected override void ApplySortCore(PropertyDescriptor property, ListSortDirection direction)
     {
         ((List<T>)Items).Sort(new Comparison<T>((x, y) =>
         {
             IComparer? comp;
-            if (!_comparerCache.ContainsKey(property.PropertyType))
+            if (!ComparerCache.ContainsKey(property.PropertyType))
             {
                 var compType = typeof(Comparer<>).MakeGenericType(property.PropertyType);
                 var compField = compType.GetProperty("Default", BindingFlags.Static | BindingFlags.Public);
@@ -32,7 +32,7 @@ public class AdvancedBindingList<T> : BindingList<T>
             }
             else
             {
-                comp = _comparerCache[property.PropertyType];
+                comp = ComparerCache[property.PropertyType];
             }
 
             int? result = direction == ListSortDirection.Ascending

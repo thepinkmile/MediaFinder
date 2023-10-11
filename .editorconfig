@@ -376,3 +376,7 @@ tab_width = 4
 indent_size = 4
 end_of_line = crlf
 
+# Entity Framework Core Migrations
+[**/Migrations/*.cs]
+exclude = true
+generated_code = true

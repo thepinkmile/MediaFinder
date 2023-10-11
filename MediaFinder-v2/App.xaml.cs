@@ -1,19 +1,25 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-
-using MaterialDesignThemes.Wpf;
+﻿using System.Windows;
 
 using MediaFinder_v2.DataAccessLayer;
-using MediaFinder_v2.Services;
-using MediaFinder_v2.Views.Executors;
-using MediaFinder_v2.Views.SearchSettings;
 
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
-using System.Windows;
+using Serilog.Events;
+
+using Serilog;
+using CommunityToolkit.Mvvm.Messaging;
+using MediaFinder_v2.Services;
+using MediaFinder_v2.Views.SearchSettings;
+using MediaFinder_v2.Views.Executors;
+using MaterialDesignThemes.Wpf;
 using System.Windows.Threading;
+using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore;
+using NReco.VideoInfo;
+using MediaFinder_v2.Services.Archive;
+using MediaFinder_v2.Services.Search;
 
 namespace MediaFinder_v2;
 
@@ -22,23 +28,57 @@ namespace MediaFinder_v2;
 /// </summary>
 public partial class App : Application
 {
+
     [STAThread]
     public static void Main(string[] args)
     {
-        using IHost host = CreateHostBuilder(args).Build();
-        host.Start();
+        Log.Logger = new LoggerConfiguration()
+            .MinimumLevel.Debug()
+            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+            .Enrich.FromLogContext()
+            .WriteTo.Console()
+            .WriteTo.File(
+                path: "logs/mediaFinder-.log",
+                rollingInterval: RollingInterval.Day,
+                retainedFileCountLimit: 15,
+                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}|{Level:u3}|{SourceContext}|{Message:lj}{NewLine}{Exception}")
+            .CreateLogger();
 
-        using (var scope = host.Services.GetRequiredService<IServiceScopeFactory>().CreateScope())
-        using (var ctx = scope.ServiceProvider.GetRequiredService<AppDbContext>())
+        try
         {
-            ctx.Database.Migrate();
-        }
+            using IHost host = CreateHostBuilder(args).Build();
+            host.Start();
 
-        App app = new();
-        app.InitializeComponent();
-        app.MainWindow = host.Services.GetRequiredService<MainWindow>();
-        app.MainWindow.Visibility = Visibility.Visible;
-        app.Run();
+            AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
+            {
+                var logger = host.Services.GetRequiredService<ILogger<App>>();
+                logger.LogError(args.ExceptionObject as Exception, "An unexpected exception occured.");
+            };
+
+            using var scope = host.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
+            {
+                scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
+            }
+
+            App app = new();
+            app.InitializeComponent();
+            app.DispatcherUnhandledException += (sender, args) =>
+            {
+                var logger = host.Services.GetRequiredService<ILogger<App>>();
+                logger.LogError(args.Exception, "An unexpected exception occured.");
+            };
+            app.MainWindow = host.Services.GetRequiredService<MainWindow>();
+            app.MainWindow.Visibility = Visibility.Visible;
+            app.Run();
+        }
+        catch (Exception ex)
+        {
+            Log.Fatal(ex, "Host terminated unexpectedly.");
+        }
+        finally
+        {
+            Log.CloseAndFlush();
+        }
     }
 
     public static IHostBuilder CreateHostBuilder(string[] args) =>
@@ -47,18 +87,23 @@ public partial class App : Application
             => configurationBuilder.AddUserSecrets(typeof(App).Assembly))
         .ConfigureServices((hostContext, services) =>
         {
-            services.AddDbContext<AppDbContext>();
+            var log = new LoggerConfiguration()
+                .ReadFrom.Configuration(hostContext.Configuration)
+                .CreateLogger();
+            services.AddSerilog(log);
 
-            services.AddScoped<MainWindow>();
+            services.AddDbContext<AppDbContext>(ServiceLifetime.Singleton);
+
+            services.AddTransient<SearchStageOneWorker>();
+            services.AddTransient<SearchStageTwoWorker>();
+            
+            services.AddTransient<FFProbe>();
+
+            services.AddSingleton<MainWindow>();
             services.AddSingleton<MainWindowsViewModel>();
             services.AddSingleton<SearchSettingsViewModel>();
             services.AddSingleton<AddSearchSettingViewModel>();
             services.AddSingleton<SearchExecutorViewModel>();
-
-            services.AddSingleton<IMediaDetector, ArchiveDetector>();
-            services.AddSingleton<IMediaDetector, VideoDetector>();
-            services.AddSingleton<IMediaDetector, ImageDetector>();
-            services.AddSingleton<MediaLocator>();
 
             services.AddScoped<WeakReferenceMessenger>();
             services.AddScoped<IMessenger, WeakReferenceMessenger>(provider => provider.GetRequiredService<WeakReferenceMessenger>());

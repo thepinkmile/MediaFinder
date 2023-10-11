@@ -10,3 +10,16 @@ public enum MultiMediaType
 
     Archive
 }
+
+public static class MultiMediaTypeHelpers
+{
+    public static MultiMediaType ToMultiMediaType(this string? type)
+    {
+        return type switch
+        {
+            "image" => MultiMediaType.Image,
+            "video" => MultiMediaType.Video,
+            _ => MultiMediaType.Unknown,
+        };
+    }
+}

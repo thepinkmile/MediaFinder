@@ -53,4 +53,7 @@ public partial class MediaFile : ObservableObject
         Sha256Hash = file.SHA256_Hash;
         Sha512Hash = file.SHA512_Hash;
     }
+
+    public static MediaFile Create(FileDetails file)
+        => new(file);
 }
