@@ -6,19 +6,17 @@ public enum MultiMediaType
 
     Image,
 
-    Video,
-
-    Archive
+    Video
 }
 
 public static class MultiMediaTypeHelpers
 {
     public static MultiMediaType ToMultiMediaType(this string? type)
     {
-        return type switch
+        return type?.ToUpperInvariant()?.Trim() switch
         {
-            "image" => MultiMediaType.Image,
-            "video" => MultiMediaType.Video,
+            "IMAGE" => MultiMediaType.Image,
+            "VIDEO" => MultiMediaType.Video,
             _ => MultiMediaType.Unknown,
         };
     }

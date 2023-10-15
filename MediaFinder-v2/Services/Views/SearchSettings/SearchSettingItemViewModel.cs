@@ -1,4 +1,6 @@
-﻿namespace MediaFinder_v2.Views.SearchSettings;
+﻿using System.Drawing;
+
+namespace MediaFinder_v2.Views.SearchSettings;
 
 public class SearchSettingItemViewModel
 {
@@ -20,6 +22,14 @@ public class SearchSettingItemViewModel
 
     public string? WorkingDirectory { get; set; }
 
+    public long? MinImageWidth { get; set; }
+
+    public long? MinImageHeight { get; set; }
+
+    public long? MinVideoWidth { get; set; }
+
+    public long? MinVideoHeight { get; set; }
+
     public SearchSettingItemViewModel(DataAccessLayer.Models.SearchSettings item)
     {
         Id = item.Id;
@@ -30,5 +40,9 @@ public class SearchSettingItemViewModel
         ExtractArchives = item.ExtractArchives;
         ExtractionDepth = item.ExtractionDepth;
         PerformDeepAnalysis = item.PerformDeepAnalysis;
+        MinImageHeight = item.MinImageHeight;
+        MinImageWidth = item.MinImageWidth;
+        MinVideoHeight = item.MinVideoHeight;
+        MinVideoWidth = item.MinVideoWidth;
     }
 }

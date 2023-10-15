@@ -30,4 +30,6 @@ public class FileDetails
     public bool Extracted { get; set; }
 
     public DateTimeOffset Created {  get; set; }
+
+    public string RelativePath { get; set; } = null!;
 }

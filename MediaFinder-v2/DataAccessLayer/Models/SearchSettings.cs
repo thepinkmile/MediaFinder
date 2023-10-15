@@ -17,4 +17,12 @@ public record SearchSettings
     public int? ExtractionDepth { get; set; }
 
     public bool PerformDeepAnalysis { get; set; }
+
+    public long? MinImageWidth { get; set; }
+
+    public long? MinImageHeight { get; set; }
+
+    public long? MinVideoWidth {  get; set; }
+
+    public long? MinVideoHeight { get; set; }
 }

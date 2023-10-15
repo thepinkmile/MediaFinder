@@ -14,14 +14,20 @@ namespace MediaFinder_v2.Services.Search;
 
 public class SearchStageOneWorker : ReactiveBackgroundWorker
 {
+    private readonly IMessenger _messenger;
+
     public SearchStageOneWorker(ILogger<SearchStageOneWorker> logger, IMessenger messenger)
         : base(logger, messenger)
     {
+        _messenger = messenger;
     }
 
     protected override void Execute(object? sender, DoWorkEventArgs e)
     {
-        if (e.Argument is not SearchRequest inputs) return;
+        if (e.Argument is not SearchRequest inputs)
+        {
+            throw new InvalidOperationException("Stage called with invalid arguments.");
+        }
 
         SetProgress("Preparing Working Directory...");
         var workingDirectory = Path.Combine(inputs.WorkingDirectory, Guid.NewGuid().ToString());
@@ -43,6 +49,15 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker
 
         SetProgress("Finalising Search Results...");
         e.Result = SearchResponse.Create(files.Distinct().ToList());
+    }
+
+    protected override void UpdateProgress(object? sender, ProgressChangedEventArgs e)
+    {
+        switch (e.UserState)
+        {
+            case WorkingDirectoryCreated wdc: _messenger.Send(wdc); break;
+            default: base.UpdateProgress(sender, e); break;
+        }
     }
 
     private List<string> IterateFiles(
@@ -75,33 +90,31 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker
         var files = new ConcurrentBag<string>();
         var extracted = new ConcurrentBag<string>();
 
-        Parallel.ForEach(
-            Directory.EnumerateFiles(directory, "*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly),
-            f => 
+        foreach(var f in Directory.EnumerateFiles(directory, "*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+        {
+            if (CancellationPending)
             {
-                if (CancellationPending)
-                {
-                    return;
-                }
-                SetProgress($"Iterating files in directory: {directory}");
+                break;
+            }
+            SetProgress($"Iterating files in directory: {directory}");
 
-                var isExtracted = false;
-                if (extractArchive && extractionDepth != 0)
+            var isExtracted = false;
+            if (extractArchive && extractionDepth != 0)
+            {
+                LogDebug("Attempting archive extraction...");
+                var extractionPath = Path.Combine(workingDirectory, $"Extracted_{Path.GetFileNameWithoutExtension(f)}");
+                if (ExtractArchive(f, extractionPath))
                 {
-                    LogDebug("Attempting archive extraction...");
-                    var extractionPath = Path.Combine(workingDirectory, $"Extracted_{Path.GetFileNameWithoutExtension(f)}");
-                    if (ExtractArchive(f, extractionPath))
-                    {
-                        LogDebug($"Archive extracted to: {extractionPath}");
-                        isExtracted = true;
-                        extracted.Add(extractionPath);
-                    }
+                    LogDebug($"Archive extracted to: {extractionPath}");
+                    isExtracted = true;
+                    extracted.Add(extractionPath);
                 }
-                if (!isExtracted)
-                {
-                    files.Add(f);
-                }
-            });
+            }
+            if (!isExtracted)
+            {
+                files.Add(f);
+            }
+        }
 
         foreach (var file in IterateFiles(extracted, recursive, extractArchive, extractionDepth - 1, workingDirectory))
         {

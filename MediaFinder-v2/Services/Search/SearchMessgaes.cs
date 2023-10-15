@@ -21,18 +21,20 @@ public record WorkingDirectoryCreated(string Path)
         => new(path);
 }
 
-public record AnalyseRequest(ICollection<string> Files, bool PerformDeepAnalysis = false)
+public record AnalyseRequest(ICollection<string> Files, ICollection<string> OriginalPaths, string WorkingDirectory, bool PerformDeepAnalysis = false)
 {
-    public static AnalyseRequest Creatae(ICollection<string> files, bool performDeepAnalysis = false)
-        => new(files, performDeepAnalysis);
+    public static AnalyseRequest Create(ICollection<string> files, ICollection<string> originalPaths, string workingDirectory, bool performDeepAnalysis = false)
+        => new(files, originalPaths, workingDirectory, performDeepAnalysis);
 }
 
 public record AnalysisResponse(ICollection<FileDetails> Files)
 {
     public static AnalysisResponse Create(ICollection<FileDetails> files)
         => new(files);
+}
 
-
-    public static AnalysisResponse Create()
-        => new(new List<FileDetails>());
+public record FilterRequest(long? MinImageWidth, long? MinImageHeight, long? MinVideoWidth, long? MinVideoHeight)
+{
+    public static FilterRequest Create(long? minImageWidth, long? minImageHeight, long? minVideoWidth, long? minVideoHeight)
+        => new(minImageWidth, minImageHeight, minVideoWidth, minVideoHeight);
 }

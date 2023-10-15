@@ -14,7 +14,12 @@
     Height="600"
     d:DataContext="{d:DesignInstance Type=local:MainWindowsViewModel,
                                      IsDesignTimeCreatable=False}"
+    Background="{DynamicResource MaterialDesignPaper}"
+    FontFamily="{materialDesign:MaterialDesignFont}"
     Style="{StaticResource MaterialDesignWindow}"
+    TextElement.FontSize="14"
+    TextElement.FontWeight="Medium"
+    TextElement.Foreground="{DynamicResource MaterialDesignBody}"
     mc:Ignorable="d">
     <Window.Resources>
         <Style

@@ -10,7 +10,6 @@ using Serilog.Events;
 
 using Serilog;
 using CommunityToolkit.Mvvm.Messaging;
-using MediaFinder_v2.Services;
 using MediaFinder_v2.Views.SearchSettings;
 using MediaFinder_v2.Views.Executors;
 using MaterialDesignThemes.Wpf;
@@ -18,8 +17,8 @@ using System.Windows.Threading;
 using Microsoft.Extensions.Configuration;
 using Microsoft.EntityFrameworkCore;
 using NReco.VideoInfo;
-using MediaFinder_v2.Services.Archive;
 using MediaFinder_v2.Services.Search;
+using MediaFinder_v2.Services.Export;
 
 namespace MediaFinder_v2;
 
@@ -96,7 +95,9 @@ public partial class App : Application
 
             services.AddTransient<SearchStageOneWorker>();
             services.AddTransient<SearchStageTwoWorker>();
-            
+            services.AddTransient<SearchStageThreeWorker>();
+            services.AddTransient<ExportWorker>();
+
             services.AddTransient<FFProbe>();
 
             services.AddSingleton<MainWindow>();

@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Data.Common;
 using System.IO;
 using System.Windows.Data;
 
@@ -7,11 +8,12 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
+using MaterialDesignThemes.Wpf;
 using MaterialDesignThemes.Wpf.Transitions;
 
 using MediaFinder_v2.DataAccessLayer;
-using MediaFinder_v2.Helpers;
 using MediaFinder_v2.Messages;
+using MediaFinder_v2.Services.Export;
 using MediaFinder_v2.Services.Search;
 using MediaFinder_v2.Views.SearchSettings;
 
@@ -32,6 +34,8 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
 
     private readonly SearchStageOneWorker _searchStageOneWorker;
     private readonly SearchStageTwoWorker _searchStagaeTwoWorker;
+    private readonly SearchStageThreeWorker _searchStagaeThreeWorker;
+    private readonly ExportWorker _exportWorker;
 
     public SearchExecutorViewModel(IServiceProvider serviceProvider)
     {
@@ -41,14 +45,27 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
         _logger = _serviceProvider.GetRequiredService<ILogger<SearchExecutorViewModel>>();
         _searchStageOneWorker = _serviceProvider.GetRequiredService<SearchStageOneWorker>();
         _searchStagaeTwoWorker = _serviceProvider.GetRequiredService<SearchStageTwoWorker>();
+        _searchStagaeThreeWorker = _serviceProvider.GetRequiredService<SearchStageThreeWorker>();
+        _exportWorker = _serviceProvider.GetRequiredService<ExportWorker>();
 
         _messenger.RegisterAll(this);
 
         BindingOperations.EnableCollectionSynchronization(Configurations, new());
         BindingOperations.EnableCollectionSynchronization(DiscoveredFiles, new());
-        DiscoveredFiles.ListChanged += DiscoveredFiles_ListChanged;
+        
+
+        // Bind CollectionViewSource.Source to MyCollection
+        _mediaFilesViewSource = new CollectionViewSource();
+        Binding myBind = new() { Source = DiscoveredFiles };
+        BindingOperations.SetBinding(_mediaFilesViewSource, CollectionViewSource.SourceProperty, myBind);
+        MediaFilesView = _mediaFilesViewSource.View;
+        MediaFilesView.Filter = MediaFile_Filter_ShouldExport;
+        FilterByShouldExport = true;
+
         _searchStageOneWorker.RunWorkerCompleted += SearchStepOneCompleted;
         _searchStagaeTwoWorker.RunWorkerCompleted += SearchStageTwoCompleted;
+        _searchStagaeThreeWorker.RunWorkerCompleted += SearchStageThreeCompleted;
+        _exportWorker.RunWorkerCompleted += ExportCompleted;
     }
 
     private void ShowProgressIndicator(string message)
@@ -86,6 +103,7 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
     [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
     [NotifyCanExecuteChangedFor(nameof(MoveToReviewCommand))]
     [NotifyCanExecuteChangedFor(nameof(BackToSearchCommand))]
+    [NotifyCanExecuteChangedFor(nameof(FinishCommand))]
     private bool _searchComplete;
 
     [ObservableProperty]
@@ -126,7 +144,8 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
 
         HideProgressIndicator();
 
-        if (SearchComplete && !_searchStageOneWorker.IsBusy)
+        if (SearchComplete && !_searchStageOneWorker.IsBusy && !_searchStagaeTwoWorker.IsBusy
+            && !_searchStagaeThreeWorker.IsBusy)
         {
             await MoveToReviewCommand.ExecuteAsync(null);
         }
@@ -137,10 +156,12 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
             && SelectedConfig is not null
             && !SearchComplete
             && !IsSearching
-            && !_searchStageOneWorker.IsBusy;
+            && !_searchStageOneWorker.IsBusy
+            && !_searchStagaeTwoWorker.IsBusy
+            && !_searchStagaeThreeWorker.IsBusy;
 
     [RelayCommand(CanExecute = nameof(CanPerformSearch))]
-    public void OnPerformSearch()
+    public async Task OnPerformSearch()
     {
         if (SelectedConfig is null)
         {
@@ -154,275 +175,30 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
             return;
         }
 
-        IsSearching = true;
-        ShowProgressIndicator("Initializing search parameters");
-
-        if (!_searchStageOneWorker.IsBusy)
+        if (!_searchStageOneWorker.IsBusy && !_searchStagaeTwoWorker.IsBusy && !_searchStagaeThreeWorker.IsBusy)
         {
+            ShowProgressIndicator("Initializing search parameters");
+
+            await TruncateFileDetailState(_dbContext);
+
             _searchStageOneWorker.RunWorkerAsync(SearchRequest.Create(WorkingDirectory!, SelectedConfig!));
-            CancelSearchCommand.NotifyCanExecuteChanged();
+            IsSearching = true;
         }
-
-        //try
-        //{
-            
-        //}
-        //catch (TaskCanceledException)
-        //{
-        //    _messenger.Send(SnackBarMessage.Create("Search cancelled"));
-        //    _logger.LogInformation("Process cancelled by user.");
-        //}
-        //catch (Exception ex)
-        //{
-        //    _messenger.Send(SnackBarMessage.Create($"Search failed: {ex.Message}"));
-        //    _logger.LogError(ex, "Process Failed.");
-        //}
-        //finally
-        //{
-        //    HideProgressIndicator();
-        //    IsSearching = false;
-        //}
-
-        #region Original Code
-
-        //ShowProgressIndicator("Preparing Working Directory...");
-        //var workingDirectory = Path.Combine(WorkingDirectory!, Guid.NewGuid().ToString());
-        //Directory.CreateDirectory(workingDirectory);
-        //SelectedConfig.WorkingDirectory = workingDirectory;
-        //WorkingDirectorySet = true;
-
-        //try
-        //{
-        //    await TruncateFileDetailState(_dbContext, cancellationToken);
-
-        //    UpdateProgressIndicator("Performing Search...");
-        //    await foreach (var file in _mediaLocator.Search(SelectedConfig.Directories, recursive: SelectedConfig.Recursive, performDeepAnalysis: SelectedConfig.PerformDeepAnalysis, cancellationToken: cancellationToken))
-        //    {
-        //        _dbContext.FileDetails.Add(file);
-        //    }
-        //    await _dbContext.SaveChangesAsync(cancellationToken);
-
-        //    if (SelectedConfig.ExtractArchives)
-        //    {
-        //        UpdateProgressIndicator("Extracting Archives...");
-
-        //        var extractionDepth = 0;
-        //        bool filesExtracted;
-        //        do
-        //        {
-        //            extractionDepth++;
-        //            filesExtracted = false;
-
-        //            var archiveCount = await _dbContext.FileDetails.CountAsync(f => f.FileType == DataAccessLayer.Models.MultiMediaType.Archive && !f.Extracted, cancellationToken);
-        //            var currentArchive = 0;
-        //            foreach (var archive in _dbContext.FileDetails.Where(f => f.FileType == DataAccessLayer.Models.MultiMediaType.Archive && !f.Extracted))
-        //            {
-        //                cancellationToken.ThrowIfCancellationRequested();
-
-        //                var filePath = Path.Combine(archive.ParentPath, archive.FileName);
-        //                UpdateProgressIndicator($"Extracting Archives ...\nIteration: {extractionDepth}\nExtracting {++currentArchive} of {archiveCount}\nFile: {filePath}");
-        //                var destDir = Path.Combine(workingDirectory, $"Extracted_{archive.FileName}");
-
-        //                _logger.LogDebug("Extracting archive: {filePath}", filePath);
-        //                _archiveExtractor.Extract(filePath, destDir);
-        //                archive.Extracted = true;
-        //                _logger.LogDebug("Archive extracted: {filePath}", filePath);
-
-        //                await foreach (var file in _mediaLocator.Search(destDir, recursive: SelectedConfig.Recursive, performDeepAnalysis: SelectedConfig.PerformDeepAnalysis, cancellationToken: cancellationToken))
-        //                {
-        //                    filesExtracted = true;
-        //                    _dbContext.FileDetails.Add(file);
-        //                }
-        //                _logger.LogDebug("Discovered files in extraction directory: {destDir}", destDir);
-        //            }
-        //            await _dbContext.SaveChangesAsync(cancellationToken);
-        //        }
-        //        while (filesExtracted && extractionDepth <= SelectedConfig.ExtractionDepth);
-        //    }
-
-        //    if (SelectedConfig.PerformDeepAnalysis)
-        //    {
-        //        UpdateProgressIndicator("Analysing Files...");
-        //        var totalFiles = await _dbContext.FileDetails
-        //            .CountAsync(f => f.FileType != DataAccessLayer.Models.MultiMediaType.Archive, cancellationToken);
-        //        var currentFile = 0;
-        //        await foreach (var file in _dbContext.FileDetails
-        //            .Include(fd => fd.FileProperties)
-        //            .Where(f => f.FileType != DataAccessLayer.Models.MultiMediaType.Archive)
-        //            .AsAsyncEnumerable())
-        //        {
-        //            cancellationToken.ThrowIfCancellationRequested();
-
-        //            var filePath = Path.Combine(file.ParentPath, file.FileName);
-        //            UpdateProgressIndicator($"Analysing File {++currentFile} of {totalFiles}\nFile: {filePath}");
-
-        //            var detector = _mediaDetectors.SingleOrDefault(md => md.MediaType == file.FileType);
-        //            if (detector is not null)
-        //            {
-        //                var details = detector.GetMediaProperties(filePath);
-        //                file.FileProperties = details
-        //                    .Where(kvp => kvp.Value != null && kvp.Key != null)
-        //                    .Select(kvp => new DataAccessLayer.Models.FileProperty
-        //                    {
-        //                        Name = kvp.Key,
-        //                        Value = kvp.Value
-        //                    }).ToList();
-        //            }
-        //        }
-        //        await _dbContext.SaveChangesAsync(cancellationToken);
-        //    }
-
-        //    UpdateProgressIndicator("Calculating Hashes...");
-        //    var total = await _dbContext.FileDetails
-        //        .CountAsync(f => f.FileType != DataAccessLayer.Models.MultiMediaType.Archive, cancellationToken);
-        //    var current = 0;
-        //    await foreach (var file in _dbContext.FileDetails
-        //        .Where(f => f.FileType != DataAccessLayer.Models.MultiMediaType.Archive)
-        //        .AsAsyncEnumerable())
-        //    {
-        //        cancellationToken.ThrowIfCancellationRequested();
-
-        //        var filePath = Path.Combine(file.ParentPath, file.FileName);
-        //        UpdateProgressIndicator($"Calculating Hash {++current} of {total}\nFile: {filePath}");
-        //        var fileInfo = new FileInfo(filePath);
-
-        //        using var fileStream = fileInfo.Open(FileMode.Open, FileAccess.ReadWrite, FileShare.Read);
-        //        using var hashStream = new HashStream(fileStream, HashAlgorithmName.MD5, HashAlgorithmName.SHA256, HashAlgorithmName.SHA512);
-
-        //        var read = 1024;
-        //        var buffer = new byte[read];
-        //        do
-        //        {
-        //            await Task.Yield();
-        //            cancellationToken.ThrowIfCancellationRequested();
-        //            read = hashStream.Read(buffer, 0, buffer.Length);
-        //        } while (read != 0);
-
-        //        file.MD5_Hash = Convert.ToHexString(hashStream.Hash(HashAlgorithmName.MD5));
-        //        file.SHA256_Hash = Convert.ToHexString(hashStream.Hash(HashAlgorithmName.SHA256));
-        //        file.SHA512_Hash = Convert.ToHexString(hashStream.Hash(HashAlgorithmName.SHA512));
-
-        //        _logger.LogDebug("File hash for '{filePath}': MD5 = {MD5_Hash}", filePath, file.MD5_Hash);
-        //        _logger.LogDebug("File hash for '{filePath}': SHA256 = {SHA256_Hash}", filePath, file.SHA256_Hash);
-        //        _logger.LogDebug("File hash for '{filePath}': SHA512 = {SHA512_Hash}", filePath, file.SHA512_Hash);
-        //    }
-        //    await _dbContext.SaveChangesAsync(cancellationToken);
-
-        //    UpdateProgressIndicator("Saving Results...");
-        //    await foreach (var file in _dbContext.FileDetails
-        //        .Where(f => f.FileType == DataAccessLayer.Models.MultiMediaType.Image || f.FileType == DataAccessLayer.Models.MultiMediaType.Video)
-        //        .AsAsyncEnumerable())
-        //    {
-        //        file.ShouldExport = true;
-        //    }
-        //    await _dbContext.SaveChangesAsync(cancellationToken);
-
-        //    var tmp = await _dbContext.FileDetails.CountAsync(fd => fd.ShouldExport == true, cancellationToken);
-
-        //    UpdateProgressIndicator("Removing Duplicates...");
-        //    var md5DupeCount = 0;
-        //    var md5_hashes = await _dbContext.FileDetails
-        //        .Where(f => f.ShouldExport && f.MD5_Hash != null)
-        //        .GroupBy(f => f.MD5_Hash)
-        //        .Where(g => g.Count() > 1)
-        //        .Select(g => g.Key)
-        //        .ToListAsync(cancellationToken);
-        //    UpdateProgressIndicator($"Removing Duplicates...\nBased on MD5 Hash: {md5_hashes.Count}");
-        //    foreach (var md5_hash in md5_hashes)
-        //    {
-        //        await foreach (var file in _dbContext.FileDetails
-        //            .Where(f => f.MD5_Hash == md5_hash)
-        //            .Skip(1)
-        //            .AsAsyncEnumerable())
-        //        {
-        //            file.ShouldExport = false;
-        //            ++md5DupeCount;
-        //        }
-        //    }
-        //    await _dbContext.SaveChangesAsync(cancellationToken);
-        //    var sha256DupeCount = 0;
-        //    var sha256_hashes = await _dbContext.FileDetails
-        //        .Where(f => f.ShouldExport && f.SHA256_Hash != null)
-        //        .GroupBy(f => f.SHA256_Hash)
-        //        .Where(g => g.Count() > 1)
-        //        .Select(g => g.Key)
-        //        .ToListAsync(cancellationToken);
-        //    UpdateProgressIndicator($"Removing Duplicates...\nBased on SHA256 Hash: {sha256_hashes.Count}");
-        //    foreach (var sha256_hash in sha256_hashes)
-        //    {
-        //        await foreach (var file in _dbContext.FileDetails
-        //            .Where(f => f.SHA256_Hash == sha256_hash)
-        //            .Skip(1)
-        //            .AsAsyncEnumerable())
-        //        {
-        //            file.ShouldExport = false;
-        //            ++sha256DupeCount;
-        //        }
-        //    }
-        //    await _dbContext.SaveChangesAsync(cancellationToken);
-        //    var sha512DupeCount = 0;
-        //    var sha512_hashes = await _dbContext.FileDetails
-        //        .Where(f => f.ShouldExport && f.SHA512_Hash != null)
-        //        .GroupBy(f => f.SHA512_Hash)
-        //        .Where(g => g.Count() > 1)
-        //        .Select(g => g.Key)
-        //        .ToListAsync(cancellationToken);
-        //    UpdateProgressIndicator($"Removing Duplicates...\nBased on SHA512 Hash: {sha512_hashes.Count}");
-        //    foreach (var sha512_hash in sha512_hashes)
-        //    {
-        //        await foreach (var file in _dbContext.FileDetails
-        //            .Where(f => f.SHA512_Hash == sha512_hash)
-        //            .Skip(1)
-        //            .AsAsyncEnumerable())
-        //        {
-        //            file.ShouldExport = false;
-        //            ++sha512DupeCount;
-        //        }
-        //    }
-        //    await _dbContext.SaveChangesAsync(cancellationToken);
-
-        //    var tmp2 = await _dbContext.FileDetails.CountAsync(fd => fd.ShouldExport == true, cancellationToken);
-        //    var totalDupeCount = md5DupeCount + sha256DupeCount + sha512DupeCount;
-        //    _logger.LogDebug("Original Export Count: {tmp}", tmp);
-        //    _logger.LogDebug("MD5 Duplicates Removed: {md5DupeCount}", md5DupeCount);
-        //    _logger.LogDebug("SHA256 Duplicates Removed: {sha256DupeCount}", sha256DupeCount);
-        //    _logger.LogDebug("SHA512 Duplicates Removed: {sha512DupeCount}", sha512DupeCount);
-        //    _logger.LogDebug("Total Duplicates Removed: {totalDupeCount}", totalDupeCount);
-        //    _logger.LogDebug("Final Export Count: {tmp2}", tmp2);
-        //    UpdateProgressIndicator($"Finalizing...\nTotal Duplicates Found: {totalDupeCount}\nMD5: {md5DupeCount}\nSHA256: {sha256DupeCount}\nSHA512: {sha512DupeCount}\n\nOriginal Count: {tmp}\nFinal Count: {tmp2}");
-        //    SearchComplete = true;
-        //}
-        //catch (TaskCanceledException)
-        //{
-        //    _messenger.Send(SnackBarMessage.Create("Search cancelled"));
-        //    _logger.LogInformation("Process cancelled by user.");
-        //}
-        //catch (Exception ex)
-        //{
-        //    _messenger.Send(SnackBarMessage.Create($"Search failed: {ex.Message}"));
-        //    _logger.LogError(ex, "Process Failed.");
-        //}
-        //finally
-        //{
-        //    HideProgressIndicator();
-
-        //    IsSearching = false;
-        //}
-
-        #endregion
     }
 
     private bool CanCancelSearch()
         => IsSearching && (
             (_searchStageOneWorker.IsBusy && !_searchStageOneWorker.CancellationPending)
             || (_searchStagaeTwoWorker.IsBusy && !_searchStagaeTwoWorker.CancellationPending)
+            || (_searchStagaeThreeWorker.IsBusy && !_searchStagaeThreeWorker.CancellationPending)
         );
 
     [RelayCommand(CanExecute = nameof(CanCancelSearch))]
     private void OnCancelSearch()
     {
         if (!_searchStageOneWorker.IsBusy
-            && !_searchStagaeTwoWorker.IsBusy)
+            && !_searchStagaeTwoWorker.IsBusy
+            && !_searchStagaeThreeWorker.IsBusy)
         {
             return;
         }
@@ -434,6 +210,10 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
         if (_searchStagaeTwoWorker.IsBusy)
         {
             _searchStagaeTwoWorker.CancelAsync();
+        }
+        if (_searchStagaeThreeWorker.IsBusy)
+        {
+            _searchStagaeThreeWorker.CancelAsync();
         }
         CancelSearchCommand.NotifyCanExecuteChanged();
         _messenger.Send(UpdateProgressBarStatus.Create("Cancelling..."));
@@ -463,7 +243,12 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
             return;
         }
 
-        _searchStagaeTwoWorker.RunWorkerAsync(AnalyseRequest.Creatae(result.Files, SelectedConfig!.PerformDeepAnalysis));
+        _searchStagaeTwoWorker.RunWorkerAsync(
+            AnalyseRequest.Create(
+                result.Files,
+                SelectedConfig!.Directories,
+                SelectedConfig.WorkingDirectory!,
+                SelectedConfig.PerformDeepAnalysis));
     }
 
     private void SearchStageTwoCompleted(object? sender, RunWorkerCompletedEventArgs e)
@@ -490,12 +275,52 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
             return;
         }
 
-        _dbContext.FileDetails.AddRange(result.Files);
-        _dbContext.SaveChanges();
+        try
+        {
+            _dbContext.FileDetails.AddRange(result.Files);
+            _dbContext.SaveChanges();
+        }
+        catch (DbException ex)
+        {
+            _messenger.Send(SnackBarMessage.Create($"Failed to save search results"));
+            _logger.LogError(ex, "Failed to save initial search results");
+            SearchCleanup();
+            return;
+        }
 
-        IsSearching = false;
-        SearchComplete = true;
-        HideProgressIndicator();
+        _searchStagaeThreeWorker.RunWorkerAsync(
+            FilterRequest.Create(
+                SelectedConfig!.MinImageWidth,
+                SelectedConfig.MinImageHeight,
+                SelectedConfig.MinVideoWidth,
+                SelectedConfig.MinVideoHeight));
+    }
+
+    private void SearchStageThreeCompleted(object? sender, RunWorkerCompletedEventArgs e)
+    {
+        if (e.Cancelled)
+        {
+            _messenger.Send(SnackBarMessage.Create("Search cancelled"));
+            _logger.LogInformation("Process cancelled by user.");
+            SearchCleanup();
+            return;
+        }
+        if (e.Error is not null)
+        {
+            _messenger.Send(SnackBarMessage.Create($"Search failed: {e.Error.Message}"));
+            _logger.LogError(e.Error, "Process Failed.");
+            SearchCleanup();
+            return;
+        }
+        if (e.Result is not bool result || !result)
+        {
+            _messenger.Send(SnackBarMessage.Create($"Search returned invalid analysis result"));
+            _logger.LogError("Invalid SearchWorker Result: Stage 3 returned false");
+            SearchCleanup();
+            return;
+        }
+
+        SearchFinished();
     }
 
     private void SearchCleanup()
@@ -509,12 +334,23 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
         }
         IsSearching = false;
         HideProgressIndicator();
+        FinishCommand.NotifyCanExecuteChanged();
+    }
+
+    private void SearchFinished()
+    {
+        IsSearching = false;
+        SearchComplete = true;
+        HideProgressIndicator();
+        FinishCommand.NotifyCanExecuteChanged();
     }
 
     private bool CanMoveToReview()
         => SearchComplete
             && !IsSearching
-            && !_searchStageOneWorker.IsBusy;
+            && !_searchStageOneWorker.IsBusy
+            && !_searchStagaeTwoWorker.IsBusy
+            && !_searchStagaeThreeWorker.IsBusy;
 
     [RelayCommand(CanExecute = nameof(CanMoveToReview))]
     private async Task OnMoveToReview()
@@ -528,18 +364,34 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
 
     #region Step2 - View Results
 
+    private readonly CollectionViewSource _mediaFilesViewSource;
+
+    [ObservableProperty]
+    private ICollectionView _mediaFilesView;
+
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExportFilesCommand))]
-    private AdvancedBindingList<MediaFile> _discoveredFiles = new();
+    private ObservableCollection<MediaFile> _discoveredFiles = new();
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExportFilesCommand))]
     private string? _exportDirectory;
 
     [ObservableProperty]
+    private ExportType _exportType;
+
+    [ObservableProperty]
+    private bool _exportRename;
+
+    [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(BackToSearchCommand))]
     [NotifyCanExecuteChangedFor(nameof(FinishCommand))]
+    [NotifyCanExecuteChangedFor(nameof(ExportFilesCommand))]
+    [NotifyCanExecuteChangedFor(nameof(CancelExportCommand))]
     private bool _isExporting;
+
+    [ObservableProperty]
+    private bool? _filterByShouldExport;
 
     [RelayCommand]
     public async Task OnLoadingResults()
@@ -550,76 +402,163 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
         }
 
         ShowProgressIndicator("Populating Results...");
+        foreach (var mediaFile in DiscoveredFiles)
+        {
+            mediaFile.PropertyChanged -= MediaFile_PropertyChanged;
+        }
         DiscoveredFiles.Clear();
         await foreach (var file in _dbContext.FileDetails.AsAsyncEnumerable())
         {
-            DiscoveredFiles.Add(MediaFile.Create(file));
+            var mediaFile = MediaFile.Create(file);
+            mediaFile.PropertyChanged += MediaFile_PropertyChanged;
+            DiscoveredFiles.Add(mediaFile);
         }
         HideProgressIndicator();
     }
 
-    [RelayCommand(CanExecute = nameof(CanNavigateBack))]
+    private bool MediaFile_Filter_ShouldExport(object file)
+        => FilterByShouldExport is null
+            || (file is MediaFile mf && mf.ShouldExport == FilterByShouldExport);
+
+    partial void OnFilterByShouldExportChanged(bool? value)
+    {
+        MediaFilesView.Refresh();
+    }
+
+    [ObservableProperty]
+    private MediaFile? _selectedExportFile;
+
+    [RelayCommand]
+    public void OnShowFileDetails(DrawerHost drawerHost)
+    {
+        if (SelectedExportFile is null)
+            return;
+
+        drawerHost!.IsRightDrawerOpen = true;
+    }
+
+    public bool CanNavigateBackToSearch()
+        => !IsExporting
+            && SearchComplete;
+
+    [RelayCommand(CanExecute = nameof(CanNavigateBackToSearch))]
     public static void OnBackToSearch(CancellationToken cancellationToken)
     {
         Transitioner.MoveFirstCommand.Execute(null, null);
     }
 
-    public bool CanNavigateBack()
-        => !IsExporting
-            && SearchComplete;
+    public bool CanExportFiles()
+        => !string.IsNullOrEmpty(ExportDirectory)
+            && DiscoveredFiles.Any(x => x.ShouldExport)
+            && !_exportWorker.IsBusy;
 
-    [RelayCommand(CanExecute = nameof(CanExportFiles), IncludeCancelCommand = true)]
+    [RelayCommand(CanExecute = nameof(CanExportFiles))]
     public async Task OnExportFiles(CancellationToken cancellationToken)
     {
-        IsExporting = true;
-        _messenger.Send(ShowProgressBar.Create("Exporting Files..."));
-        try
+        if (ExportDirectory is null)
         {
-            // TODO: Implement export feature
-            await Task.Delay(20_000, cancellationToken);
+            _messenger.Send(SnackBarMessage.Create("No export directory selected"));
+            return;
+        }
 
-            _messenger.Send(SnackBarMessage.Create("Export completed successfully"));
-            Transitioner.MoveNextCommand.Execute(null, null);
-        }
-        catch(TaskCanceledException)
+        if (!_exportWorker.IsBusy)
         {
-            _messenger.Send(SnackBarMessage.Create("Export cancelled"));
-            _logger.LogInformation("Process cancelled by user.");
-        }
-        catch(Exception ex)
-        {   
-            _messenger.Send(SnackBarMessage.Create($"Export failed: {ex.Message}"));
-            _logger.LogError(ex, "Process failed.");
-        }
-        finally
-        {
-            _messenger.Send(HideProgressBar.Create());
-            IsExporting = false;
+            ShowProgressIndicator("Initializing export...");
+
+            var originalLazyLoadSetting = _dbContext.ChangeTracker.LazyLoadingEnabled;
+            _dbContext.ChangeTracker.LazyLoadingEnabled = false;
+            var filesToExport = await _dbContext.FileDetails
+                .Include(fd => fd.FileProperties)
+                .Where(fd => fd.ShouldExport)
+                .ToListAsync(cancellationToken);
+            _dbContext.ChangeTracker.LazyLoadingEnabled = originalLazyLoadSetting;
+
+            _exportWorker.RunWorkerAsync(ExportRequest.Create(filesToExport, ExportDirectory!, ExportType, ExportRename));
+            IsExporting = true;
         }
     }
 
-    public bool CanExportFiles()
-        => !string.IsNullOrEmpty(ExportDirectory) &&
-            DiscoveredFiles.Any(x => x.ShouldExport);
+    private bool CanCancelExport()
+        => IsExporting && (
+            (_exportWorker.IsBusy && !_exportWorker.CancellationPending)
+        );
 
-    private async void DiscoveredFiles_ListChanged(object? sender, ListChangedEventArgs e)
+    [RelayCommand(CanExecute = nameof(CanCancelExport))]
+    private void OnCancelExport()
     {
-        if (e.ListChangedType is ListChangedType.ItemChanged)
+        if (!_exportWorker.IsBusy)
         {
-            var item = DiscoveredFiles.ElementAt(e.OldIndex);
-            var entity = await _dbContext.FileDetails.FindAsync(item.Id);
-            if (entity is not null && e.PropertyDescriptor is not null)
-            {
-                var entityPropertyDescriptor = TypeDescriptor.GetProperties(entity)[e.PropertyDescriptor.Name];
-                if (entityPropertyDescriptor is not null)
-                {
-                    entityPropertyDescriptor!.SetValue(entity, e.PropertyDescriptor.GetValue(item));
-                    await _dbContext.SaveChangesAsync();
-                }
-            }
+            return;
         }
 
-        ExportFilesCommand.NotifyCanExecuteChanged();
+        _exportWorker.CancelAsync();
+
+        CancelExportCommand.NotifyCanExecuteChanged();
+        _messenger.Send(UpdateProgressBarStatus.Create("Cancelling..."));
+    }
+
+    private void ExportCompleted(object? sender, RunWorkerCompletedEventArgs e)
+    {
+        if (e.Cancelled)
+        {
+            _messenger.Send(SnackBarMessage.Create("Export cancelled"));
+            _logger.LogInformation("Process cancelled by user.");
+            ExportCleanup();
+            return;
+        }
+        if (e.Error is not null)
+        {
+            _messenger.Send(SnackBarMessage.Create($"Export failed: {e.Error.Message}"));
+            _logger.LogError(e.Error, "Process Failed.");
+            ExportCleanup();
+            return;
+        }
+        if (e.Result is not bool result || !result)
+        {
+            _messenger.Send(SnackBarMessage.Create($"Export returned invalid analysis result"));
+            _logger.LogError("Invalid ExportWorker Result");
+            ExportCleanup();
+            return;
+        }
+
+        _messenger.Send(SnackBarMessage.Create("Export completed successfully"));
+        _logger.LogError("Export completed successfully");
+        ExportCleanup();
+        Transitioner.MoveNextCommand.Execute(null, null);
+    }
+
+    private void ExportCleanup()
+    {
+        IsExporting = false;
+        HideProgressIndicator();
+        FinishCommand.NotifyCanExecuteChanged();
+    }
+
+    private async void MediaFile_PropertyChanged(object? sender, PropertyChangedEventArgs e)
+    {
+        if (sender is not MediaFile item || e.PropertyName is null)
+        {
+            return;
+        }
+
+        var entity = await _dbContext.FileDetails.FindAsync(item.Id);
+        if (entity is null)
+        {
+            return;
+        }
+
+        var itemPropertyDescriptor = TypeDescriptor.GetProperties(item)[e.PropertyName];
+        var entityPropertyDescriptor = TypeDescriptor.GetProperties(entity)[e.PropertyName];
+        if (entityPropertyDescriptor is not null && itemPropertyDescriptor is not null)
+        {
+            var originalValue = entityPropertyDescriptor.GetValue(entity);
+            var newValue = itemPropertyDescriptor.GetValue(item);
+            if (newValue != originalValue)
+            {
+                entityPropertyDescriptor.SetValue(entity, newValue);
+                await _dbContext.SaveChangesAsync();
+            }
+        }
     }
 
     #endregion
@@ -636,7 +575,9 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
         => !IsSearching
             && !IsExporting
             && !_searchStageOneWorker.IsBusy
-            && SelectedConfig?.WorkingDirectory is not null;
+            && !_searchStagaeTwoWorker.IsBusy
+            && !_searchStagaeThreeWorker.IsBusy
+            && (SelectedConfig?.WorkingDirectory is not null || _dbContext.FileDetails.Any());
 
     [RelayCommand(CanExecute = nameof(CanFinishSearach))]
     public async Task Finish()

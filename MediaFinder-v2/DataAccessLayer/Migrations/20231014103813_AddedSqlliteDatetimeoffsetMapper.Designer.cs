@@ -3,6 +3,7 @@ using System;
 using MediaFinder_v2.DataAccessLayer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediaFinder_v2.DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20231014103813_AddedSqlliteDatetimeoffsetMapper")]
+    partial class AddedSqlliteDatetimeoffsetMapper
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -158,18 +161,6 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                     b.Property<int?>("ExtractionDepth")
                         .HasColumnType("INTEGER");
 
-                    b.Property<long?>("MinImageHeight")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long?>("MinImageWidth")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long?>("MinVideoHeight")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<long?>("MinVideoWidth")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -198,10 +189,6 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                             Id = 2,
                             ExtractArchives = true,
                             ExtractionDepth = 5,
-                            MinImageHeight = 200L,
-                            MinImageWidth = 200L,
-                            MinVideoHeight = 300L,
-                            MinVideoWidth = 600L,
                             Name = "Testing",
                             PerformDeepAnalysis = true,
                             Recursive = true
