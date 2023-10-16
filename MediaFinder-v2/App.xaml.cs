@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore;
 using NReco.VideoInfo;
 using MediaFinder_v2.Services.Search;
 using MediaFinder_v2.Services.Export;
+using MediaFinder_v2.Views;
 
 namespace MediaFinder_v2;
 

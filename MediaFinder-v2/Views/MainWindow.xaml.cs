@@ -4,7 +4,7 @@ using System.Windows.Input;
 using MediaFinder_v2.Views.Executors;
 using MediaFinder_v2.Views.SearchSettings;
 
-namespace MediaFinder_v2;
+namespace MediaFinder_v2.Views;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml

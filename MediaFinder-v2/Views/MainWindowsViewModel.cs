@@ -5,7 +5,7 @@ using MaterialDesignThemes.Wpf;
 
 using MediaFinder_v2.Messages;
 
-namespace MediaFinder_v2;
+namespace MediaFinder_v2.Views;
 
 public partial class MainWindowsViewModel : ObservableObject,
     IRecipient<ChangeTab>,
