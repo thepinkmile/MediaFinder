@@ -28,35 +28,56 @@ public abstract class ReactiveBackgroundWorker : BackgroundWorker
 
     protected abstract void Execute(object? sender, DoWorkEventArgs e);
 
-    protected void ReportProgress(object userState)
-        => ReportProgress(default, userState);
-
     #region Logging
 
-    protected void Log(LogLevel logLevel, string messagee, Exception? exception = null)
-        => ReportProgress(LogMessage.Log(logLevel, messagee, exception));
+    protected void Log(LogLevel logLevel, Exception exception, string messagee, params string[] args)
+        => ReportProgress(LogMessage.Log(logLevel, exception, messagee, args));
 
-    protected void LogTrace(string message, Exception? exception = null)
-        => ReportProgress(LogMessage.LogTrace(message, exception));
+    protected void Log(LogLevel logLevel, string messagee, params string[] args)
+        => ReportProgress(LogMessage.Log(logLevel, messagee, args));
 
-    protected void LogDebug(string message, Exception? exception = null)
-        => ReportProgress(LogMessage.LogDebug(message, exception));
+    protected void LogTrace(Exception exception, string messagee, params string[] args)
+        => ReportProgress(LogMessage.LogTrace(exception, messagee, args));
 
-    protected void LogInformation(string message, Exception? exception = null)
-        => ReportProgress(LogMessage.LogInformation(message, exception));
+    protected void LogTrace(string messagee, params string[] args)
+        => ReportProgress(LogMessage.LogTrace(messagee, args));
 
-    protected void LogWarning(string message, Exception? exception = null)
-        => ReportProgress(LogMessage.LogWarning(message, exception));
+    protected void LogDebug(Exception exception, string messagee, params string[] args)
+        => ReportProgress(LogMessage.LogDebug(exception, messagee, args));
 
-    protected void LogError(string message, Exception? exception = null)
-        => ReportProgress(LogMessage.LogError(message, exception));
+    protected void LogDebug(string messagee, params string[] args)
+        => ReportProgress(LogMessage.LogDebug(messagee, args));
 
-    protected void LogCritical(string message, Exception? exception = null)
-        => ReportProgress(LogMessage.LogCritical(message, exception));
+    protected void LogInformation(Exception exception, string messagee, params string[] args)
+        => ReportProgress(LogMessage.LogInformation(exception, messagee, args));
+
+    protected void LogInformation(string messagee, params string[] args)
+        => ReportProgress(LogMessage.LogInformation(messagee, args));
+
+    protected void LogWarning(Exception exception, string messagee, params string[] args)
+        => ReportProgress(LogMessage.LogWarning(exception, messagee, args));
+
+    protected void LogWarning(string messagee, params string[] args)
+        => ReportProgress(LogMessage.LogWarning(messagee, args));
+
+    protected void LogError(Exception exception, string messagee, params string[] args)
+        => ReportProgress(LogMessage.LogError(exception, messagee, args));
+
+    protected void LogError(string messagee, params string[] args)
+        => ReportProgress(LogMessage.LogError(messagee, args));
+
+    protected void LogCritical(Exception exception, string messagee, params string[] args)
+        => ReportProgress(LogMessage.LogCritical(exception, messagee, args));
+
+    protected void LogCritical(string messagee, params string[] args)
+        => ReportProgress(LogMessage.LogCritical(messagee, args));
 
     #endregion
 
     #region ProgressReporting
+
+    protected void ReportProgress(object userState)
+        => ReportProgress(default, userState);
 
     protected void SetProgress(string message, LogLevel logLevel = LogLevel.Debug)
     {
@@ -81,31 +102,9 @@ public abstract class ReactiveBackgroundWorker : BackgroundWorker
         }
     }
 
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2254:Template should be a static expression", Justification = "Don't care")]
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Usage", "CA2254:Template should be a static expression", Justification = "It is, but it is passed from an underlaying process/thread")]
     private void SendLogMessage(LogMessage logMessage)
-    {
-        switch (logMessage.LogLevel)
-        {
-            case LogLevel.Trace:
-                _logger.LogTrace(logMessage.Exception, logMessage.Message);
-                break;
-            case LogLevel.Debug:
-                _logger.LogDebug(logMessage.Exception, logMessage.Message);
-                break;
-            case LogLevel.Information:
-                _logger.LogInformation(logMessage.Exception, logMessage.Message);
-                break;
-            case LogLevel.Warning:
-                _logger.LogWarning(logMessage.Exception, logMessage.Message);
-                break;
-            case LogLevel.Error:
-                _logger.LogError(logMessage.Exception, logMessage.Message);
-                break;
-            case LogLevel.Critical:
-                _logger.LogCritical(logMessage.Exception, logMessage.Message);
-                break;
-        }
-    }
+        => _logger.Log(logMessage.LogLevel, logMessage.Exception, logMessage.Message, logMessage.FormatArgs);
 
     #endregion
 }

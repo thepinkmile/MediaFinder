@@ -9,9 +9,9 @@ namespace MediaFinder_v2.Converters;
 
 public class MediaFileToIconConverter : IValueConverter
 {
-    public PackIconKind ImageIcon { get; set; } = PackIconKind.ImageArea;
+    public PackIconKind ImageIcon { get; set; } = PackIconKind.FileImageOutline;
 
-    public PackIconKind VideoIcon { get; set; } = PackIconKind.VideoImage;
+    public PackIconKind VideoIcon { get; set; } = PackIconKind.FileVideoOutline;
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value is not MediaFile mf ? (object)PackIconKind.None

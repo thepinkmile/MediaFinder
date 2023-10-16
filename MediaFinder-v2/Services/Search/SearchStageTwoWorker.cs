@@ -216,7 +216,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker
         }
         catch (Exception ex)
         {
-            LogDebug($"Failed to describe file: {details[FULLPATH_DETAIL]}", ex);
+            LogDebug(ex, "Failed to describe file: {filename}", details[FULLPATH_DETAIL]);
             fileDetails = null;
             return false;
         }
@@ -307,12 +307,12 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker
         }
         catch (Exception ex) when (ex is FFProbeException || ex.InnerException is FFProbeException)
         {
-            LogDebug($"No video metadata detected: {details[FILENAME_DETAIL]}", ex);
+            LogDebug(ex, "No video metadata detected: {filename}", details[FILENAME_DETAIL]);
             await Task.Yield();
         }
         catch (Exception ex) when (ex.InnerException is not FFProbeException)
         {
-            LogDebug($"Failed to analyse file as video: {details[FILENAME_DETAIL]}", ex);
+            LogDebug(ex, "Failed to analyse file as video: {filename}", details[FILENAME_DETAIL]);
             await Task.Yield();
         }
     }
@@ -398,7 +398,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker
         }
         catch(Exception ex)
         {
-            LogDebug($"Failed to analyse file as image: {details[FILENAME_DETAIL]}", ex);
+            LogDebug(ex, "Failed to analyse file as image: {filename}", details[FILENAME_DETAIL]);
             await Task.Yield();
         }
     }
@@ -461,7 +461,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker
         }
         catch (Exception ex)
         {
-            LogDebug($"Failed to generate checksum for file: {details[FILENAME_DETAIL]}", ex);
+            LogDebug(ex, "Failed to generate checksum for file: {filename}", details[FILENAME_DETAIL]);
             await Task.Yield();
         }
     }

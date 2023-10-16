@@ -1,9 +1,8 @@
-﻿using System.ComponentModel;
-using System.IO;
+﻿using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace MediaFinder_v2.Services;
+namespace MediaFinder_v2.Helpers;
 // Copyright 2018 Steve Streeting
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy

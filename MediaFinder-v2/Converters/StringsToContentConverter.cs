@@ -28,5 +28,7 @@ public class StringsToContentConverter : IValueConverter
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
-        => value;
+        => value is not string strValue
+            ? Binding.DoNothing
+            : strValue.Split(Delimeter, StringSplitOptions.RemoveEmptyEntries);
 }

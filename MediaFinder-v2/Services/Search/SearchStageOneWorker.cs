@@ -105,7 +105,7 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker
                 var extractionPath = Path.Combine(workingDirectory, $"Extracted_{Path.GetFileNameWithoutExtension(f)}");
                 if (ExtractArchive(f, extractionPath))
                 {
-                    LogDebug($"Archive extracted to: {extractionPath}");
+                    LogDebug("Archive extracted to: {extractionPath}", extractionPath);
                     isExtracted = true;
                     extracted.Add(extractionPath);
                 }
@@ -133,7 +133,7 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker
     {
         try
         {
-            LogDebug($"Performing archive detection: {filepath}");
+            LogDebug("Performing archive detection: {filepath}", filepath);
             using var archive = new ArchiveFile(filepath);
             SetProgress($"Extracting Archive: {filepath}");
             archive.Extract(destinationPath);
@@ -141,7 +141,7 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker
         }
         catch (SevenZipException ex)
         {
-            LogDebug($"Archive detection failed for {filepath}", ex);
+            LogDebug(ex, "Archive detection failed for {filepath}", filepath);
             return false;
         }
     }

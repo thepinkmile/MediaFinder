@@ -44,7 +44,7 @@ public partial class SearchSettingsViewModel : ObservableObject, IRecipient<Sear
 
         await foreach (var config in _dbContext.SearchSettings.AsAsyncEnumerable())
         {
-            Configurations.Add(new SearchSettingItemViewModel(config));
+            Configurations.Add(SearchSettingItemViewModel.Create(config));
         }
         _messenger.Send(HideProgressBar.Create());
     }

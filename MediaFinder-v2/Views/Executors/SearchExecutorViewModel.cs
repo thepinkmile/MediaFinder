@@ -139,7 +139,7 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
             .Include(ss => ss.Directories)
             .AsAsyncEnumerable())
         {
-            Configurations.Add(new SearchSettingItemViewModel(config));
+            Configurations.Add(SearchSettingItemViewModel.Create(config));
         }
 
         HideProgressIndicator();
