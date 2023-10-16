@@ -1,6 +1,6 @@
-﻿namespace MediaFinder_v2.Views.SearchSettings;
+﻿namespace MediaFinder_v2.Services.Search;
 
-public class SearchSettingItemViewModel
+public class SearchConfiguration
 {
     public int Id { get; private set; }
 
@@ -28,7 +28,7 @@ public class SearchSettingItemViewModel
 
     public long? MinVideoHeight { get; private set; }
 
-    public static SearchSettingItemViewModel Create(DataAccessLayer.Models.SearchSettings item)
+    public static SearchConfiguration Create(DataAccessLayer.Models.SearchSettings item)
         => new()
         {
             Id = item.Id,

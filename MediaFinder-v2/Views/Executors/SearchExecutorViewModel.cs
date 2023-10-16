@@ -89,7 +89,7 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
     #region Step1 - Set Working Directory
 
     [ObservableProperty]
-    private ObservableCollection<SearchSettingItemViewModel> _configurations = new();
+    private ObservableCollection<SearchConfiguration> _configurations = new();
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
@@ -97,7 +97,7 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
-    private SearchSettingItemViewModel? _selectedConfig;
+    private SearchConfiguration? _selectedConfig;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
@@ -118,7 +118,7 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
         SearchComplete = false;
     }
 
-    partial void OnSelectedConfigChanged(SearchSettingItemViewModel? value)
+    partial void OnSelectedConfigChanged(SearchConfiguration? value)
     {
         SearchComplete = false;
     }
@@ -139,7 +139,7 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
             .Include(ss => ss.Directories)
             .AsAsyncEnumerable())
         {
-            Configurations.Add(SearchSettingItemViewModel.Create(config));
+            Configurations.Add(SearchConfiguration.Create(config));
         }
 
         HideProgressIndicator();

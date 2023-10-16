@@ -7,6 +7,7 @@ using CommunityToolkit.Mvvm.Messaging;
 
 using MediaFinder_v2.DataAccessLayer;
 using MediaFinder_v2.Messages;
+using MediaFinder_v2.Services.Search;
 
 using Microsoft.EntityFrameworkCore;
 
@@ -18,11 +19,11 @@ public partial class SearchSettingsViewModel : ObservableObject, IRecipient<Sear
     private readonly IMessenger _messenger;
 
     [ObservableProperty]
-    private ObservableCollection<SearchSettingItemViewModel> _configurations = new();
+    private ObservableCollection<SearchConfiguration> _configurations = new();
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(RemoveSearchSettingCommand))]
-    private SearchSettingItemViewModel? _selectedConfig;
+    private SearchConfiguration? _selectedConfig;
 
     public SearchSettingsViewModel(AppDbContext appDbContext, IMessenger messenger)
     {
@@ -44,7 +45,7 @@ public partial class SearchSettingsViewModel : ObservableObject, IRecipient<Sear
 
         await foreach (var config in _dbContext.SearchSettings.AsAsyncEnumerable())
         {
-            Configurations.Add(SearchSettingItemViewModel.Create(config));
+            Configurations.Add(SearchConfiguration.Create(config));
         }
         _messenger.Send(HideProgressBar.Create());
     }

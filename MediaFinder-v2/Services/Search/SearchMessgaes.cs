@@ -1,11 +1,10 @@
 ﻿using MediaFinder_v2.DataAccessLayer.Models;
-using MediaFinder_v2.Views.SearchSettings;
 
 namespace MediaFinder_v2.Services.Search;
 
 public record SearchRequest(string WorkingDirectory, ICollection<string> SourceDirectories, bool Recursive, bool ExtractArchives, int? ExtractionDepth)
 {
-    public static SearchRequest Create(string workingDirectory, SearchSettingItemViewModel settings)
+    public static SearchRequest Create(string workingDirectory, SearchConfiguration settings)
         => new(workingDirectory, settings.Directories, settings.Recursive, settings.ExtractArchives, settings.ExtractionDepth);
 }
 
