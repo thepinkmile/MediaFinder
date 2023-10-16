@@ -43,31 +43,47 @@
                 Style="{StaticResource MaterialDesignCardGroupBox}">
                 <GroupBox.HeaderTemplate>
                     <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock
-                                Margin="8,0,0,0"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                                Text="{Binding .}" />
-                        </StackPanel>
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                            Text="{Binding .}" />
                     </DataTemplate>
                 </GroupBox.HeaderTemplate>
                 <StackPanel Margin="16">
                     <TextBlock Text="Blah Blah Woof Woof" />
-                    <Button
-                        Margin="4"
-                        HorizontalAlignment="Center"
-                        Command="{x:Static materialDesign:DrawerHost.CloseDrawerCommand}"
-                        CommandParameter="{x:Static Dock.Right}">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon
-                                Width="15"
-                                Height="15"
-                                Margin="0,1,8,0"
-                                Kind="Close" />
-                            <TextBlock Text="Close" />
-                        </StackPanel>
-                    </Button>
+                    <DockPanel Margin="4" LastChildFill="False">
+                        <Button
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Command="{x:Static materialDesign:DrawerHost.CloseDrawerCommand}"
+                            CommandParameter="{x:Static Dock.Right}"
+                            DockPanel.Dock="Right">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon
+                                    Width="15"
+                                    Height="15"
+                                    Margin="0,1,8,0"
+                                    Kind="Cancel" />
+                                <TextBlock Text="Cancel" />
+                            </StackPanel>
+                        </Button>
+                        <Button
+                            Margin="0,0,8,0"
+                            HorizontalAlignment="Center"
+                            VerticalAlignment="Center"
+                            Command="{Binding SaveSearchConfigurationCommand}"
+                            DockPanel.Dock="Right">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon
+                                    Width="15"
+                                    Height="15"
+                                    Margin="0,1,8,0"
+                                    Kind="ContentSave" />
+                                <TextBlock Text="Save" />
+                            </StackPanel>
+                        </Button>
+                    </DockPanel>
                 </StackPanel>
             </GroupBox>
         </materialDesign:DrawerHost.RightDrawerContent>
@@ -115,6 +131,7 @@
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
                         Command="{Binding AddSearchSettingCommand}"
+                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type materialDesign:DrawerHost}}}"
                         Content="{materialDesign:PackIcon Kind=Plus,
                                                           Size=22}"
                         Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryLightButton}" />

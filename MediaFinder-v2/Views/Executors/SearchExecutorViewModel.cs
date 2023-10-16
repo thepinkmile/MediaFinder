@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Data.Common;
 using System.IO;
+using System.Windows.Controls;
 using System.Windows.Data;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -152,9 +153,15 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
     }
 
     [RelayCommand]
-    public void OnAddSearchSetting(DrawerHost drawerHost)
+    private void OnAddSearchSetting(DrawerHost drawerHost)
     {
         drawerHost!.IsRightDrawerOpen = true;
+    }
+
+    [RelayCommand]
+    private void OnSaveSearchConfiguration()
+    {
+        DrawerHost.CloseDrawerCommand.Execute(Dock.Right, null);
     }
 
     [RelayCommand(CanExecute = nameof(CanRemoveSearchSetting))]
