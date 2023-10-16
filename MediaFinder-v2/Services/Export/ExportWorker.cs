@@ -27,6 +27,7 @@ public class ExportWorker : ReactiveBackgroundWorker
 
         SetProgress("Exporting Files...");
 
+        var cts = new CancellationTokenSource();
         var exportTasks = new List<Task>(inputs.Files.Count);
         foreach(var file in inputs.Files)
         {
@@ -44,31 +45,16 @@ public class ExportWorker : ReactiveBackgroundWorker
 
             EnsureDestinationDirectoryExists(path);
 
-            exportTasks.Add(Task.Factory.StartNew(() =>
+            exportTasks.Add(CopyFile(originalFilePath, fullpath, cts.Token));
+        }
+        while (!exportTasks.All(t => t.IsCompleted || t.IsCompletedSuccessfully || t.IsFaulted || t.IsCanceled)
+                && !cts.IsCancellationRequested)
+        {
+            Thread.Sleep(500);
+            if (CancellationPending)
             {
-                if (!File.Exists(originalFilePath))
-                    return;
-
-                using var inputStream = new FileStream(originalFilePath, FileMode.Open, FileAccess.Read, FileShare.Read, 1024);
-                using var outputStream = new FileStream(fullpath, FileMode.Create, FileAccess.Write, FileShare.None, 1024);
-
-                var buffer = new byte[1024];
-                int bytesRead = 0;
-                do
-                {
-                    if (CancellationPending)
-                    {
-                        return;
-                    }
-
-                    bytesRead = inputStream.Read(buffer, 0, buffer.Length);
-                    if (bytesRead > 0)
-                    {
-                        outputStream.Write(buffer, 0, bytesRead);
-                    }
-                }
-                while (bytesRead > 0);
-            }));
+                cts.Cancel();
+            }
         }
         Task.WaitAll(exportTasks.ToArray());
 
@@ -84,7 +70,7 @@ public class ExportWorker : ReactiveBackgroundWorker
     private static void EnsureDestinationDirectoryExists(string path)
     {
         var parentPath = Path.GetDirectoryName(path);
-        if (Directory.Exists(path) || parentPath is not null)
+        if (Directory.Exists(path) || parentPath is null)
             return;
 
         EnsureDestinationDirectoryExists(parentPath!);
@@ -128,5 +114,29 @@ public class ExportWorker : ReactiveBackgroundWorker
             case ExportType.Flat: return file => string.Empty;
             default: return file => Path.GetDirectoryName(file.RelativePath)!.TrimStart('\\');
         }
+    }
+
+    private static Task CopyFile(string source, string destination, CancellationToken cancellationToken = default)
+    {
+        if (File.Exists(source))
+        {
+            using var inputStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, 1024);
+            using var outputStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, 1024);
+
+            var buffer = new byte[1024];
+            int bytesRead = 0;
+            do
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+
+                bytesRead = inputStream.Read(buffer, 0, buffer.Length);
+                if (bytesRead > 0)
+                {
+                    outputStream.Write(buffer, 0, bytesRead);
+                }
+            }
+            while (bytesRead > 0);
+        }
+        return Task.CompletedTask;
     }
 }

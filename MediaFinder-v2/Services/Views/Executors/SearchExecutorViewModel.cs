@@ -343,6 +343,7 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
         SearchComplete = true;
         HideProgressIndicator();
         FinishCommand.NotifyCanExecuteChanged();
+        Transitioner.MoveNextCommand.Execute(null, null);
     }
 
     private bool CanMoveToReview()
