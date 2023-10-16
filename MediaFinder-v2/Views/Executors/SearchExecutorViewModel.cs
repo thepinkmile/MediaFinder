@@ -151,6 +151,31 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
         }
     }
 
+    [RelayCommand]
+    public void OnAddSearchSetting(DrawerHost drawerHost)
+    {
+        drawerHost!.IsRightDrawerOpen = true;
+    }
+
+    [RelayCommand(CanExecute = nameof(CanRemoveSearchSetting))]
+    private async Task OnRemoveSearchSetting()
+    {
+        var config = SelectedConfig!;
+        var entity = await _dbContext.SearchSettings.FirstOrDefaultAsync(x => x.Id == config.Id);
+        if (entity is null)
+        {
+            return;
+        }
+
+        _dbContext.SearchSettings.Remove(entity);
+        await _dbContext.SaveChangesAsync();
+        _messenger.Send(SearchSettingUpdated.Create(config));
+        _messenger.Send(SnackBarMessage.Create($"Removed configuration: {config.Name}"));
+    }
+
+    private bool CanRemoveSearchSetting()
+        => SelectedConfig is not null;
+
     public bool CanPerformSearch()
         => !string.IsNullOrEmpty(WorkingDirectory)
             && SelectedConfig is not null
