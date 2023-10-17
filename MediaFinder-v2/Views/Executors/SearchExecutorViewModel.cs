@@ -16,7 +16,6 @@ using MediaFinder_v2.DataAccessLayer;
 using MediaFinder_v2.Messages;
 using MediaFinder_v2.Services.Export;
 using MediaFinder_v2.Services.Search;
-using MediaFinder_v2.Views.SearchSettings;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,7 +24,7 @@ using Microsoft.Extensions.Logging;
 namespace MediaFinder_v2.Views.Executors;
 
 #pragma warning disable CA2254 // Template should be a static expression - Don't care about formats here
-public partial class SearchExecutorViewModel : ObservableObject, IRecipient<WorkingDirectoryCreated>
+public partial class SearchExecutorViewModel : ObservableObject, IRecipient<WorkingDirectoryCreated>, IRecipient<SearchSettingUpdated>
 {
     private readonly IServiceProvider _serviceProvider;
 
@@ -44,6 +43,7 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
         _dbContext = _serviceProvider.GetRequiredService<AppDbContext>();
         _messenger = _serviceProvider.GetRequiredService<IMessenger>();
         _logger = _serviceProvider.GetRequiredService<ILogger<SearchExecutorViewModel>>();
+        SearchConfigViewModel = _serviceProvider.GetRequiredService<AddSearchSettingViewModel>();
         _searchStageOneWorker = _serviceProvider.GetRequiredService<SearchStageOneWorker>();
         _searchStagaeTwoWorker = _serviceProvider.GetRequiredService<SearchStageTwoWorker>();
         _searchStagaeThreeWorker = _serviceProvider.GetRequiredService<SearchStageThreeWorker>();
@@ -87,6 +87,45 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
         _logger.LogInformation("Process Complete.");
     }
 
+    public async void Receive(SearchSettingUpdated message)
+    {
+        if (LoadConfigurationsCommand.IsRunning)
+            return;
+
+        await LoadConfigurationsCommand.ExecuteAsync(null);
+    }
+
+#region Settings Configurations
+
+    public AddSearchSettingViewModel SearchConfigViewModel { get; set; }
+
+    [RelayCommand]
+    private static void OnAddSearchSetting(DrawerHost drawerHost)
+    {
+        drawerHost!.IsRightDrawerOpen = true;
+    }
+
+    private bool CanRemoveSearchSetting()
+        => SelectedConfig is not null;
+
+    [RelayCommand(CanExecute = nameof(CanRemoveSearchSetting))]
+    private async Task OnRemoveSearchSetting()
+    {
+        var config = SelectedConfig!;
+        var entity = await _dbContext.SearchSettings.FirstOrDefaultAsync(x => x.Id == config.Id);
+        if (entity is null)
+        {
+            return;
+        }
+
+        _dbContext.SearchSettings.Remove(entity);
+        await _dbContext.SaveChangesAsync();
+        _messenger.Send(SearchSettingUpdated.Create(config));
+        _messenger.Send(SnackBarMessage.Create($"Removed configuration: {config.Name}"));
+    }
+
+    #endregion
+
     #region Step1 - Set Working Directory
 
     [ObservableProperty]
@@ -98,6 +137,7 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
+    [NotifyCanExecuteChangedFor(nameof(RemoveSearchSettingCommand))]
     private SearchConfiguration? _selectedConfig;
 
     [ObservableProperty]
@@ -151,37 +191,6 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
             await MoveToReviewCommand.ExecuteAsync(null);
         }
     }
-
-    [RelayCommand]
-    private void OnAddSearchSetting(DrawerHost drawerHost)
-    {
-        drawerHost!.IsRightDrawerOpen = true;
-    }
-
-    [RelayCommand]
-    private void OnSaveSearchConfiguration()
-    {
-        DrawerHost.CloseDrawerCommand.Execute(Dock.Right, null);
-    }
-
-    [RelayCommand(CanExecute = nameof(CanRemoveSearchSetting))]
-    private async Task OnRemoveSearchSetting()
-    {
-        var config = SelectedConfig!;
-        var entity = await _dbContext.SearchSettings.FirstOrDefaultAsync(x => x.Id == config.Id);
-        if (entity is null)
-        {
-            return;
-        }
-
-        _dbContext.SearchSettings.Remove(entity);
-        await _dbContext.SaveChangesAsync();
-        _messenger.Send(SearchSettingUpdated.Create(config));
-        _messenger.Send(SnackBarMessage.Create($"Removed configuration: {config.Name}"));
-    }
-
-    private bool CanRemoveSearchSetting()
-        => SelectedConfig is not null;
 
     public bool CanPerformSearch()
         => !string.IsNullOrEmpty(WorkingDirectory)

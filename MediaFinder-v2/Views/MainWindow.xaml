@@ -8,7 +8,6 @@
     xmlns:local="clr-namespace:MediaFinder_v2.Views"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:searchSettings="clr-namespace:MediaFinder_v2.Views.SearchSettings"
     Title="Demo App"
     Width="800"
     Height="600"
@@ -36,64 +35,7 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <TabControl
-            Grid.Row="0"
-            materialDesign:ColorZoneAssist.Mode="PrimaryMid"
-            materialDesign:ElevationAssist.Elevation="Dp0"
-            SelectedIndex="{Binding SelectedTabIndex, Mode=TwoWay}"
-            Style="{StaticResource MaterialDesignNavigationRailTabControl}">
-            <TabItem Visibility="Collapsed">
-                <TabItem.Header>
-                    <StackPanel>
-                        <materialDesign:PackIcon
-                            Width="24"
-                            Height="24"
-                            HorizontalAlignment="Center"
-                            Kind="Cog" />
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            Text="Add Config"
-                            TextAlignment="Center"
-                            TextWrapping="Wrap" />
-                    </StackPanel>
-                </TabItem.Header>
-                <searchSettings:AddSearchSetting x:Name="AddSearchSettingsView" />
-            </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel>
-                        <materialDesign:PackIcon
-                            Width="24"
-                            Height="24"
-                            HorizontalAlignment="Center"
-                            Kind="CogClockwise" />
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            Text="Manage Configs"
-                            TextAlignment="Center"
-                            TextWrapping="Wrap" />
-                    </StackPanel>
-                </TabItem.Header>
-                <searchSettings:SearchSettings x:Name="SearchSettingsView" />
-            </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel>
-                        <materialDesign:PackIcon
-                            Width="24"
-                            Height="24"
-                            HorizontalAlignment="Center"
-                            Kind="FolderSearchOutline" />
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            Text="Execute Search"
-                            TextAlignment="Center"
-                            TextWrapping="Wrap" />
-                    </StackPanel>
-                </TabItem.Header>
-                <executors:SearchExecutor x:Name="Executor" />
-            </TabItem>
-        </TabControl>
+        <executors:SearchExecutor x:Name="Executor" Grid.Row="0" />
         <materialDesign:DialogHost
             x:Name="m_dialogHost"
             DialogTheme="Inherit"

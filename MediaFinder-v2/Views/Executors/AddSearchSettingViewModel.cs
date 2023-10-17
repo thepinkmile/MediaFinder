@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows.Controls;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -6,11 +7,13 @@ using CommunityToolkit.Mvvm.Messaging;
 
 using MaterialDesignExtensions.Controls;
 
+using MaterialDesignThemes.Wpf;
+
 using MediaFinder_v2.DataAccessLayer;
 using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.Messages;
 
-namespace MediaFinder_v2.Views.SearchSettings;
+namespace MediaFinder_v2.Views.Executors;
 
 public partial class AddSearchSettingViewModel : ObservableObject
 {
@@ -98,8 +101,8 @@ public partial class AddSearchSettingViewModel : ObservableObject
 
         ClearFormCommand.Execute(null);
         _messenger.Send(SnackBarMessage.Create("New search configuration saved"));
-
-        _messenger.Send(ChangeTab.ToViewSettingsTab());
+        _messenger.Send(SearchSettingUpdated.Create(newSettings));
+        DrawerHost.CloseDrawerCommand.Execute(Dock.Right, null);
     }
 
     private bool CanSubmit()
@@ -115,5 +118,12 @@ public partial class AddSearchSettingViewModel : ObservableObject
         SettingExtractArchives = false;
         SettingExtractionDepth = 5;
         SettingPerformDeepAnalysis = false;
+    }
+
+    [RelayCommand]
+    private void OnCancelAddSearchSetting()
+    {
+        ClearFormCommand.Execute(null);
+        DrawerHost.CloseDrawerCommand.Execute(Dock.Right, null);
     }
 }

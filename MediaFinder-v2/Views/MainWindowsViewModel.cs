@@ -8,15 +8,11 @@ using MediaFinder_v2.Messages;
 namespace MediaFinder_v2.Views;
 
 public partial class MainWindowsViewModel : ObservableObject,
-    IRecipient<ChangeTab>,
     IRecipient<ShowProgressBar>,
     IRecipient<HideProgressBar>,
     IRecipient<UpdateProgressBarStatus>,
     IRecipient<SnackBarMessage>
 {
-    [ObservableProperty]
-    private int _selectedTabIndex = 1;
-
     [ObservableProperty]
     private bool _progressBarVisible;
 
@@ -29,11 +25,6 @@ public partial class MainWindowsViewModel : ObservableObject,
     {
         messenger.RegisterAll(this);
         MessageQueue = snackbarMessageQueue;
-    }
-
-    public void Receive(ChangeTab message)
-    {
-        SelectedTabIndex = message.TabIndex;
     }
 
     public void Receive(UpdateProgressBarStatus message)

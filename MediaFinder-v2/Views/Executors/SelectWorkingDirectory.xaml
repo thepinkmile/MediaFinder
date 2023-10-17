@@ -50,41 +50,7 @@
                             Text="{Binding .}" />
                     </DataTemplate>
                 </GroupBox.HeaderTemplate>
-                <StackPanel Margin="16">
-                    <TextBlock Text="Blah Blah Woof Woof" />
-                    <DockPanel Margin="4" LastChildFill="False">
-                        <Button
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Command="{x:Static materialDesign:DrawerHost.CloseDrawerCommand}"
-                            CommandParameter="{x:Static Dock.Right}"
-                            DockPanel.Dock="Right">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon
-                                    Width="15"
-                                    Height="15"
-                                    Margin="0,1,8,0"
-                                    Kind="Cancel" />
-                                <TextBlock Text="Cancel" />
-                            </StackPanel>
-                        </Button>
-                        <Button
-                            Margin="0,0,8,0"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Command="{Binding SaveSearchConfigurationCommand}"
-                            DockPanel.Dock="Right">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon
-                                    Width="15"
-                                    Height="15"
-                                    Margin="0,1,8,0"
-                                    Kind="ContentSave" />
-                                <TextBlock Text="Save" />
-                            </StackPanel>
-                        </Button>
-                    </DockPanel>
-                </StackPanel>
+                <local:AddSearchSetting DataContext="{Binding SearchConfigViewModel, Mode=TwoWay}" />
             </GroupBox>
         </materialDesign:DrawerHost.RightDrawerContent>
         <Grid>

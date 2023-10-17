@@ -10,7 +10,6 @@ using Serilog.Events;
 
 using Serilog;
 using CommunityToolkit.Mvvm.Messaging;
-using MediaFinder_v2.Views.SearchSettings;
 using MediaFinder_v2.Views.Executors;
 using MaterialDesignThemes.Wpf;
 using System.Windows.Threading;
@@ -103,7 +102,6 @@ public partial class App : Application
 
             services.AddSingleton<MainWindow>();
             services.AddSingleton<MainWindowsViewModel>();
-            services.AddSingleton<SearchSettingsViewModel>();
             services.AddSingleton<AddSearchSettingViewModel>();
             services.AddSingleton<SearchExecutorViewModel>();
 

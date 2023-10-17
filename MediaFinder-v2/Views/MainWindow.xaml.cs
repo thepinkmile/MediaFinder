@@ -2,7 +2,6 @@
 using System.Windows.Input;
 
 using MediaFinder_v2.Views.Executors;
-using MediaFinder_v2.Views.SearchSettings;
 
 namespace MediaFinder_v2.Views;
 
@@ -14,15 +13,11 @@ public partial class MainWindow
     private readonly SearchExecutorViewModel _searchExecutorViewModel;
 
     public MainWindow(MainWindowsViewModel mainWindowViewModel,
-        SearchSettingsViewModel searchSettingsViewModel,
-        AddSearchSettingViewModel addSearchSettingViewModel,
         SearchExecutorViewModel searchExecutorViewModel)
     {
         DataContext = mainWindowViewModel;
         InitializeComponent();
 
-        AddSearchSettingsView.DataContext = addSearchSettingViewModel;
-        SearchSettingsView.DataContext = searchSettingsViewModel;
         Executor.DataContext = _searchExecutorViewModel = searchExecutorViewModel;
 
         CommandBindings.Add(new CommandBinding(ApplicationCommands.Close, OnClose));
