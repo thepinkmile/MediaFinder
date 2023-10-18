@@ -157,6 +157,30 @@
                                 Header="Perform Deep Analysis"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
+                                Binding="{Binding MinImageWidth}"
+                                CanUserSort="False"
+                                CellStyle="{StaticResource DGCellStyle}"
+                                Header="Min Image Width"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding MinImageHeight}"
+                                CanUserSort="False"
+                                CellStyle="{StaticResource DGCellStyle}"
+                                Header="Min Image Height"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding MinVideoWidth}"
+                                CanUserSort="False"
+                                CellStyle="{StaticResource DGCellStyle}"
+                                Header="Min Video Width"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                Binding="{Binding MinVideoHeight}"
+                                CanUserSort="False"
+                                CellStyle="{StaticResource DGCellStyle}"
+                                Header="Min Video Height"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
                                 Binding="{Binding Directories, Converter={StaticResource ListToStringConverter}}"
                                 CanUserSort="False"
                                 CellStyle="{StaticResource DGCellStyle}"

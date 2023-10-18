@@ -1,0 +1,19 @@
+﻿using System.Globalization;
+using System.Windows.Data;
+
+namespace MediaFinder_v2.Converters;
+
+public class NullableLongToStringConverter : IValueConverter
+{
+    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+        => value is not long lngValue
+            ? Binding.DoNothing
+            : lngValue.ToString(CultureInfo.InvariantCulture);
+
+    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+        => value is not string strValue
+            ? Binding.DoNothing
+            : string.IsNullOrEmpty(strValue) || !long.TryParse(strValue, out var parsedValue)
+                ? null!
+                : (object)parsedValue;
+}

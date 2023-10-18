@@ -45,6 +45,24 @@ public partial class AddSearchSettingViewModel : ObservableObject
     private bool _settingPerformDeepAnalysis;
 
     [ObservableProperty]
+    private bool _imageSizesDefined;
+
+    [ObservableProperty]
+    private long? _minImageWidth;
+
+    [ObservableProperty]
+    private long? _minImageHeight;
+
+    [ObservableProperty]
+    private bool _videoSizesDefined;
+
+    [ObservableProperty]
+    private long? _minVideoWidth;
+
+    [ObservableProperty]
+    private long? _minVideoHeight;
+
+    [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
     private ObservableCollection<string> _settingsDirectories = new();
 
@@ -86,7 +104,7 @@ public partial class AddSearchSettingViewModel : ObservableObject
     [RelayCommand(CanExecute = nameof(CanSubmit))]
     private async Task OnSubmit()
     {
-        var newSettings = new DataAccessLayer.Models.SearchSettings()
+        var newSettings = new SearchSettings()
         {
             Name = SettingName!,
             Description = SettingDescription,
@@ -94,7 +112,11 @@ public partial class AddSearchSettingViewModel : ObservableObject
             Recursive = SettingRecursive,
             ExtractArchives = SettingExtractArchives,
             ExtractionDepth = SettingExtractArchives ? SettingExtractionDepth : null,
-            PerformDeepAnalysis = SettingPerformDeepAnalysis
+            PerformDeepAnalysis = SettingPerformDeepAnalysis,
+            MinImageWidth = ImageSizesDefined ? MinImageWidth : null,
+            MinImageHeight = ImageSizesDefined ? MinImageHeight : null,
+            MinVideoWidth = VideoSizesDefined ? MinVideoWidth : null,
+            MinVideoHeight = VideoSizesDefined ? MinVideoHeight : null
         };
         _dbContext.SearchSettings.Add(newSettings);
         await _dbContext.SaveChangesAsync();
