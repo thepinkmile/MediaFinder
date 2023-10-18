@@ -17,7 +17,7 @@
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignExtensions;component/Themes/MaterialDesignDarkTheme.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
-            <Style BasedOn="{StaticResource MaterialDesignAccentCheckBox}" TargetType="CheckBox" />
+            <Style BasedOn="{StaticResource MaterialDesignCheckBox}" TargetType="CheckBox" />
         </ResourceDictionary>
     </Application.Resources>
 </Application>

@@ -29,11 +29,27 @@
             x:Key="MediaFileToIconConverter"
             ImageIcon="FileImageOutline"
             VideoIcon="FileVideoOutline" />
+        <materialDesign:BooleanToVisibilityConverter
+            x:Key="InverseBooleanToVisibilityConverter"
+            FalseValue="Visible"
+            TrueValue="Collapsed" />
+        <materialDesign:BooleanToVisibilityConverter
+            x:Key="BooleanToVisibilityConverter"
+            FalseValue="Collapsed"
+            TrueValue="Visible" />
 
         <system:Double x:Key="IconSize">24</system:Double>
         <system:Double x:Key="HeaderIconSize">32</system:Double>
         <system:Double x:Key="DrawerFieldLabelSize">110</system:Double>
         <system:Double x:Key="DrawerFieldValueSize">290</system:Double>
+
+        <Style
+            x:Key="DGCellStyle"
+            BasedOn="{StaticResource MaterialDesignDataGridCell}"
+            TargetType="DataGridCell">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        </Style>
     </UserControl.Resources>
     <materialDesign:DrawerHost
         x:Name="DrawerHost"
@@ -291,36 +307,43 @@
                         <DataGrid.Columns>
                             <DataGridCheckBoxColumn
                                 Binding="{Binding ShouldExport, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                CellStyle="{StaticResource DGCellStyle}"
                                 Header="Export"
                                 IsReadOnly="False" />
                             <DataGridTextColumn
                                 Binding="{Binding FileName}"
+                                CellStyle="{StaticResource DGCellStyle}"
                                 Header="Name"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
                                 Binding="{Binding FileSize, Converter={StaticResource FormatKbSizeConverter}}"
+                                CellStyle="{StaticResource DGCellStyle}"
                                 Header="Size"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
                                 Binding="{Binding DateCreated, Converter={StaticResource DateTimeOffsetToStringConverter}}"
+                                CellStyle="{StaticResource DGCellStyle}"
                                 Header="Created"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
                                 Binding="{Binding IsImage, Converter={StaticResource BooleanToStringConverter}}"
+                                CellStyle="{StaticResource DGCellStyle}"
                                 Header="Is Image"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
                                 Binding="{Binding IsVideo, Converter={StaticResource BooleanToStringConverter}}"
+                                CellStyle="{StaticResource DGCellStyle}"
                                 Header="Is Video"
                                 IsReadOnly="True" />
-                            <DataGridTemplateColumn>
+                            <DataGridTemplateColumn CellStyle="{StaticResource DGCellStyle}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Button
                                             Margin="4"
                                             Command="{Binding DataContext.ShowFileDetailsCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}"
                                             CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type materialDesign:DrawerHost}}}"
-                                            Content="{materialDesign:PackIcon Kind=EyeArrowRightOutline}" />
+                                            Content="{materialDesign:PackIcon Kind=EyeArrowRightOutline}"
+                                            Style="{StaticResource MaterialDesignRaisedSecondaryButton}" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
@@ -354,7 +377,10 @@
                             <TextBlock Text="Back" />
                         </StackPanel>
                     </Button>
-                    <Button Margin="0,0,8,0" Command="{Binding ExportFilesCommand}">
+                    <Button
+                        Margin="0,0,8,0"
+                        Command="{Binding ExportFilesCommand}"
+                        Visibility="{Binding ExportComplete, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon
                                 Width="15"
@@ -364,7 +390,10 @@
                             <TextBlock Text="Export" />
                         </StackPanel>
                     </Button>
-                    <Button Margin="0,0,8,0" Command="{Binding CancelExportCommand}">
+                    <Button
+                        Margin="0,0,8,0"
+                        Command="{Binding CancelExportCommand}"
+                        Visibility="{Binding ExportComplete, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon
                                 Width="15"
@@ -372,6 +401,19 @@
                                 Margin="0,1,8,0"
                                 Kind="Cancel" />
                             <TextBlock Text="Cancel" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Margin="0,0,8,0"
+                        Command="{Binding MoveToCompletionCommand}"
+                        Visibility="{Binding ExportComplete, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon
+                                Width="15"
+                                Height="15"
+                                Margin="0,0,8,0"
+                                Kind="ArrowrightBoldOutline" />
+                            <TextBlock Text="Next" />
                         </StackPanel>
                     </Button>
                     <Button Command="{Binding FinishCommand}">

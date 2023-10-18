@@ -21,13 +21,21 @@
             TrueValue="Yes" />
         <converters:StringsToContentConverter x:Key="ListToStringConverter" Delimeter="\n" />
         <materialDesign:BooleanToVisibilityConverter
+            x:Key="InverseBooleanToVisibilityConverter"
+            FalseValue="Visible"
+            TrueValue="Collapsed" />
+        <materialDesign:BooleanToVisibilityConverter
             x:Key="BooleanToVisibilityConverter"
             FalseValue="Collapsed"
             TrueValue="Visible" />
-        <materialDesign:BooleanToVisibilityConverter
-            x:Key="BooleanToOppositeVisibilityConverter"
-            FalseValue="Visible"
-            TrueValue="Collapsed" />
+
+        <Style
+            x:Key="DGCellStyle"
+            BasedOn="{StaticResource MaterialDesignDataGridCell}"
+            TargetType="DataGridCell">
+            <Setter Property="Focusable" Value="False" />
+            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+        </Style>
     </UserControl.Resources>
     <materialDesign:DrawerHost
         x:Name="DrawerHost"
@@ -100,7 +108,7 @@
                         CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type materialDesign:DrawerHost}}}"
                         Content="{materialDesign:PackIcon Kind=Plus,
                                                           Size=22}"
-                        Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryLightButton}" />
+                        Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}" />
                     <Button
                         Grid.Row="0"
                         Margin="0,0,20,0"
@@ -119,28 +127,41 @@
                         SelectedItem="{Binding SelectedConfig}"
                         SelectionUnit="FullRow">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Binding="{Binding Id}" Header="ID" />
-                            <DataGridTextColumn Binding="{Binding Name}" Header="Name" />
+                            <DataGridTextColumn
+                                Binding="{Binding Name}"
+                                CellStyle="{StaticResource DGCellStyle}"
+                                Header="Name"
+                                IsReadOnly="True" />
                             <DataGridTextColumn
                                 Binding="{Binding Description}"
                                 CanUserSort="False"
-                                Header="Description" />
+                                CellStyle="{StaticResource DGCellStyle}"
+                                Header="Description"
+                                IsReadOnly="True" />
                             <DataGridTextColumn
                                 Binding="{Binding Recursive, Converter={StaticResource BooleanToStringConverter}}"
                                 CanUserSort="False"
-                                Header="Recursive" />
+                                CellStyle="{StaticResource DGCellStyle}"
+                                Header="Recursive"
+                                IsReadOnly="True" />
                             <DataGridTextColumn
                                 Binding="{Binding ExtractArchives, Converter={StaticResource BooleanToStringConverter}}"
                                 CanUserSort="False"
-                                Header="Extract Archives" />
+                                CellStyle="{StaticResource DGCellStyle}"
+                                Header="Extract Archives"
+                                IsReadOnly="True" />
                             <DataGridTextColumn
                                 Binding="{Binding PerformDeepAnalysis, Converter={StaticResource BooleanToStringConverter}}"
                                 CanUserSort="False"
-                                Header="Perform Deep Analysis" />
+                                CellStyle="{StaticResource DGCellStyle}"
+                                Header="Perform Deep Analysis"
+                                IsReadOnly="True" />
                             <DataGridTextColumn
                                 Binding="{Binding Directories, Converter={StaticResource ListToStringConverter}}"
                                 CanUserSort="False"
-                                Header="Directories" />
+                                CellStyle="{StaticResource DGCellStyle}"
+                                Header="Directories"
+                                IsReadOnly="True" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -153,7 +174,7 @@
                 <Button
                     Margin="0,0,8,0"
                     Command="{Binding PerformSearchCommand}"
-                    Visibility="{Binding SearchComplete, Converter={StaticResource BooleanToOppositeVisibilityConverter}}">
+                    Visibility="{Binding SearchComplete, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon
                             Width="15"
@@ -166,7 +187,7 @@
                 <Button
                     Margin="0,0,8,0"
                     Command="{Binding CancelSearchCommand}"
-                    Visibility="{Binding SearchComplete, Converter={StaticResource BooleanToOppositeVisibilityConverter}}">
+                    Visibility="{Binding SearchComplete, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon
                             Width="15"

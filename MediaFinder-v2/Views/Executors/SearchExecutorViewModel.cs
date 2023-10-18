@@ -26,7 +26,8 @@ namespace MediaFinder_v2.Views.Executors;
 public partial class SearchExecutorViewModel : ObservableObject,
     IRecipient<WorkingDirectoryCreated>,
     IRecipient<SearchSettingUpdated>,
-    IRecipient<WizardNavigationMessage>
+    IRecipient<WizardNavigationMessage>,
+    IRecipient<SearchCompletedMessage>
 {
     private readonly IServiceProvider _serviceProvider;
 
@@ -89,14 +90,6 @@ public partial class SearchExecutorViewModel : ObservableObject,
         _logger.LogInformation("Process Complete.");
     }
 
-    public async void Receive(SearchSettingUpdated message)
-    {
-        if (LoadConfigurationsCommand.IsRunning)
-            return;
-
-        await LoadConfigurationsCommand.ExecuteAsync(null);
-    }
-
     public void Receive(WizardNavigationMessage message)
     {
         switch (message.NavigateTo)
@@ -138,6 +131,14 @@ public partial class SearchExecutorViewModel : ObservableObject,
         _messenger.Send(SnackBarMessage.Create($"Removed configuration: {config.Name}"));
     }
 
+    public async void Receive(SearchSettingUpdated message)
+    {
+        if (LoadConfigurationsCommand.IsRunning)
+            return;
+
+        await LoadConfigurationsCommand.ExecuteAsync(null);
+    }
+
     #endregion
 
     #region Step1 - Set Working Directory
@@ -159,6 +160,7 @@ public partial class SearchExecutorViewModel : ObservableObject,
     [NotifyCanExecuteChangedFor(nameof(MoveToReviewCommand))]
     [NotifyCanExecuteChangedFor(nameof(BackToSearchCommand))]
     [NotifyCanExecuteChangedFor(nameof(FinishCommand))]
+    [NotifyCanExecuteChangedFor(nameof(CancelSearchCommand))]
     private bool _searchComplete;
 
     partial void OnWorkingDirectoryChanged(string? value)
@@ -191,14 +193,6 @@ public partial class SearchExecutorViewModel : ObservableObject,
         }
 
         HideProgressIndicator();
-
-        if (SearchComplete
-            && !_searchStageOneWorker.IsBusy
-            && !_searchStagaeTwoWorker.IsBusy
-            && !_searchStagaeThreeWorker.IsBusy)
-        {
-            _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));
-        }
     }
 
     public bool CanPerformSearch()
@@ -231,6 +225,7 @@ public partial class SearchExecutorViewModel : ObservableObject,
             await TruncateFileDetailState(_dbContext);
 
             _searchStageOneWorker.RunWorkerAsync(SearchRequest.Create(WorkingDirectory!, SelectedConfig!));
+            CancelSearchCommand.NotifyCanExecuteChanged();
         }
     }
 
@@ -380,12 +375,12 @@ public partial class SearchExecutorViewModel : ObservableObject,
         }
         HideProgressIndicator();
         CancelSearchCommand.NotifyCanExecuteChanged();
+        PerformSearchCommand.NotifyCanExecuteChanged();
     }
 
     private void SearchFinished()
     {
         HideProgressIndicator();
-        CancelSearchCommand.NotifyCanExecuteChanged();
         SearchComplete = true;
     }
 
@@ -393,7 +388,8 @@ public partial class SearchExecutorViewModel : ObservableObject,
     {
         if (newValue is true && newValue != oldValue)
         {
-            OnMoveToReview().ConfigureAwait(true).GetAwaiter().GetResult();
+            _messenger.Send(SearchCompletedMessage.Create());
+            _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));
         }
     }
 
@@ -404,11 +400,17 @@ public partial class SearchExecutorViewModel : ObservableObject,
             && !_searchStagaeThreeWorker.IsBusy;
 
     [RelayCommand(CanExecute = nameof(CanMoveToReview))]
-    private async Task OnMoveToReview()
+    private void OnMoveToReview()
     {
-        var reload = LoadingResultsCommand.ExecuteAsync(null);
         _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));
-        await reload;
+    }
+
+    public async void Receive(SearchCompletedMessage message)
+    {
+        if (LoadingResultsCommand.IsRunning)
+            return;
+
+        await LoadingResultsCommand.ExecuteAsync(null);
     }
 
     #endregion
@@ -439,6 +441,7 @@ public partial class SearchExecutorViewModel : ObservableObject,
     [NotifyCanExecuteChangedFor(nameof(FinishCommand))]
     [NotifyCanExecuteChangedFor(nameof(ExportFilesCommand))]
     [NotifyCanExecuteChangedFor(nameof(CancelExportCommand))]
+    [NotifyCanExecuteChangedFor(nameof(MoveToCompletionCommand))]
     private bool _exportComplete;
 
     [ObservableProperty]
@@ -470,6 +473,21 @@ public partial class SearchExecutorViewModel : ObservableObject,
     private bool MediaFile_Filter_ShouldExport(object file)
         => FilterByShouldExport is null
             || (file is MediaFile mf && mf.ShouldExport == FilterByShouldExport);
+
+    partial void OnExportDirectoryChanged(string? value)
+    {
+        ExportComplete = false;
+    }
+
+    partial void OnExportRenameChanged(bool value)
+    {
+        ExportComplete = false;
+    }
+
+    partial void OnExportTypeChanged(ExportType value)
+    {
+        ExportComplete = false;
+    }
 
     partial void OnFilterByShouldExportChanged(bool? value)
     {
@@ -505,6 +523,11 @@ public partial class SearchExecutorViewModel : ObservableObject,
     [RelayCommand(CanExecute = nameof(CanExportFiles))]
     public async Task OnExportFiles(CancellationToken cancellationToken)
     {
+        if (ExportComplete)
+        {
+            _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));
+        }
+
         if (ExportDirectory is null)
         {
             _messenger.Send(SnackBarMessage.Create("No export directory selected"));
@@ -529,7 +552,8 @@ public partial class SearchExecutorViewModel : ObservableObject,
     }
 
     private bool CanCancelExport()
-        => (_exportWorker.IsBusy && !_exportWorker.CancellationPending);
+        => !ExportComplete &&
+            (_exportWorker.IsBusy && !_exportWorker.CancellationPending);
 
     [RelayCommand(CanExecute = nameof(CanCancelExport))]
     private void OnCancelExport()
@@ -578,6 +602,7 @@ public partial class SearchExecutorViewModel : ObservableObject,
     {
         HideProgressIndicator();
         ExportComplete = isComplete;
+        ExportFilesCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnExportCompleteChanged(bool oldValue, bool newValue)
@@ -586,6 +611,16 @@ public partial class SearchExecutorViewModel : ObservableObject,
         {
             _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));
         }
+    }
+
+    private bool CanMoveToCompletion()
+        => ExportComplete
+            && !_exportWorker.IsBusy;
+
+    [RelayCommand(CanExecute = nameof(CanMoveToCompletion))]
+    private void OnMoveToCompletion()
+    {
+        _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));
     }
 
     private async void MediaFile_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -650,6 +685,13 @@ public partial class SearchExecutorViewModel : ObservableObject,
             SearchComplete = false;
             SelectedConfig = null;
         }
+
+        if (ExportComplete)
+        {
+            ExportComplete = false;
+            ExportDirectory = null;
+        }
+
         _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Beginning));
     }
 
