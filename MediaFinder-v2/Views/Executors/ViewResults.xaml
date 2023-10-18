@@ -43,7 +43,7 @@
         OverlayBackground="{DynamicResource PrimaryHueMidBrush}">
         <materialDesign:DrawerHost.RightDrawerContent>
             <GroupBox
-                MaxWidth="450"
+                MaxWidth="500"
                 Margin="16"
                 materialDesign:ColorZoneAssist.Mode="PrimaryMid"
                 Foreground="{DynamicResource MaterialDesignBody}"
@@ -65,156 +65,158 @@
                         </StackPanel>
                     </DataTemplate>
                 </GroupBox.HeaderTemplate>
-                <StackPanel Margin="16">
-                    <Image
-                        MaxWidth="400"
-                        MaxHeight="700"
-                        Margin="0,8,0,8"
-                        Source="{Binding SelectedExportFile.FilePath, Converter={StaticResource PathToBitmapImageConverter}}"
-                        Stretch="Uniform"
-                        Visibility="{Binding SelectedExportFile.IsImage, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="16">
+                        <Image
+                            MaxWidth="400"
+                            MaxHeight="700"
+                            Margin="0,8,0,8"
+                            Source="{Binding SelectedExportFile.FilePath, Converter={StaticResource PathToBitmapImageConverter}}"
+                            Stretch="Uniform"
+                            Visibility="{Binding SelectedExportFile.IsImage, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                    <MediaElement
-                        x:Name="fileVideoViewer"
-                        MaxWidth="400"
-                        Loaded="FileVideoViewer_Loaded"
-                        LoadedBehavior="Manual"
-                        MediaEnded="FileVideoViewer_MediaEnded"
-                        ScrubbingEnabled="True"
-                        Source="{Binding SelectedExportFile.FilePath}"
-                        Stretch="Uniform"
-                        UnloadedBehavior="Stop"
-                        Visibility="{Binding SelectedExportFile.IsVideo, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                        <MediaElement
+                            x:Name="fileVideoViewer"
+                            MaxWidth="400"
+                            Loaded="FileVideoViewer_Loaded"
+                            LoadedBehavior="Manual"
+                            MediaEnded="FileVideoViewer_MediaEnded"
+                            ScrubbingEnabled="True"
+                            Source="{Binding SelectedExportFile.FilePath}"
+                            Stretch="Uniform"
+                            UnloadedBehavior="Stop"
+                            Visibility="{Binding SelectedExportFile.IsVideo, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                    <StackPanel
-                        Margin="0,0,0,8"
-                        HorizontalAlignment="Center"
-                        Orientation="Horizontal"
-                        Visibility="{Binding SelectedExportFile.IsVideo, Converter={StaticResource BooleanToVisibilityConverter}}">
-
-                        <!--  Play button.  -->
-                        <Button
-                            Margin="5"
+                        <StackPanel
+                            Margin="0,0,0,8"
                             HorizontalAlignment="Center"
-                            Click="PlayButton_Click"
-                            Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                            ToolTip="Play">
+                            Orientation="Horizontal"
+                            Visibility="{Binding SelectedExportFile.IsVideo, Converter={StaticResource BooleanToVisibilityConverter}}">
+
+                            <!--  Play button.  -->
+                            <Button
+                                Margin="5"
+                                HorizontalAlignment="Center"
+                                Click="PlayButton_Click"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                ToolTip="Play">
+                                <materialDesign:PackIcon
+                                    Width="{StaticResource IconSize}"
+                                    Height="{StaticResource IconSize}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Kind="PlayCircle" />
+                            </Button>
+
+                            <!--  Pause button.  -->
+                            <Button
+                                Margin="5"
+                                HorizontalAlignment="Center"
+                                Click="PauseButton_Click"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                ToolTip="Pause">
+                                <materialDesign:PackIcon
+                                    Width="{StaticResource IconSize}"
+                                    Height="{StaticResource IconSize}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Kind="PauseCircle" />
+                            </Button>
+
+                            <!--  Stop button.  -->
+                            <Button
+                                Margin="5"
+                                HorizontalAlignment="Center"
+                                Click="StopButton_Click"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                ToolTip="Stop">
+                                <materialDesign:PackIcon
+                                    Width="{StaticResource IconSize}"
+                                    Height="{StaticResource IconSize}"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Kind="StopCircle" />
+                            </Button>
+
+                            <!--  speed slider. This slider allows you to change the speed of the media playback.  -->
                             <materialDesign:PackIcon
                                 Width="{StaticResource IconSize}"
                                 Height="{StaticResource IconSize}"
-                                HorizontalAlignment="Center"
+                                Margin="5"
                                 VerticalAlignment="Center"
-                                Kind="PlayCircle" />
-                        </Button>
-
-                        <!--  Pause button.  -->
-                        <Button
-                            Margin="5"
-                            HorizontalAlignment="Center"
-                            Click="PauseButton_Click"
-                            Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                            ToolTip="Pause">
-                            <materialDesign:PackIcon
-                                Width="{StaticResource IconSize}"
-                                Height="{StaticResource IconSize}"
-                                HorizontalAlignment="Center"
+                                Kind="PlaySpeed" />
+                            <Slider
+                                Name="speedRatioSlider"
+                                MinWidth="180"
+                                HorizontalAlignment="Stretch"
                                 VerticalAlignment="Center"
-                                Kind="PauseCircle" />
-                        </Button>
-
-                        <!--  Stop button.  -->
-                        <Button
-                            Margin="5"
-                            HorizontalAlignment="Center"
-                            Click="StopButton_Click"
-                            Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                            ToolTip="Stop">
-                            <materialDesign:PackIcon
-                                Width="{StaticResource IconSize}"
-                                Height="{StaticResource IconSize}"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Kind="StopCircle" />
-                        </Button>
-
-                        <!--  speed slider. This slider allows you to change the speed of the media playback.  -->
-                        <materialDesign:PackIcon
-                            Width="{StaticResource IconSize}"
-                            Height="{StaticResource IconSize}"
-                            Margin="5"
-                            VerticalAlignment="Center"
-                            Kind="PlaySpeed" />
-                        <Slider
-                            Name="speedRatioSlider"
-                            MinWidth="180"
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Center"
-                            IsSnapToTickEnabled="True"
-                            Maximum="4"
-                            Minimum="0.5"
-                            TickFrequency="0.5"
-                            TickPlacement="BottomRight"
-                            Value="{Binding SpeedRatio, ElementName=fileVideoViewer, Mode=TwoWay}" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                        <TextBlock
-                            Width="{StaticResource DrawerFieldLabelSize}"
-                            Margin="0,0,8,0"
-                            FontWeight="Bold"
-                            Text="Full Path:" />
-                        <TextBlock
-                            MaxWidth="{StaticResource DrawerFieldValueSize}"
-                            Text="{Binding SelectedExportFile.FilePath}"
-                            TextWrapping="Wrap" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                        <TextBlock
-                            Width="{StaticResource DrawerFieldLabelSize}"
-                            Margin="0,0,8,0"
-                            FontWeight="Bold"
-                            Text="Size:" />
-                        <TextBlock
-                            MaxWidth="{StaticResource DrawerFieldValueSize}"
-                            Text="{Binding SelectedExportFile.FileSize, Converter={StaticResource FormatKbSizeConverter}}"
-                            TextWrapping="Wrap" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                        <TextBlock
-                            Width="{StaticResource DrawerFieldLabelSize}"
-                            Margin="0,0,8,0"
-                            FontWeight="Bold"
-                            Text="Created:" />
-                        <TextBlock
-                            MaxWidth="{StaticResource DrawerFieldValueSize}"
-                            Text="{Binding SelectedExportFile.DateCreated, Converter={StaticResource DateTimeOffsetToStringConverter}}"
-                            TextWrapping="Wrap" />
-                    </StackPanel>
-                    <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                        <TextBlock
-                            Width="{StaticResource DrawerFieldLabelSize}"
-                            Margin="0,0,8,0"
-                            FontWeight="Bold"
-                            Text="MD5 Checksum:" />
-                        <TextBlock
-                            MaxWidth="{StaticResource DrawerFieldValueSize}"
-                            Text="{Binding SelectedExportFile.Md5Hash}"
-                            TextWrapping="Wrap" />
-                    </StackPanel>
-                    <Button
-                        Margin="4"
-                        HorizontalAlignment="Center"
-                        Command="{x:Static materialDesign:DrawerHost.CloseDrawerCommand}"
-                        CommandParameter="{x:Static Dock.Right}">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon
-                                Width="15"
-                                Height="15"
-                                Margin="0,1,8,0"
-                                Kind="Close" />
-                            <TextBlock Text="Close" />
+                                IsSnapToTickEnabled="True"
+                                Maximum="4"
+                                Minimum="0.5"
+                                TickFrequency="0.5"
+                                TickPlacement="BottomRight"
+                                Value="{Binding SpeedRatio, ElementName=fileVideoViewer, Mode=TwoWay}" />
                         </StackPanel>
-                    </Button>
-                </StackPanel>
+                        <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
+                            <TextBlock
+                                Width="{StaticResource DrawerFieldLabelSize}"
+                                Margin="0,0,8,0"
+                                FontWeight="Bold"
+                                Text="Full Path:" />
+                            <TextBlock
+                                MaxWidth="{StaticResource DrawerFieldValueSize}"
+                                Text="{Binding SelectedExportFile.FilePath}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
+                            <TextBlock
+                                Width="{StaticResource DrawerFieldLabelSize}"
+                                Margin="0,0,8,0"
+                                FontWeight="Bold"
+                                Text="Size:" />
+                            <TextBlock
+                                MaxWidth="{StaticResource DrawerFieldValueSize}"
+                                Text="{Binding SelectedExportFile.FileSize, Converter={StaticResource FormatKbSizeConverter}}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
+                            <TextBlock
+                                Width="{StaticResource DrawerFieldLabelSize}"
+                                Margin="0,0,8,0"
+                                FontWeight="Bold"
+                                Text="Created:" />
+                            <TextBlock
+                                MaxWidth="{StaticResource DrawerFieldValueSize}"
+                                Text="{Binding SelectedExportFile.DateCreated, Converter={StaticResource DateTimeOffsetToStringConverter}}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
+                            <TextBlock
+                                Width="{StaticResource DrawerFieldLabelSize}"
+                                Margin="0,0,8,0"
+                                FontWeight="Bold"
+                                Text="MD5 Checksum:" />
+                            <TextBlock
+                                MaxWidth="{StaticResource DrawerFieldValueSize}"
+                                Text="{Binding SelectedExportFile.Md5Hash}"
+                                TextWrapping="Wrap" />
+                        </StackPanel>
+                        <Button
+                            Margin="4"
+                            HorizontalAlignment="Center"
+                            Command="{x:Static materialDesign:DrawerHost.CloseDrawerCommand}"
+                            CommandParameter="{x:Static Dock.Right}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon
+                                    Width="15"
+                                    Height="15"
+                                    Margin="0,1,8,0"
+                                    Kind="Close" />
+                                <TextBlock Text="Close" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
+                </ScrollViewer>
             </GroupBox>
         </materialDesign:DrawerHost.RightDrawerContent>
         <Grid>

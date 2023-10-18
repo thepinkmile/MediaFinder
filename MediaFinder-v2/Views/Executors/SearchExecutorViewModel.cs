@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Data.Common;
 using System.IO;
-using System.Windows.Controls;
 using System.Windows.Data;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -24,7 +23,10 @@ using Microsoft.Extensions.Logging;
 namespace MediaFinder_v2.Views.Executors;
 
 #pragma warning disable CA2254 // Template should be a static expression - Don't care about formats here
-public partial class SearchExecutorViewModel : ObservableObject, IRecipient<WorkingDirectoryCreated>, IRecipient<SearchSettingUpdated>
+public partial class SearchExecutorViewModel : ObservableObject,
+    IRecipient<WorkingDirectoryCreated>,
+    IRecipient<SearchSettingUpdated>,
+    IRecipient<WizardNavigationMessage>
 {
     private readonly IServiceProvider _serviceProvider;
 
@@ -95,7 +97,19 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
         await LoadConfigurationsCommand.ExecuteAsync(null);
     }
 
-#region Settings Configurations
+    public void Receive(WizardNavigationMessage message)
+    {
+        switch (message.NavigateTo)
+        {
+            case NavigationDirection.Next: Transitioner.MoveNextCommand.Execute(null, null); break;
+            case NavigationDirection.Previous: Transitioner.MovePreviousCommand.Execute(null, null); break;
+            case NavigationDirection.Beginning: Transitioner.MoveFirstCommand.Execute(null, null); break;
+            case NavigationDirection.End: Transitioner.MoveLastCommand.Execute(null, null); break;
+            default: break;
+        }
+    }
+
+    #region Settings Configurations
 
     public AddSearchSettingViewModel SearchConfigViewModel { get; set; }
 
@@ -185,10 +199,12 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
 
         HideProgressIndicator();
 
-        if (SearchComplete && !_searchStageOneWorker.IsBusy && !_searchStagaeTwoWorker.IsBusy
+        if (SearchComplete
+            && !_searchStageOneWorker.IsBusy
+            && !_searchStagaeTwoWorker.IsBusy
             && !_searchStagaeThreeWorker.IsBusy)
         {
-            await MoveToReviewCommand.ExecuteAsync(null);
+            _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));
         }
     }
 
@@ -375,7 +391,6 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
         }
         IsSearching = false;
         HideProgressIndicator();
-        FinishCommand.NotifyCanExecuteChanged();
     }
 
     private void SearchFinished()
@@ -383,8 +398,7 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
         IsSearching = false;
         SearchComplete = true;
         HideProgressIndicator();
-        FinishCommand.NotifyCanExecuteChanged();
-        Transitioner.MoveNextCommand.Execute(null, null);
+        OnMoveToReview().ConfigureAwait(true).GetAwaiter().GetResult();
     }
 
     private bool CanMoveToReview()
@@ -398,7 +412,7 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
     private async Task OnMoveToReview()
     {
         var reload = LoadingResultsCommand.ExecuteAsync(null);
-        Transitioner.MoveNextCommand.Execute(null, null);
+        _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));
         await reload;
     }
 
@@ -484,9 +498,9 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
             && SearchComplete;
 
     [RelayCommand(CanExecute = nameof(CanNavigateBackToSearch))]
-    public static void OnBackToSearch(CancellationToken cancellationToken)
+    public void OnBackToSearch()
     {
-        Transitioner.MoveFirstCommand.Execute(null, null);
+        _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Previous));
     }
 
     public bool CanExportFiles()
@@ -566,7 +580,7 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
         _messenger.Send(SnackBarMessage.Create("Export completed successfully"));
         _logger.LogError("Export completed successfully");
         ExportCleanup();
-        Transitioner.MoveNextCommand.Execute(null, null);
+        _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));
     }
 
     private void ExportCleanup()
@@ -608,9 +622,9 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
     #region Step3 - Complete
 
     [RelayCommand]
-    public static void OnBackToExport()
+    public void OnBackToExport()
     {
-        Transitioner.MovePreviousCommand.Execute(null, null);
+        _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Previous));
     }
 
     public bool CanFinishSearach()
@@ -639,7 +653,7 @@ public partial class SearchExecutorViewModel : ObservableObject, IRecipient<Work
             SearchComplete = false;
             SelectedConfig = null;
         }
-        Transitioner.MoveFirstCommand.Execute(null, null);
+        _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Beginning));
     }
 
     #endregion

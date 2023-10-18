@@ -82,7 +82,9 @@ public class ExportWorker : ReactiveBackgroundWorker
         if (!renameFiles)
             return file.FileName;
 
-        var filename = $"{file.MD5_Hash}__{file.FileName}";
+        var filename = type == ExportType.OriginalPath
+            ? file.FileName
+            : $"{file.MD5_Hash}__{file.FileName}";
         var expectedExtension = file.GetExpectedExtension();
         return file.GetExtension().Equals(expectedExtension, StringComparison.InvariantCultureIgnoreCase)
             ? filename
@@ -103,7 +105,7 @@ public class ExportWorker : ReactiveBackgroundWorker
         {
             case ExportType.ByDateCreated: return file => Path.Combine(
                 file.Created.Year.ToString(CultureInfo.InvariantCulture),
-                file.Created.Month.ToString(CultureInfo.InvariantCulture),
+                CultureInfo.CurrentCulture.DateTimeFormat.GetAbbreviatedMonthName(file.Created.Month),
                 file.Created.Day.ToString(CultureInfo.InvariantCulture)
                 );
             case ExportType.ByChecksum: return file => Path.Combine(

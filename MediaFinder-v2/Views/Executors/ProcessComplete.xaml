@@ -12,34 +12,43 @@
     d:DesignWidth="800"
     mc:Ignorable="d">
     <Grid>
-        <StackPanel HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
-            <TextBlock Text="Export is now complete." />
-            <StackPanel
-                Margin="0,8,0,0"
-                HorizontalAlignment="Right"
-                VerticalAlignment="Bottom"
-                Orientation="Horizontal">
-                <Button Margin="0,0,8,0" Command="{Binding BackToExportCommand}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon
-                            Width="15"
-                            Height="15"
-                            Margin="0,0,8,0"
-                            Kind="ArrowLeftBoldOutline" />
-                        <TextBlock Text="Back" />
-                    </StackPanel>
-                </Button>
-                <Button Margin="0,0,8,0" Command="{Binding FinishCommand}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon
-                            Width="15"
-                            Height="15"
-                            Margin="0,2,8,0"
-                            Kind="TickCircleOutline" />
-                        <TextBlock Text="Finish" />
-                    </StackPanel>
-                </Button>
-            </StackPanel>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <TextBlock
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            FontSize="24"
+            FontWeight="Bold"
+            Text="Export is now complete." />
+        <StackPanel
+            Grid.Row="1"
+            Margin="0,8,0,0"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Orientation="Horizontal">
+            <Button Margin="0,0,8,0" Command="{Binding BackToExportCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon
+                        Width="15"
+                        Height="15"
+                        Margin="0,0,8,0"
+                        Kind="ArrowLeftBoldOutline" />
+                    <TextBlock Text="Back" />
+                </StackPanel>
+            </Button>
+            <Button Command="{Binding FinishCommand}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon
+                        Width="15"
+                        Height="15"
+                        Margin="0,2,8,0"
+                        Kind="TickCircleOutline" />
+                    <TextBlock Text="Finish" />
+                </StackPanel>
+            </Button>
         </StackPanel>
     </Grid>
 </UserControl>
