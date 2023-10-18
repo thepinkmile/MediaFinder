@@ -161,13 +161,6 @@ public partial class SearchExecutorViewModel : ObservableObject,
     [NotifyCanExecuteChangedFor(nameof(FinishCommand))]
     private bool _searchComplete;
 
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
-    [NotifyCanExecuteChangedFor(nameof(CancelSearchCommand))]
-    [NotifyCanExecuteChangedFor(nameof(MoveToReviewCommand))]
-    [NotifyCanExecuteChangedFor(nameof(FinishCommand))]
-    private bool _isSearching;
-
     partial void OnWorkingDirectoryChanged(string? value)
     {
         SearchComplete = false;
@@ -212,7 +205,6 @@ public partial class SearchExecutorViewModel : ObservableObject,
         => !string.IsNullOrEmpty(WorkingDirectory)
             && SelectedConfig is not null
             && !SearchComplete
-            && !IsSearching
             && !_searchStageOneWorker.IsBusy
             && !_searchStagaeTwoWorker.IsBusy
             && !_searchStagaeThreeWorker.IsBusy;
@@ -239,16 +231,13 @@ public partial class SearchExecutorViewModel : ObservableObject,
             await TruncateFileDetailState(_dbContext);
 
             _searchStageOneWorker.RunWorkerAsync(SearchRequest.Create(WorkingDirectory!, SelectedConfig!));
-            IsSearching = true;
         }
     }
 
     private bool CanCancelSearch()
-        => IsSearching && (
-            (_searchStageOneWorker.IsBusy && !_searchStageOneWorker.CancellationPending)
+        => ((_searchStageOneWorker.IsBusy && !_searchStageOneWorker.CancellationPending)
             || (_searchStagaeTwoWorker.IsBusy && !_searchStagaeTwoWorker.CancellationPending)
-            || (_searchStagaeThreeWorker.IsBusy && !_searchStagaeThreeWorker.CancellationPending)
-        );
+            || (_searchStagaeThreeWorker.IsBusy && !_searchStagaeThreeWorker.CancellationPending));
 
     [RelayCommand(CanExecute = nameof(CanCancelSearch))]
     private void OnCancelSearch()
@@ -389,21 +378,27 @@ public partial class SearchExecutorViewModel : ObservableObject,
             SelectedConfig.WorkingDirectory = null;
             _logger.LogDebug("Removed Working Directory: {SelectedConfig.WorkingDirectory}", SelectedConfig.WorkingDirectory);
         }
-        IsSearching = false;
         HideProgressIndicator();
+        CancelSearchCommand.NotifyCanExecuteChanged();
     }
 
     private void SearchFinished()
     {
-        IsSearching = false;
-        SearchComplete = true;
         HideProgressIndicator();
-        OnMoveToReview().ConfigureAwait(true).GetAwaiter().GetResult();
+        CancelSearchCommand.NotifyCanExecuteChanged();
+        SearchComplete = true;
+    }
+
+    partial void OnSearchCompleteChanged(bool oldValue, bool newValue)
+    {
+        if (newValue is true && newValue != oldValue)
+        {
+            OnMoveToReview().ConfigureAwait(true).GetAwaiter().GetResult();
+        }
     }
 
     private bool CanMoveToReview()
         => SearchComplete
-            && !IsSearching
             && !_searchStageOneWorker.IsBusy
             && !_searchStagaeTwoWorker.IsBusy
             && !_searchStagaeThreeWorker.IsBusy;
@@ -444,7 +439,7 @@ public partial class SearchExecutorViewModel : ObservableObject,
     [NotifyCanExecuteChangedFor(nameof(FinishCommand))]
     [NotifyCanExecuteChangedFor(nameof(ExportFilesCommand))]
     [NotifyCanExecuteChangedFor(nameof(CancelExportCommand))]
-    private bool _isExporting;
+    private bool _exportComplete;
 
     [ObservableProperty]
     private bool? _filterByShouldExport;
@@ -494,8 +489,7 @@ public partial class SearchExecutorViewModel : ObservableObject,
     }
 
     public bool CanNavigateBackToSearch()
-        => !IsExporting
-            && SearchComplete;
+        => !_exportWorker.IsBusy;
 
     [RelayCommand(CanExecute = nameof(CanNavigateBackToSearch))]
     public void OnBackToSearch()
@@ -530,14 +524,12 @@ public partial class SearchExecutorViewModel : ObservableObject,
             _dbContext.ChangeTracker.LazyLoadingEnabled = originalLazyLoadSetting;
 
             _exportWorker.RunWorkerAsync(ExportRequest.Create(filesToExport, ExportDirectory!, ExportType, ExportRename));
-            IsExporting = true;
+            CancelExportCommand.NotifyCanExecuteChanged();
         }
     }
 
     private bool CanCancelExport()
-        => IsExporting && (
-            (_exportWorker.IsBusy && !_exportWorker.CancellationPending)
-        );
+        => (_exportWorker.IsBusy && !_exportWorker.CancellationPending);
 
     [RelayCommand(CanExecute = nameof(CanCancelExport))]
     private void OnCancelExport()
@@ -579,15 +571,21 @@ public partial class SearchExecutorViewModel : ObservableObject,
 
         _messenger.Send(SnackBarMessage.Create("Export completed successfully"));
         _logger.LogError("Export completed successfully");
-        ExportCleanup();
-        _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));
+        ExportCleanup(true);
     }
 
-    private void ExportCleanup()
+    private void ExportCleanup(bool isComplete = false)
     {
-        IsExporting = false;
         HideProgressIndicator();
-        FinishCommand.NotifyCanExecuteChanged();
+        ExportComplete = isComplete;
+    }
+
+    partial void OnExportCompleteChanged(bool oldValue, bool newValue)
+    {
+        if (newValue is true && newValue != oldValue)
+        {
+            _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));
+        }
     }
 
     private async void MediaFile_PropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -628,12 +626,11 @@ public partial class SearchExecutorViewModel : ObservableObject,
     }
 
     public bool CanFinishSearach()
-        => !IsSearching
-            && !IsExporting
+        => (SelectedConfig?.WorkingDirectory is not null || _dbContext.FileDetails.Any())
             && !_searchStageOneWorker.IsBusy
             && !_searchStagaeTwoWorker.IsBusy
             && !_searchStagaeThreeWorker.IsBusy
-            && (SelectedConfig?.WorkingDirectory is not null || _dbContext.FileDetails.Any());
+            && !_exportWorker.IsBusy;
 
     [RelayCommand(CanExecute = nameof(CanFinishSearach))]
     public async Task Finish()
