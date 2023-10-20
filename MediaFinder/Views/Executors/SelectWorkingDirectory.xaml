@@ -64,25 +64,24 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
-            <StackPanel>
-                <TextBlock Text="Select a working directory and configuration for the search." />
-                <mde:TextBoxOpenDirectory
-                    Margin="0,8,0,0"
-                    DialogHostName="DialogHost"
-                    Directory="{Binding WorkingDirectory, Mode=TwoWay}">
-                    <mde:TextBoxOpenDirectory.TextBoxStyle>
-                        <Style BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}" TargetType="TextBox">
-                            <Setter Property="materialDesign:HintAssist.Hint" Value="Choose a directory" />
-                        </Style>
-                    </mde:TextBoxOpenDirectory.TextBoxStyle>
-                </mde:TextBoxOpenDirectory>
-            </StackPanel>
-            <Border
+            <TextBlock Grid.Row="0" Text="Select a working directory and configuration for the search." />
+            <mde:TextBoxOpenDirectory
                 Grid.Row="1"
-                Margin="0,8,0,0"
+                DialogHostName="DialogHost"
+                Directory="{Binding WorkingDirectory, Mode=TwoWay}">
+                <mde:TextBoxOpenDirectory.TextBoxStyle>
+                    <Style BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}" TargetType="TextBox">
+                        <Setter Property="materialDesign:HintAssist.Hint" Value="Choose a directory" />
+                    </Style>
+                </mde:TextBoxOpenDirectory.TextBoxStyle>
+            </mde:TextBoxOpenDirectory>
+            <Border
+                Grid.Row="2"
+                Margin="0,8"
                 HorizontalAlignment="Stretch"
                 BorderBrush="{DynamicResource PrimaryHueMidBrush}"
                 BorderThickness="1"
@@ -99,33 +98,35 @@
                         Mode="PrimaryMid">
                         <TextBlock Margin="16" Text="Configurations" />
                     </materialDesign:ColorZone>
-                    <Button
-                        Grid.Row="0"
-                        Margin="0,0,80,0"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        Command="{Binding AddSearchSettingCommand}"
-                        CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type materialDesign:DrawerHost}}}"
-                        Content="{materialDesign:PackIcon Kind=Plus,
-                                                          Size=22}"
-                        Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}" />
-                    <Button
-                        Grid.Row="0"
-                        Margin="0,0,20,0"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        Command="{Binding RemoveSearchSettingCommand}"
-                        Content="{materialDesign:PackIcon Kind=Minus,
-                                                          Size=22}"
-                        Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}" />
+                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                        <Button
+                            Grid.Row="0"
+                            Margin="0,0,14,0"
+                            VerticalAlignment="Center"
+                            Command="{Binding AddSearchSettingCommand}"
+                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type materialDesign:DrawerHost}}}"
+                            Content="{materialDesign:PackIcon Kind=Plus,
+                                                              Size=22}"
+                            Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}" />
+                        <Button
+                            Grid.Row="0"
+                            Margin="0,0,14,0"
+                            VerticalAlignment="Center"
+                            Command="{Binding RemoveSearchSettingCommand}"
+                            Content="{materialDesign:PackIcon Kind=Minus,
+                                                              Size=22}"
+                            Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}" />
+                    </StackPanel>
                     <DataGrid
                         Grid.Row="1"
                         AutoGenerateColumns="False"
                         CanUserAddRows="False"
+                        HorizontalScrollBarVisibility="Auto"
                         IsReadOnly="True"
                         ItemsSource="{Binding Configurations}"
                         SelectedItem="{Binding SelectedConfig}"
-                        SelectionUnit="FullRow">
+                        SelectionUnit="FullRow"
+                        VerticalScrollBarVisibility="Auto">
                         <DataGrid.Columns>
                             <DataGridTextColumn
                                 Binding="{Binding Name}"
@@ -191,8 +192,7 @@
                 </Grid>
             </Border>
             <StackPanel
-                Grid.Row="2"
-                Margin="0,8,0,0"
+                Grid.Row="3"
                 HorizontalAlignment="Right"
                 Orientation="Horizontal">
                 <Button
@@ -206,19 +206,6 @@
                             Margin="0,0,8,0"
                             Kind="RunFast" />
                         <TextBlock Text="Run" />
-                    </StackPanel>
-                </Button>
-                <Button
-                    Margin="0,0,8,0"
-                    Command="{Binding CancelSearchCommand}"
-                    Visibility="{Binding SearchComplete, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon
-                            Width="15"
-                            Height="15"
-                            Margin="0,1,8,0"
-                            Kind="Cancel" />
-                        <TextBlock Text="Cancel" />
                     </StackPanel>
                 </Button>
                 <Button

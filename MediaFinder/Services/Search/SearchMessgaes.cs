@@ -1,11 +1,42 @@
 ﻿using MediaFinder_v2.DataAccessLayer.Models;
+using MediaFinder_v2.Helpers;
 
 namespace MediaFinder_v2.Services.Search;
 
-public record SearchRequest(string WorkingDirectory, ICollection<string> SourceDirectories, bool Recursive, bool ExtractArchives, int? ExtractionDepth)
+#region Discovery
+
+public class SearchRequest : ReactiveBackgroundWorkerContextBase
 {
-    public static SearchRequest Create(string workingDirectory, SearchConfiguration settings)
-        => new(workingDirectory, settings.Directories, settings.Recursive, settings.ExtractArchives, settings.ExtractionDepth);
+
+    private SearchRequest(
+        object progressToken,
+        string workingDirectory,
+        ICollection<string> sourceDirectories,
+        bool recursive,
+        bool extractArchives,
+        int? extractionDepth)
+        : base(progressToken)
+    {
+        WorkingDirectory = workingDirectory;
+        SourceDirectories = sourceDirectories;
+        Recursive = recursive;
+        ExtractArchives = extractArchives;
+        ExtractionDepth = extractionDepth;
+    }
+
+    public string WorkingDirectory { get; }
+
+    public ICollection<string> SourceDirectories { get; }
+
+    public bool Recursive { get; }
+
+    public bool ExtractArchives { get; }
+
+    public int? ExtractionDepth { get; }
+
+    public static SearchRequest Create(object progressToken, string workingDirectory, SearchConfiguration settings)
+        => new(progressToken, workingDirectory, settings.Directories,
+            settings.Recursive, settings.ExtractArchives, settings.ExtractionDepth);
 }
 
 public record SearchResponse(ICollection<string> Files)
@@ -20,10 +51,37 @@ public record WorkingDirectoryCreated(string Path)
         => new(path);
 }
 
-public record AnalyseRequest(ICollection<string> Files, ICollection<string> OriginalPaths, string WorkingDirectory, bool PerformDeepAnalysis = false)
+#endregion
+
+#region Analysis
+
+public class AnalyseRequest : ReactiveBackgroundWorkerContextBase
 {
-    public static AnalyseRequest Create(ICollection<string> files, ICollection<string> originalPaths, string workingDirectory, bool performDeepAnalysis = false)
-        => new(files, originalPaths, workingDirectory, performDeepAnalysis);
+    private AnalyseRequest(
+        object ProgressToken,
+        ICollection<string> files,
+        ICollection<string> originalPaths,
+        string workingDirectory,
+        bool performDeepAnalysis = false)
+        : base(ProgressToken)
+    {
+        Files = files;
+        OriginalPaths = originalPaths;
+        WorkingDirectory = workingDirectory;
+        PerformDeepAnalysis = performDeepAnalysis;
+    }
+
+    public ICollection<string> Files { get; }
+
+    public ICollection<string> OriginalPaths { get; }
+
+    public string WorkingDirectory { get; }
+
+    public bool PerformDeepAnalysis { get; }
+
+    public static AnalyseRequest Create(object progressToken, ICollection<string> files,
+        ICollection<string> originalPaths, string workingDirectory, bool performDeepAnalysis = false)
+        => new(progressToken, files, originalPaths, workingDirectory, performDeepAnalysis);
 }
 
 public record AnalysisResponse(ICollection<FileDetails> Files)
@@ -32,8 +90,37 @@ public record AnalysisResponse(ICollection<FileDetails> Files)
         => new(files);
 }
 
-public record FilterRequest(long? MinImageWidth, long? MinImageHeight, long? MinVideoWidth, long? MinVideoHeight)
+#endregion
+
+#region Filtering
+
+public class FilterRequest : ReactiveBackgroundWorkerContextBase
 {
-    public static FilterRequest Create(long? minImageWidth, long? minImageHeight, long? minVideoWidth, long? minVideoHeight)
-        => new(minImageWidth, minImageHeight, minVideoWidth, minVideoHeight);
+    private FilterRequest(
+        object progressToken,
+        long? minImageWidth,
+        long? minImageHeight,
+        long? minVideoWidth,
+        long? minVideoHeight)
+        : base(progressToken)
+    {
+        MinImageWidth = minImageWidth;
+        MinImageHeight = minImageHeight;
+        MinVideoWidth = minVideoWidth;
+        MinVideoHeight = minVideoHeight;
+    }
+
+    public long? MinImageWidth { get; }
+
+    public long? MinImageHeight { get; }
+
+    public long? MinVideoWidth { get; }
+
+    public long? MinVideoHeight { get; }
+
+    public static FilterRequest Create(object progressToken, long? minImageWidth, long? minImageHeight,
+        long? minVideoWidth, long? minVideoHeight)
+        => new(progressToken, minImageWidth, minImageHeight, minVideoWidth, minVideoHeight);
 }
+
+#endregion

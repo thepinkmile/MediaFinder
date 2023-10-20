@@ -31,49 +31,20 @@
         <converters:PercentageConverter x:Key="ProgressBarWidthConverter" Percentage="60" />
     </Window.Resources>
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+        <executors:SearchExecutor x:Name="Executor" />
 
-        <executors:SearchExecutor x:Name="Executor" Grid.Row="0" />
         <materialDesign:DialogHost
             x:Name="m_dialogHost"
             DialogTheme="Inherit"
             Identifier="DialogHost" />
-        <materialDesign:Card
-            Width="Auto"
-            Height="Auto"
-            Margin="15"
-            Padding="15"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Background="{DynamicResource PrimaryHueMidBrush}"
-            Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
-            UniformCornerRadius="6"
-            Visibility="{Binding ProgressBarVisible, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
-                <ProgressBar
-                    VerticalAlignment="Center"
-                    IsIndeterminate="True"
-                    Style="{StaticResource CircularProgressBar}"
-                    Value="0" />
-                <TextBlock
-                    MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource ProgressBarWidthConverter}}"
-                    Margin="8,0,0,0"
-                    VerticalAlignment="Center"
-                    Text="{Binding ProgressBarStatus}"
-                    TextWrapping="Wrap" />
-            </StackPanel>
-        </materialDesign:Card>
+        <materialDesign:Snackbar
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Bottom"
+            MessageQueue="{Binding MessageQueue}" />
         <controls:ProgressOverlay
             CancelCommand="{Binding ProgressCancelCommand}"
             IsBusy="{Binding ProgressVisible}"
             Progress="{Binding ProgressValue}"
             StatusMessage="{Binding ProgressMessage}" />
-        <materialDesign:Snackbar
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Bottom"
-            MessageQueue="{Binding MessageQueue}" />
     </Grid>
 </Window>

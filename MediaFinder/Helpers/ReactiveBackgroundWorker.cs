@@ -8,10 +8,13 @@ using Microsoft.Extensions.Logging;
 
 namespace MediaFinder_v2.Helpers;
 
-public abstract class ReactiveBackgroundWorker : BackgroundWorker
+public abstract class ReactiveBackgroundWorker<T> : BackgroundWorker
+    where T : ReactiveBackgroundWorkerContextBase
 {
     private readonly ILogger _logger;
     private readonly IMessenger _messenger;
+
+    private object _progressToken = null!;
 
     protected ReactiveBackgroundWorker(ILogger logger, IMessenger messenger)
     {
@@ -26,7 +29,18 @@ public abstract class ReactiveBackgroundWorker : BackgroundWorker
 
     #region Background Methods
 
-    protected abstract void Execute(object? sender, DoWorkEventArgs e);
+    protected void Execute(object? sender, DoWorkEventArgs e)
+    {
+        if (e.Argument is not T inputs || inputs is null)
+        {
+            throw new InvalidOperationException("Stage called with invalid arguments.");
+        }
+
+        _progressToken = inputs.ProgressToken;
+        Execute(inputs, e);
+    }
+
+    protected abstract void Execute(T context, DoWorkEventArgs e);
 
     #region Logging
 
@@ -81,7 +95,7 @@ public abstract class ReactiveBackgroundWorker : BackgroundWorker
 
     protected void SetProgress(string message, LogLevel logLevel = LogLevel.Debug)
     {
-        ReportProgress(UpdateProgressBarStatus.Create(message));
+        ReportProgress(UpdateProgressMessage.Create(_progressToken, message));
         Log(logLevel, message);
     }
 
@@ -95,9 +109,8 @@ public abstract class ReactiveBackgroundWorker : BackgroundWorker
     {
         switch (e.UserState)
         {
-            case string stateMessage: _messenger.Send(UpdateProgressBarStatus.Create(stateMessage)); break;
-            case UpdateProgressBarStatus updateStatusMessage: _messenger.Send(updateStatusMessage); break;
-            case UpdateProgressBarValue updateStatusValue: _messenger.Send(updateStatusValue); break;
+            case string stateMessage: _messenger.Send(UpdateProgressMessage.Create(_progressToken, stateMessage)); break;
+            case UpdateProgressMessage updateStatusMessage: _messenger.Send(updateStatusMessage); break;
             case LogMessage logMessage: SendLogMessage(logMessage); break;
         }
     }

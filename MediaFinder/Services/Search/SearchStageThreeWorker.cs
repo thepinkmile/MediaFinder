@@ -11,7 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace MediaFinder_v2.Services.Search;
 
-public class SearchStageThreeWorker : ReactiveBackgroundWorker
+public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
 {
     private readonly AppDbContext _dbContext;
 
@@ -22,13 +22,8 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker
         _dbContext = dbContext;
     }
 
-    protected override void Execute(object? sender, DoWorkEventArgs e)
+    protected override void Execute(FilterRequest inputs, DoWorkEventArgs e)
     {
-        if (e.Argument is not FilterRequest inputs)
-        {
-            throw new InvalidOperationException("Stage called with invalid arguments.");
-        }
-
         SetProgress($"Finalising Analysis Results...");
         
         var initialCount = _dbContext.FileDetails.Count(fd => fd.ShouldExport);

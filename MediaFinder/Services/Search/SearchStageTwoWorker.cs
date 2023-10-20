@@ -18,7 +18,7 @@ using NReco.VideoInfo;
 
 namespace MediaFinder_v2.Services.Search;
 
-public partial class SearchStageTwoWorker : ReactiveBackgroundWorker
+public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequest>
 {
     private static readonly string[] IsoDateFormats = { 
         // Basic formats
@@ -98,13 +98,8 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker
         _ffProbe = ffProbe;
     }
 
-    protected override void Execute(object? sender, DoWorkEventArgs e)
+    protected override void Execute(AnalyseRequest inputs, DoWorkEventArgs e)
     {
-        if (e.Argument is not AnalyseRequest inputs)
-        {
-            throw new InvalidOperationException("Stage called with invalid arguments.");
-        }
-
         SetProgress("Initializing analizers...");
 
         var files = new List<FileDetails>();

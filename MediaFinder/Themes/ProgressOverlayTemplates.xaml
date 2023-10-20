@@ -66,6 +66,7 @@
                                 FontSize="{StaticResource MediaFinderProgressFontSize}"
                                 Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                                 Text="{Binding Path=StatusMessage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                TextWrapping="Wrap"
                                 Visibility="{Binding Path=StatusMessage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}, Converter={StaticResource StringIsEmptyVisibilityConverter}}" />
                         </StackPanel>
                         <Button
@@ -192,6 +193,7 @@
                             FontSize="{StaticResource MediaFinderProgressFontSize}"
                             Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                             Text="{Binding Path=StatusMessage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                            TextWrapping="Wrap"
                             Visibility="{Binding Path=StatusMessage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}, Converter={StaticResource StringIsEmptyVisibilityConverter}}" />
                         <ProgressBar
                             Height="8"

@@ -392,19 +392,6 @@
                     </Button>
                     <Button
                         Margin="0,0,8,0"
-                        Command="{Binding CancelExportCommand}"
-                        Visibility="{Binding ExportComplete, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon
-                                Width="15"
-                                Height="15"
-                                Margin="0,1,8,0"
-                                Kind="Cancel" />
-                            <TextBlock Text="Cancel" />
-                        </StackPanel>
-                    </Button>
-                    <Button
-                        Margin="0,0,8,0"
                         Command="{Binding MoveToCompletionCommand}"
                         Visibility="{Binding ExportComplete, Converter={StaticResource BooleanToVisibilityConverter}}">
                         <StackPanel Orientation="Horizontal">

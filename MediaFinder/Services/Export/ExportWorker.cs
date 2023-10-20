@@ -11,20 +11,15 @@ using Microsoft.Extensions.Logging;
 
 namespace MediaFinder_v2.Services.Export;
 
-public class ExportWorker : ReactiveBackgroundWorker
+public class ExportWorker : ReactiveBackgroundWorker<ExportRequest>
 {
     public ExportWorker(ILogger<ExportWorker> logger, IMessenger messenger)
         : base(logger, messenger)
     {   
     }
 
-    protected override void Execute(object? sender, DoWorkEventArgs e)
+    protected override void Execute(ExportRequest inputs, DoWorkEventArgs e)
     {
-        if (e.Argument is not ExportRequest inputs)
-        {
-            throw new InvalidOperationException("Stage called with invalid arguments.");
-        }
-
         SetProgress("Exporting Files...");
 
         var cts = new CancellationTokenSource();

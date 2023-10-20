@@ -12,7 +12,7 @@ using SevenZipExtractor;
 
 namespace MediaFinder_v2.Services.Search;
 
-public class SearchStageOneWorker : ReactiveBackgroundWorker
+public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
 {
     private const int SixteenKBytes = 1024 * 16;
 
@@ -24,13 +24,8 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker
         _messenger = messenger;
     }
 
-    protected override void Execute(object? sender, DoWorkEventArgs e)
+    protected override void Execute(SearchRequest inputs, DoWorkEventArgs e)
     {
-        if (e.Argument is not SearchRequest inputs)
-        {
-            throw new InvalidOperationException("Stage called with invalid arguments.");
-        }
-
         SetProgress("Preparing Working Directory...");
         var workingDirectory = Path.Combine(inputs.WorkingDirectory, Guid.NewGuid().ToString());
         Directory.CreateDirectory(workingDirectory);

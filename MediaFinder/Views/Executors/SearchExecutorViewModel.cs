@@ -41,8 +41,12 @@ public partial class SearchExecutorViewModel : ObservableObject,
     private readonly SearchStageThreeWorker _searchStagaeThreeWorker;
     private readonly ExportWorker _exportWorker;
 
+    private readonly object _progressToken;
+
     public SearchExecutorViewModel(IServiceProvider serviceProvider)
     {
+        _progressToken = Guid.NewGuid();
+
         _serviceProvider = serviceProvider;
         _dbContext = _serviceProvider.GetRequiredService<AppDbContext>();
         _messenger = _serviceProvider.GetRequiredService<IMessenger>();
@@ -73,21 +77,27 @@ public partial class SearchExecutorViewModel : ObservableObject,
         _exportWorker.RunWorkerCompleted += ExportCompleted;
     }
 
-    private void ShowProgressIndicator(string message)
+    private void ShowProgressIndicator(string message, ICommand? cancelCommand = null)
     {
-        _messenger.Send(ShowProgressBar.Create(message));
+        _messenger.Send(ShowProgressMessage.Create(_progressToken, message, cancelCommand));
         _logger.LogInformation(message);
     }
 
     private void UpdateProgressIndicator(string message)
     {
-        _messenger.Send(UpdateProgressBarStatus.Create(message));
+        _messenger.Send(UpdateProgressMessage.Create(_progressToken, message));
+        _logger.LogInformation(message);
+    }
+
+    private void CancelProgressIndicator(string message)
+    {
+        _messenger.Send(CancelProgressMessage.Create(_progressToken));
         _logger.LogInformation(message);
     }
 
     private void HideProgressIndicator()
     {
-        _messenger.Send(HideProgressBar.Create());
+        _messenger.Send(CompleteProgressMessage.Create(_progressToken));
         _logger.LogInformation("Process Complete.");
     }
 
@@ -102,54 +112,6 @@ public partial class SearchExecutorViewModel : ObservableObject,
             default: break;
         }
     }
-
-    #region ProgressOverlay
-
-    [RelayCommand]
-    private void Test()
-    {
-        ProgressCancelCommand = CancelProgressCommand;
-        ProgressMessage = "Testing";
-        ShowProgress = true;
-        IsCancelling = false;
-    }
-
-    [ObservableProperty]
-    private ICommand? _progressCancelCommand;
-
-    [RelayCommand(CanExecute = nameof(CanCancelProgress))]
-    private void OnCancelProgress()
-    {
-        ProgressMessage = "Cancelling...";
-        IsCancelling = true;
-        _ = PendingCancel();
-        ProgressCancelCommand = null;
-    }
-
-    private async Task PendingCancel()
-    {
-        await Task.Delay(10_000);
-        ShowProgress = false;
-    }
-
-    private bool CanCancelProgress
-        => ShowProgress && !IsCancelling;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(CancelProgressCommand))]
-    private bool _isCancelling;
-
-    [ObservableProperty]
-    [NotifyCanExecuteChangedFor(nameof(CancelProgressCommand))]
-    private bool _showProgress;
-
-    [ObservableProperty]
-    private string? _progressMessage;
-
-    [ObservableProperty]
-    private int _progressValue;
-
-    #endregion
 
     #region Settings Configurations
 
@@ -269,11 +231,11 @@ public partial class SearchExecutorViewModel : ObservableObject,
 
         if (!_searchStageOneWorker.IsBusy && !_searchStagaeTwoWorker.IsBusy && !_searchStagaeThreeWorker.IsBusy)
         {
-            ShowProgressIndicator("Initializing search parameters");
+            ShowProgressIndicator("Initializing search parameters", CancelSearchCommand);
 
             await TruncateFileDetailState(_dbContext);
 
-            _searchStageOneWorker.RunWorkerAsync(SearchRequest.Create(WorkingDirectory!, SelectedConfig!));
+            _searchStageOneWorker.RunWorkerAsync(SearchRequest.Create(_progressToken, WorkingDirectory!, SelectedConfig!));
             CancelSearchCommand.NotifyCanExecuteChanged();
         }
     }
@@ -293,6 +255,7 @@ public partial class SearchExecutorViewModel : ObservableObject,
             return;
         }
 
+        CancelProgressIndicator("Cancelling...");
         if (_searchStageOneWorker.IsBusy)
         {
             _searchStageOneWorker.CancelAsync();
@@ -306,7 +269,6 @@ public partial class SearchExecutorViewModel : ObservableObject,
             _searchStagaeThreeWorker.CancelAsync();
         }
         CancelSearchCommand.NotifyCanExecuteChanged();
-        _messenger.Send(UpdateProgressBarStatus.Create("Cancelling..."));
     }
 
     private void SearchStepOneCompleted(object? sender, RunWorkerCompletedEventArgs e)
@@ -335,6 +297,7 @@ public partial class SearchExecutorViewModel : ObservableObject,
 
         _searchStagaeTwoWorker.RunWorkerAsync(
             AnalyseRequest.Create(
+                _progressToken,
                 result.Files,
                 SelectedConfig!.Directories,
                 SelectedConfig.WorkingDirectory!,
@@ -380,6 +343,7 @@ public partial class SearchExecutorViewModel : ObservableObject,
 
         _searchStagaeThreeWorker.RunWorkerAsync(
             FilterRequest.Create(
+                _progressToken,
                 SelectedConfig!.MinImageWidth,
                 SelectedConfig.MinImageHeight,
                 SelectedConfig.MinVideoWidth,
@@ -585,7 +549,7 @@ public partial class SearchExecutorViewModel : ObservableObject,
 
         if (!_exportWorker.IsBusy)
         {
-            ShowProgressIndicator("Initializing export...");
+            ShowProgressIndicator("Initializing export...", CancelExportCommand);
 
             var originalLazyLoadSetting = _dbContext.ChangeTracker.LazyLoadingEnabled;
             _dbContext.ChangeTracker.LazyLoadingEnabled = false;
@@ -595,7 +559,12 @@ public partial class SearchExecutorViewModel : ObservableObject,
                 .ToListAsync(cancellationToken);
             _dbContext.ChangeTracker.LazyLoadingEnabled = originalLazyLoadSetting;
 
-            _exportWorker.RunWorkerAsync(ExportRequest.Create(filesToExport, ExportDirectory!, ExportType, ExportRename));
+            _exportWorker.RunWorkerAsync(
+                ExportRequest.Create(
+                    _progressToken,
+                    filesToExport,
+                    ExportDirectory!,
+                    ExportType, ExportRename));
             CancelExportCommand.NotifyCanExecuteChanged();
         }
     }
@@ -612,10 +581,9 @@ public partial class SearchExecutorViewModel : ObservableObject,
             return;
         }
 
+        CancelProgressIndicator("Cancelling...");
         _exportWorker.CancelAsync();
-
         CancelExportCommand.NotifyCanExecuteChanged();
-        _messenger.Send(UpdateProgressBarStatus.Create("Cancelling..."));
     }
 
     private void ExportCompleted(object? sender, RunWorkerCompletedEventArgs e)
@@ -652,6 +620,7 @@ public partial class SearchExecutorViewModel : ObservableObject,
         HideProgressIndicator();
         ExportComplete = isComplete;
         ExportFilesCommand.NotifyCanExecuteChanged();
+        CancelExportCommand.NotifyCanExecuteChanged();
     }
 
     partial void OnExportCompleteChanged(bool oldValue, bool newValue)

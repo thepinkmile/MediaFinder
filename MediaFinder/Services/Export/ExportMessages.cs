@@ -1,9 +1,33 @@
 ﻿using MediaFinder_v2.DataAccessLayer.Models;
+using MediaFinder_v2.Helpers;
 
 namespace MediaFinder_v2.Services.Export;
 
-public record ExportRequest(ICollection<FileDetails> Files, string ExportDirectory, ExportType Type, bool RenameFiles)
+public class ExportRequest : ReactiveBackgroundWorkerContextBase
 {
-    public static ExportRequest Create(ICollection<FileDetails> files, string exportDirectory, ExportType type, bool renameFiles)
-        => new(files, exportDirectory, type, renameFiles);
+    private ExportRequest(
+        object progressToken,
+        ICollection<FileDetails> files,
+        string exportDirectory,
+        ExportType type,
+        bool renameFiles)
+        : base(progressToken)
+    {
+        Files = files;
+        ExportDirectory = exportDirectory;
+        Type = type;
+        RenameFiles = renameFiles;
+    }
+
+    public ICollection<FileDetails> Files { get; }
+
+    public string ExportDirectory { get; }
+
+    public ExportType Type { get; }
+
+    public bool RenameFiles { get; }
+
+    public static ExportRequest Create(object progressToken, ICollection<FileDetails> files,
+        string exportDirectory, ExportType type, bool renameFiles)
+        => new(progressToken, files, exportDirectory, type, renameFiles);
 }
