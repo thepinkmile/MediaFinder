@@ -119,6 +119,7 @@
                     </StackPanel>
                     <DataGrid
                         Grid.Row="1"
+                        MaxHeight="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource MaxDataGridHeightConverter}}"
                         AutoGenerateColumns="False"
                         CanUserAddRows="False"
                         HorizontalScrollBarVisibility="Auto"

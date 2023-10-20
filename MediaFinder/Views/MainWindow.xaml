@@ -28,7 +28,7 @@
             TargetType="{x:Type ProgressBar}">
             <Setter Property="Foreground" Value="{DynamicResource PrimaryHueDarkForegroundBrush}" />
         </Style>
-        <converters:PercentageConverter x:Key="ProgressBarWidthConverter" Percentage="60" />
+        <converters:PercentageConverter x:Key="MaxDataGridHeightConverter" Percentage="60" />
     </Window.Resources>
     <Grid>
         <executors:SearchExecutor x:Name="Executor" />
