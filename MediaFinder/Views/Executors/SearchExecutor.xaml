@@ -13,13 +13,11 @@
     mc:Ignorable="d">
     <Grid>
         <materialDesign:Card Margin="15" Padding="4">
-            <StackPanel>
-                <materialDesign:Transitioner AutoApplyTransitionOrigins="True" SelectedIndex="0">
-                    <local:SelectWorkingDirectory DataContext="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext}" />
-                    <local:ViewResults DataContext="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext}" />
-                    <local:ProcessComplete DataContext="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext}" />
-                </materialDesign:Transitioner>
-            </StackPanel>
+            <materialDesign:Transitioner AutoApplyTransitionOrigins="True" SelectedIndex="0">
+                <local:SelectWorkingDirectory DataContext="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext}" />
+                <local:ViewResults DataContext="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext}" />
+                <local:ProcessComplete DataContext="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DataContext}" />
+            </materialDesign:Transitioner>
         </materialDesign:Card>
     </Grid>
 </UserControl>

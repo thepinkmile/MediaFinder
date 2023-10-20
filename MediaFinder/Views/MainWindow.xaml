@@ -3,7 +3,6 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:MediaFinder_v2.Controls"
-    xmlns:converters="clr-namespace:MediaFinder_v2.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:executors="clr-namespace:MediaFinder_v2.Views.Executors"
     xmlns:local="clr-namespace:MediaFinder_v2.Views"
@@ -28,7 +27,6 @@
             TargetType="{x:Type ProgressBar}">
             <Setter Property="Foreground" Value="{DynamicResource PrimaryHueDarkForegroundBrush}" />
         </Style>
-        <converters:PercentageConverter x:Key="MaxDataGridHeightConverter" Percentage="60" />
     </Window.Resources>
     <Grid>
         <executors:SearchExecutor x:Name="Executor" />

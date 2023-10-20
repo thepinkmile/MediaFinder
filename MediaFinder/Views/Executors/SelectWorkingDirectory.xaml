@@ -93,12 +93,16 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <materialDesign:ColorZone
+                        Grid.Row="0"
                         CornerRadius="8,8,0,0"
                         Effect="{DynamicResource MaterialDesignShadowDepth5}"
                         Mode="PrimaryMid">
                         <TextBlock Margin="16" Text="Configurations" />
                     </materialDesign:ColorZone>
-                    <StackPanel HorizontalAlignment="Right" Orientation="Horizontal">
+                    <StackPanel
+                        Grid.Row="0"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
                         <Button
                             Grid.Row="0"
                             Margin="0,0,14,0"
@@ -119,7 +123,6 @@
                     </StackPanel>
                     <DataGrid
                         Grid.Row="1"
-                        MaxHeight="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource MaxDataGridHeightConverter}}"
                         AutoGenerateColumns="False"
                         CanUserAddRows="False"
                         HorizontalScrollBarVisibility="Auto"
