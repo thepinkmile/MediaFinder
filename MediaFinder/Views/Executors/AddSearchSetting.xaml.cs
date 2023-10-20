@@ -18,7 +18,7 @@ namespace MediaFinder_v2.Views.Executors
             InitializeComponent();
         }
 
-        private void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
+        private void UserControl_Loaded(object sender, RoutedEventArgs e)
         {
             if (DataContext is AddSearchSettingViewModel viewModel)
             {

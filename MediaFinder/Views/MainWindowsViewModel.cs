@@ -1,4 +1,7 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using System.Windows.Input;
+
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
 using MaterialDesignThemes.Wpf;
@@ -48,4 +51,20 @@ public partial class MainWindowsViewModel : ObservableObject,
     {
         MessageQueue.Enqueue(message.Message);
     }
+
+    #region ProgressOverlay
+
+    [ObservableProperty]
+    private ICommand? _progressCancelCommand;
+
+    [ObservableProperty]
+    private bool _progressVisible;
+
+    [ObservableProperty]
+    private string? _progressMessage;
+
+    [ObservableProperty]
+    private int _progressValue;
+
+    #endregion
 }

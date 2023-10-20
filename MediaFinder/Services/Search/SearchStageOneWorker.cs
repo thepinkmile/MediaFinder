@@ -14,6 +14,8 @@ namespace MediaFinder_v2.Services.Search;
 
 public class SearchStageOneWorker : ReactiveBackgroundWorker
 {
+    private const int SixteenKBytes = 1024 * 16;
+
     private readonly IMessenger _messenger;
 
     public SearchStageOneWorker(ILogger<SearchStageOneWorker> logger, IMessenger messenger)
@@ -90,7 +92,7 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker
         var files = new ConcurrentBag<string>();
         var extracted = new ConcurrentBag<string>();
 
-        foreach(var f in Directory.EnumerateFiles(directory, "*", recursive ? SearchOption.AllDirectories : SearchOption.TopDirectoryOnly))
+        foreach(var f in Directory.EnumerateFiles(directory, "*", GetEnumerationOptions(recursive)))
         {
             if (CancellationPending)
             {
@@ -145,4 +147,11 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker
             return false;
         }
     }
+    private static EnumerationOptions GetEnumerationOptions(bool recursive)
+        => new()
+        {
+            BufferSize = SixteenKBytes,
+            IgnoreInaccessible = true,
+            RecurseSubdirectories = recursive,
+        };
 }

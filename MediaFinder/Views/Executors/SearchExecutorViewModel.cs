@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Data.Common;
 using System.IO;
 using System.Windows.Data;
+using System.Windows.Input;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -101,6 +102,54 @@ public partial class SearchExecutorViewModel : ObservableObject,
             default: break;
         }
     }
+
+    #region ProgressOverlay
+
+    [RelayCommand]
+    private void Test()
+    {
+        ProgressCancelCommand = CancelProgressCommand;
+        ProgressMessage = "Testing";
+        ShowProgress = true;
+        IsCancelling = false;
+    }
+
+    [ObservableProperty]
+    private ICommand? _progressCancelCommand;
+
+    [RelayCommand(CanExecute = nameof(CanCancelProgress))]
+    private void OnCancelProgress()
+    {
+        ProgressMessage = "Cancelling...";
+        IsCancelling = true;
+        _ = PendingCancel();
+        ProgressCancelCommand = null;
+    }
+
+    private async Task PendingCancel()
+    {
+        await Task.Delay(10_000);
+        ShowProgress = false;
+    }
+
+    private bool CanCancelProgress
+        => ShowProgress && !IsCancelling;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(CancelProgressCommand))]
+    private bool _isCancelling;
+
+    [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(CancelProgressCommand))]
+    private bool _showProgress;
+
+    [ObservableProperty]
+    private string? _progressMessage;
+
+    [ObservableProperty]
+    private int _progressValue;
+
+    #endregion
 
     #region Settings Configurations
 
