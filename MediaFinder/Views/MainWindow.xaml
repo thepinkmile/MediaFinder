@@ -29,7 +29,13 @@
         </Style>
     </Window.Resources>
     <Grid>
-        <executors:SearchExecutor x:Name="Executor" />
+        <materialDesign:Card Margin="15" Padding="4">
+            <materialDesign:Transitioner AutoApplyTransitionOrigins="True" SelectedIndex="0">
+                <executors:SelectWorkingDirectory x:Name="Discovery" DataContext="{Binding SearchExecutorViewModel}" />
+                <executors:ViewResults x:Name="Export" DataContext="{Binding SearchExecutorViewModel}" />
+                <executors:ProcessComplete x:Name="Complete" DataContext="{Binding SearchExecutorViewModel}" />
+            </materialDesign:Transitioner>
+        </materialDesign:Card>
 
         <materialDesign:DialogHost
             x:Name="m_dialogHost"

@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Windows.Input;
 
+using CommunityToolkit.Mvvm.ComponentModel;
+
 using MediaFinder_v2.Views.Executors;
 
 namespace MediaFinder_v2.Views;
@@ -10,22 +12,21 @@ namespace MediaFinder_v2.Views;
 /// </summary>
 public partial class MainWindow
 {
-    private readonly SearchExecutorViewModel _searchExecutorViewModel;
-
-    public MainWindow(MainWindowsViewModel mainWindowViewModel,
-        SearchExecutorViewModel searchExecutorViewModel)
+    public MainWindow(MainWindowsViewModel mainWindowViewModel)
     {
         DataContext = mainWindowViewModel;
-        InitializeComponent();
 
-        Executor.DataContext = _searchExecutorViewModel = searchExecutorViewModel;
+        InitializeComponent();
 
         CommandBindings.Add(new CommandBinding(ApplicationCommands.Close, OnClose));
     }
 
     protected override async void OnClosing(CancelEventArgs e)
     {
-        await _searchExecutorViewModel.FinishCommand.ExecuteAsync(null);
+        if (DataContext is MainWindowsViewModel viewModel)
+        {
+            await viewModel.SearchExecutorViewModel.FinishCommand.ExecuteAsync(null);
+        }
         base.OnClosing(e);
     }
 

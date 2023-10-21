@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using MaterialDesignThemes.Wpf;
 
 using MediaFinder_v2.Messages;
+using MediaFinder_v2.Views.Executors;
 
 namespace MediaFinder_v2.Views;
 
@@ -16,12 +17,18 @@ public partial class MainWindowsViewModel : ObservableObject,
     IRecipient<CancelProgressMessage>,
     IRecipient<CompleteProgressMessage>
 {
-
-    public MainWindowsViewModel(IMessenger messenger, ISnackbarMessageQueue snackbarMessageQueue)
+    public MainWindowsViewModel(
+        IMessenger messenger,
+        ISnackbarMessageQueue snackbarMessageQueue,
+        SearchExecutorViewModel searchExecutorViewModel)
     {
         messenger.RegisterAll(this);
         MessageQueue = snackbarMessageQueue;
+        _searchExecutorViewModel = searchExecutorViewModel;
     }
+
+    [ObservableProperty]
+    private SearchExecutorViewModel _searchExecutorViewModel;
 
     #region SnackBar
 
