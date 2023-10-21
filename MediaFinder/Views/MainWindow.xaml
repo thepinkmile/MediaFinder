@@ -41,6 +41,8 @@
             MessageQueue="{Binding MessageQueue}" />
         <controls:ProgressOverlay
             CancelCommand="{Binding ProgressCancelCommand}"
+            FontSize="16"
+            FontWeight="Bold"
             IsBusy="{Binding ProgressVisible}"
             Progress="{Binding ProgressValue}"
             StatusMessage="{Binding ProgressMessage}" />

@@ -20,7 +20,6 @@
         TrueValue="True" />
 
     <converters:PercentageConverter x:Key="ProgressBarWidthConverter" Percentage="60" />
-    <system:Double x:Key="MediaFinderProgressFontSize">20</system:Double>
 
     <Style
         x:Key="MediaFinderCircularProgressBar"
@@ -63,7 +62,11 @@
                             <TextBlock
                                 MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource ProgressBarWidthConverter}}"
                                 VerticalAlignment="Center"
-                                FontSize="{StaticResource MediaFinderProgressFontSize}"
+                                FontFamily="{Binding Path=FontFamily, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                FontSize="{Binding Path=FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                FontStretch="{Binding Path=FontStretch, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                FontStyle="{Binding Path=FontStyle, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                FontWeight="{Binding Path=FontWeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                                 Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                                 Text="{Binding Path=StatusMessage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                                 TextWrapping="Wrap"
@@ -190,7 +193,11 @@
                         <TextBlock
                             Margin="0,0,0,8"
                             HorizontalAlignment="Center"
-                            FontSize="{StaticResource MediaFinderProgressFontSize}"
+                            FontFamily="{Binding Path=FontFamily, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                            FontSize="{Binding Path=FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                            FontStretch="{Binding Path=FontStretch, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                            FontStyle="{Binding Path=FontStyle, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                            FontWeight="{Binding Path=FontWeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                             Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                             Text="{Binding Path=StatusMessage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                             TextWrapping="Wrap"
