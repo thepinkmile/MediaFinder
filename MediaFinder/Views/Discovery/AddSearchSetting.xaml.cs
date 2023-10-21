@@ -9,9 +9,8 @@ namespace MediaFinder_v2.Views.Discovery
     /// </summary>
     public partial class AddSearchSetting : UserControl
     {
-        [GeneratedRegex($"(\\d+)", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.CultureInvariant | RegexOptions.NonBacktracking)]
+        [GeneratedRegex("\\d+", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Singleline | RegexOptions.CultureInvariant)]
         private static partial Regex NumbersOnlyRegex();
-        private static readonly Regex NumberOnlyRegex = NumbersOnlyRegex();
 
         public AddSearchSetting()
         {
@@ -28,7 +27,7 @@ namespace MediaFinder_v2.Views.Discovery
 
         private void TextBox_PreviewTextInput_NumericOnly(object sender, System.Windows.Input.TextCompositionEventArgs e)
         {
-            e.Handled = !NumberOnlyRegex.IsMatch(e.Text);
+            e.Handled = !NumbersOnlyRegex().IsMatch(e.Text);
         }
 
         private void TextBox_Pasting_NumericOnly(object sender, DataObjectPastingEventArgs e)
@@ -36,7 +35,7 @@ namespace MediaFinder_v2.Views.Discovery
             if (e.DataObject.GetDataPresent(typeof(string)))
             {
                 var text = (string)e.DataObject.GetData(typeof(string));
-                if (!NumberOnlyRegex.IsMatch(text))
+                if (!NumbersOnlyRegex().IsMatch(text))
                 {
                     e.CancelCommand();
                 }

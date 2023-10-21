@@ -322,9 +322,8 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
     private static readonly string[] KnownImageExtensions = new[] { ".bmp", ".jpg", ".jpeg", ".jfif", ".png", ".tif", ".tiff", ".gif", ".svg" };
 
     private const string REGEX_GROUP_PIXELS = "pixels";
-    [GeneratedRegex($"(?<{REGEX_GROUP_PIXELS}>(\\d+))( {REGEX_GROUP_PIXELS})?", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Compiled | RegexOptions.Singleline | RegexOptions.CultureInvariant)]
+    [GeneratedRegex($"(?<{REGEX_GROUP_PIXELS}>(\\d+))( {REGEX_GROUP_PIXELS})?", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Singleline | RegexOptions.CultureInvariant)]
     private static partial Regex PixelsRegex();
-    private static readonly Regex PixelsPropertyParser = PixelsRegex();
 
     private async Task GetImageInfo(string filepath, ConcurrentDictionary<string, string> details, bool performDeepAnalysis = false, CancellationToken cancellationToken = default)
     {
@@ -414,7 +413,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
                 return;
             }
 
-            var match = PixelsPropertyParser.Match(properties[widthProperty]);
+            var match = PixelsRegex().Match(properties[widthProperty]);
             var width = match.Groups[REGEX_GROUP_PIXELS].Value;
             if (!string.IsNullOrEmpty(width))
             {
