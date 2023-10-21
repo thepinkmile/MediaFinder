@@ -13,7 +13,7 @@ using MediaFinder_v2.DataAccessLayer;
 using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.Messages;
 
-namespace MediaFinder_v2.Views.Executors;
+namespace MediaFinder_v2.Views.Discovery;
 
 public partial class AddSearchSettingViewModel : ObservableObject
 {
@@ -140,6 +140,12 @@ public partial class AddSearchSettingViewModel : ObservableObject
         SettingExtractArchives = false;
         SettingExtractionDepth = 5;
         SettingPerformDeepAnalysis = false;
+        ImageSizesDefined = false;
+        MinImageWidth = null;
+        MinImageHeight = null;
+        VideoSizesDefined = false;
+        MinVideoWidth = null;
+        MinVideoHeight = null;
     }
 
     [RelayCommand]

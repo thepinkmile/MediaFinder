@@ -2,7 +2,7 @@
 using System.Windows;
 using System.Windows.Controls;
 
-namespace MediaFinder_v2.Views.Executors
+namespace MediaFinder_v2.Views.Discovery
 {
     /// <summary>
     /// Interaction logic for AddSearchSetting.xaml

@@ -1,10 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows.Input;
 
-using CommunityToolkit.Mvvm.ComponentModel;
-
-using MediaFinder_v2.Views.Executors;
-
 namespace MediaFinder_v2.Views;
 
 /// <summary>
@@ -25,7 +21,8 @@ public partial class MainWindow
     {
         if (DataContext is MainWindowsViewModel viewModel)
         {
-            await viewModel.SearchExecutorViewModel.FinishCommand.ExecuteAsync(null);
+            await viewModel.DiscoveryViewModel.Cleanup();
+            viewModel.ExportViewModel.Cleanup();
         }
         base.OnClosing(e);
     }

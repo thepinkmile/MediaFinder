@@ -16,12 +16,9 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
 {
     private const int SixteenKBytes = 1024 * 16;
 
-    private readonly IMessenger _messenger;
-
     public SearchStageOneWorker(ILogger<SearchStageOneWorker> logger, IMessenger messenger)
         : base(logger, messenger)
     {
-        _messenger = messenger;
     }
 
     protected override void Execute(SearchRequest inputs, DoWorkEventArgs e)
@@ -29,7 +26,7 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
         SetProgress("Preparing Working Directory...");
         var workingDirectory = Path.Combine(inputs.WorkingDirectory, Guid.NewGuid().ToString());
         Directory.CreateDirectory(workingDirectory);
-        ReportProgress(WorkingDirectoryCreated.Create(workingDirectory));
+        ReportProgress(WorkingDirectoryCreated.Creatae(workingDirectory));
         LogDebug($"Working directory created: {workingDirectory}");
 
         var files = IterateFiles(
@@ -46,15 +43,6 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
 
         SetProgress("Finalising Search Results...");
         e.Result = SearchResponse.Create(files.Distinct().ToList());
-    }
-
-    protected override void UpdateProgress(object? sender, ProgressChangedEventArgs e)
-    {
-        switch (e.UserState)
-        {
-            case WorkingDirectoryCreated wdc: _messenger.Send(wdc); break;
-            default: base.UpdateProgress(sender, e); break;
-        }
     }
 
     private List<string> IterateFiles(

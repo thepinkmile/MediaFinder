@@ -1,10 +1,10 @@
 ﻿<UserControl
-    x:Class="MediaFinder_v2.Views.Executors.AddSearchSetting"
+    x:Class="MediaFinder_v2.Views.Discovery.AddSearchSetting"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:MediaFinder_v2.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:MediaFinder_v2.Views.Executors"
+    xmlns:local="clr-namespace:MediaFinder_v2.Views.Discovery"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DataContext="{d:DesignInstance Type=local:AddSearchSettingViewModel,
@@ -104,6 +104,7 @@
                     Grid.Row="0"
                     Grid.Column="0"
                     Grid.ColumnSpan="2"
+                    Margin="0,4"
                     Content="Specify Image Size Checks"
                     IsChecked="{Binding ImageSizesDefined, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBox
@@ -138,6 +139,7 @@
                     Grid.Row="2"
                     Grid.Column="0"
                     Grid.ColumnSpan="2"
+                    Margin="0,4"
                     Content="Specify Video Size Checks"
                     IsChecked="{Binding VideoSizesDefined, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <TextBox

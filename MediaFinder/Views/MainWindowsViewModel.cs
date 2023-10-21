@@ -4,31 +4,64 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Messaging;
 
 using MaterialDesignThemes.Wpf;
+using MaterialDesignThemes.Wpf.Transitions;
 
 using MediaFinder_v2.Messages;
-using MediaFinder_v2.Views.Executors;
+using MediaFinder_v2.Views.Discovery;
+using MediaFinder_v2.Views.Export;
+using MediaFinder_v2.Views.Status;
 
 namespace MediaFinder_v2.Views;
 
 public partial class MainWindowsViewModel : ObservableObject,
+    IRecipient<WizardNavigationMessage>,
     IRecipient<SnackBarMessage>,
     IRecipient<ShowProgressMessage>,
     IRecipient<UpdateProgressMessage>,
     IRecipient<CancelProgressMessage>,
-    IRecipient<CompleteProgressMessage>
+    IRecipient<CompleteProgressMessage>,
+    IRecipient<FinishedMessage>
 {
+    private readonly IMessenger _messenger;
+
     public MainWindowsViewModel(
         IMessenger messenger,
         ISnackbarMessageQueue snackbarMessageQueue,
-        SearchExecutorViewModel searchExecutorViewModel)
+        DiscoveryViewModel discoveryViewModel,
+        ExportViewModel exportViewModel,
+        ProcessCompletedViewModel statusViewModel)
     {
-        messenger.RegisterAll(this);
+        _messenger = messenger;
+        
+        _messenger.RegisterAll(this);
+
         MessageQueue = snackbarMessageQueue;
-        _searchExecutorViewModel = searchExecutorViewModel;
+        DiscoveryViewModel = discoveryViewModel;
+        ExportViewModel = exportViewModel;
+        StatusViewModel = statusViewModel;
     }
 
-    [ObservableProperty]
-    private SearchExecutorViewModel _searchExecutorViewModel;
+    public DiscoveryViewModel DiscoveryViewModel { get; }
+
+    public ExportViewModel ExportViewModel { get; }
+
+    public ProcessCompletedViewModel StatusViewModel { get; }
+
+    #region Navigation
+
+    public void Receive(WizardNavigationMessage message)
+    {
+        switch (message.NavigateTo)
+        {
+            case NavigationDirection.Next: Transitioner.MoveNextCommand.Execute(null, null); break;
+            case NavigationDirection.Previous: Transitioner.MovePreviousCommand.Execute(null, null); break;
+            case NavigationDirection.Beginning: Transitioner.MoveFirstCommand.Execute(null, null); break;
+            case NavigationDirection.End: Transitioner.MoveLastCommand.Execute(null, null); break;
+            default: break;
+        }
+    }
+
+    #endregion
 
     #region SnackBar
 
@@ -109,6 +142,15 @@ public partial class MainWindowsViewModel : ObservableObject,
         ProgressValue = 0;
         ProgressMessage = null;
         ProgressVisible = false;
+    }
+
+    #endregion
+
+    #region Finished
+
+    public void Receive(FinishedMessage message)
+    {
+        _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Beginning));
     }
 
     #endregion

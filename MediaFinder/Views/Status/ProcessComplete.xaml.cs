@@ -1,6 +1,6 @@
 ﻿using System.Windows.Controls;
 
-namespace MediaFinder_v2.Views.Executors
+namespace MediaFinder_v2.Views.Status
 {
     /// <summary>
     /// Interaction logic for ProcessComplete.xaml

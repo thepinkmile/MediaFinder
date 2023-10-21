@@ -77,12 +77,13 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Command="{Binding Path=CancelCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                            Style="{StaticResource MaterialDesignPaperLightButton}"
                             Visibility="{Binding Path=CancelCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}, Converter={StaticResource NullToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon
                                     Width="15"
                                     Height="15"
-                                    Margin="0,1,8,0"
+                                    Margin="0,2,8,0"
                                     Kind="Cancel" />
                                 <TextBlock
                                     FontFamily="{Binding Path=FontFamily, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
@@ -112,8 +113,8 @@
                         <materialDesign:Card
                             Width="Auto"
                             Height="Auto"
-                            Margin="15"
-                            Padding="15"
+                            Margin="8"
+                            Padding="8"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Background="{TemplateBinding Background}"
@@ -231,6 +232,7 @@
                         <Button
                             HorizontalAlignment="Center"
                             Command="{Binding Path=CancelCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                            Style="{StaticResource MaterialDesignPaperLightButton}"
                             Visibility="{Binding Path=CancelCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}, Converter={StaticResource NullToVisibilityConverter}}">
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon

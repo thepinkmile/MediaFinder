@@ -1,14 +1,14 @@
 ﻿<UserControl
-    x:Class="MediaFinder_v2.Views.Executors.SelectWorkingDirectory"
+    x:Class="MediaFinder_v2.Views.Discovery.DiscoveryView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:MediaFinder_v2.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:MediaFinder_v2.Views.Executors"
+    xmlns:local="clr-namespace:MediaFinder_v2.Views.Discovery"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mde="clr-namespace:MaterialDesignExtensions.Controls;assembly=MaterialDesignExtensions"
-    d:DataContext="{d:DesignInstance Type=local:SearchExecutorViewModel,
+    d:DataContext="{d:DesignInstance Type=local:DiscoveryViewModel,
                                      IsDesignTimeCreatable=False}"
     d:DesignHeight="450"
     d:DesignWidth="800"
@@ -225,7 +225,7 @@
                         <TextBlock Text="Next" />
                     </StackPanel>
                 </Button>
-                <Button Command="{Binding FinishCommand}">
+                <Button Command="{Binding FinishSearchCommand}">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon
                             Width="15"

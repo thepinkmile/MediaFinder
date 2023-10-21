@@ -45,10 +45,10 @@ public record SearchResponse(ICollection<string> Files)
         => new(files);
 }
 
-public record WorkingDirectoryCreated(string Path)
+public record WorkingDirectoryCreated(string Directory)
 {
-    public static WorkingDirectoryCreated Create(string path)
-        => new(path);
+    public static WorkingDirectoryCreated Creatae(string directory)
+        => new(directory);
 }
 
 #endregion
@@ -58,12 +58,12 @@ public record WorkingDirectoryCreated(string Path)
 public class AnalyseRequest : ReactiveBackgroundWorkerContextBase
 {
     private AnalyseRequest(
-        object ProgressToken,
+        object progressToken,
         ICollection<string> files,
         ICollection<string> originalPaths,
         string workingDirectory,
         bool performDeepAnalysis = false)
-        : base(ProgressToken)
+        : base(progressToken)
     {
         Files = files;
         OriginalPaths = originalPaths;

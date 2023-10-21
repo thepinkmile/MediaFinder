@@ -1,24 +1,30 @@
-﻿using System.Windows;
+﻿using CommunityToolkit.Mvvm.Messaging;
+
+using MaterialDesignThemes.Wpf;
 
 using MediaFinder_v2.DataAccessLayer;
+using MediaFinder_v2.Services.Export;
+using MediaFinder_v2.Services.Search;
 
+using MediaFinder_v2.Views;
+
+using MediaFinder_v2.Views.Discovery;
+using MediaFinder_v2.Views.Export;
+using MediaFinder_v2.Views.Status;
+
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-using Serilog.Events;
+using NReco.VideoInfo;
 
 using Serilog;
-using CommunityToolkit.Mvvm.Messaging;
-using MediaFinder_v2.Views.Executors;
-using MaterialDesignThemes.Wpf;
+using Serilog.Events;
+
+using System.Windows;
 using System.Windows.Threading;
-using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
-using NReco.VideoInfo;
-using MediaFinder_v2.Services.Search;
-using MediaFinder_v2.Services.Export;
-using MediaFinder_v2.Views;
 
 namespace MediaFinder_v2;
 
@@ -103,7 +109,9 @@ public partial class App : Application
             services.AddSingleton<MainWindow>();
             services.AddSingleton<MainWindowsViewModel>();
             services.AddSingleton<AddSearchSettingViewModel>();
-            services.AddSingleton<SearchExecutorViewModel>();
+            services.AddSingleton<DiscoveryViewModel>();
+            services.AddSingleton<ExportViewModel>();
+            services.AddSingleton<ProcessCompletedViewModel>();
 
             services.AddScoped<WeakReferenceMessenger>();
             services.AddScoped<IMessenger, WeakReferenceMessenger>(provider => provider.GetRequiredService<WeakReferenceMessenger>());

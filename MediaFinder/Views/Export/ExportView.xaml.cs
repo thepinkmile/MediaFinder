@@ -1,14 +1,14 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace MediaFinder_v2.Views.Executors
+namespace MediaFinder_v2.Views.Export
 {
     /// <summary>
     /// Interaction logic for ViewResults.xaml
     /// </summary>
-    public partial class ViewResults : UserControl
+    public partial class ExportView : UserControl
     {
-        public ViewResults()
+        public ExportView()
         {
             InitializeComponent();
         }

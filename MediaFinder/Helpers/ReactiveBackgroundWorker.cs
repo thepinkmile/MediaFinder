@@ -3,6 +3,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 
 using MediaFinder_v2.Messages;
+using MediaFinder_v2.Services.Search;
 
 using Microsoft.Extensions.Logging;
 
@@ -112,6 +113,7 @@ public abstract class ReactiveBackgroundWorker<T> : BackgroundWorker
             case string stateMessage: _messenger.Send(UpdateProgressMessage.Create(_progressToken, stateMessage)); break;
             case UpdateProgressMessage updateStatusMessage: _messenger.Send(updateStatusMessage); break;
             case LogMessage logMessage: SendLogMessage(logMessage); break;
+            case WorkingDirectoryCreated workingDirectoryCreated: _messenger.Send(workingDirectoryCreated); break;
         }
     }
 
