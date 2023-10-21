@@ -343,7 +343,7 @@
                                             Command="{Binding DataContext.ShowFileDetailsCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}"
                                             CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type materialDesign:DrawerHost}}}"
                                             Content="{materialDesign:PackIcon Kind=EyeArrowRightOutline}"
-                                            Style="{StaticResource MaterialDesignRaisedSecondaryButton}" />
+                                            Style="{StaticResource MaterialDesignRaisedButton}" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>

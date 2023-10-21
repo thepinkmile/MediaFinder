@@ -19,7 +19,7 @@
         FalseValue="False"
         TrueValue="True" />
 
-    <converters:PercentageConverter x:Key="ProgressBarWidthConverter" Percentage="60" />
+    <converters:PercentageConverter x:Key="ProgressMaxSizeConverter" Percentage="60" />
 
     <Style
         x:Key="MediaFinderCircularProgressBar"
@@ -60,7 +60,8 @@
                                 Style="{StaticResource MediaFinderCircularProgressBar}"
                                 Value="{Binding Path=Progress, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}" />
                             <TextBlock
-                                MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource ProgressBarWidthConverter}}"
+                                MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource ProgressMaxSizeConverter}}"
+                                MaxHeight="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource ProgressMaxSizeConverter}}"
                                 VerticalAlignment="Center"
                                 FontFamily="{Binding Path=FontFamily, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                                 FontSize="{Binding Path=FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
@@ -69,15 +70,29 @@
                                 FontWeight="{Binding Path=FontWeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                                 Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                                 Text="{Binding Path=StatusMessage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
-                                TextWrapping="Wrap"
+                                TextWrapping="WrapWithOverflow"
                                 Visibility="{Binding Path=StatusMessage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}, Converter={StaticResource StringIsEmptyVisibilityConverter}}" />
                         </StackPanel>
                         <Button
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             Command="{Binding Path=CancelCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
-                            Content="Cancel"
-                            Visibility="{Binding Path=CancelCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}, Converter={StaticResource NullToVisibilityConverter}}" />
+                            Visibility="{Binding Path=CancelCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}, Converter={StaticResource NullToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon
+                                    Width="15"
+                                    Height="15"
+                                    Margin="0,1,8,0"
+                                    Kind="Cancel" />
+                                <TextBlock
+                                    FontFamily="{Binding Path=FontFamily, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                    FontSize="{Binding Path=FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                    FontStretch="{Binding Path=FontStretch, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                    FontStyle="{Binding Path=FontStyle, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                    FontWeight="{Binding Path=FontWeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                    Text="Cancel" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </DataTemplate>
             </Setter.Value>
@@ -191,6 +206,8 @@
                 <DataTemplate>
                     <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
                         <TextBlock
+                            MaxWidth="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource ProgressMaxSizeConverter}}"
+                            MaxHeight="{Binding ActualHeight, RelativeSource={RelativeSource AncestorType=Window}, Converter={StaticResource ProgressMaxSizeConverter}}"
                             Margin="0,0,0,8"
                             HorizontalAlignment="Center"
                             FontFamily="{Binding Path=FontFamily, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
@@ -200,7 +217,7 @@
                             FontWeight="{Binding Path=FontWeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                             Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                             Text="{Binding Path=StatusMessage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
-                            TextWrapping="Wrap"
+                            TextWrapping="WrapWithOverflow"
                             Visibility="{Binding Path=StatusMessage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}, Converter={StaticResource StringIsEmptyVisibilityConverter}}" />
                         <ProgressBar
                             Height="8"
@@ -212,9 +229,24 @@
                             Style="{StaticResource MediaFinderLinearProgressBar}"
                             Value="{Binding Path=Progress, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}" />
                         <Button
+                            HorizontalAlignment="Center"
                             Command="{Binding Path=CancelCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
-                            Content="Cancel"
-                            Visibility="{Binding Path=CancelCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}, Converter={StaticResource NullToVisibilityConverter}}" />
+                            Visibility="{Binding Path=CancelCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}, Converter={StaticResource NullToVisibilityConverter}}">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon
+                                    Width="15"
+                                    Height="15"
+                                    Margin="0,1,8,0"
+                                    Kind="Cancel" />
+                                <TextBlock
+                                    FontFamily="{Binding Path=FontFamily, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                    FontSize="{Binding Path=FontSize, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                    FontStretch="{Binding Path=FontStretch, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                    FontStyle="{Binding Path=FontStyle, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                    FontWeight="{Binding Path=FontWeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                    Text="Cancel" />
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                 </DataTemplate>
             </Setter.Value>

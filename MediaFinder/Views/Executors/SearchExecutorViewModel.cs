@@ -62,7 +62,6 @@ public partial class SearchExecutorViewModel : ObservableObject,
         BindingOperations.EnableCollectionSynchronization(Configurations, new());
         BindingOperations.EnableCollectionSynchronization(DiscoveredFiles, new());
         
-
         // Bind CollectionViewSource.Source to MyCollection
         _mediaFilesViewSource = new CollectionViewSource();
         Binding myBind = new() { Source = DiscoveredFiles };
@@ -75,6 +74,12 @@ public partial class SearchExecutorViewModel : ObservableObject,
         _searchStagaeTwoWorker.RunWorkerCompleted += SearchStageTwoCompleted;
         _searchStagaeThreeWorker.RunWorkerCompleted += SearchStageThreeCompleted;
         _exportWorker.RunWorkerCompleted += ExportCompleted;
+
+        WorkingDirectory = Path.GetTempPath();
+
+        ExportDirectory = Environment.GetLogicalDrives().Length > 1
+            ? Environment.GetLogicalDrives().Skip(1).First()
+            : Path.GetTempPath();
     }
 
     private void ShowProgressIndicator(string message, ICommand? cancelCommand = null)
