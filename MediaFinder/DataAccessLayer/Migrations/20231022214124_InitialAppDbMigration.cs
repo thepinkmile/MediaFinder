@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
@@ -8,23 +7,11 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace MediaFinder_v2.DataAccessLayer.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialV2Schema : Migration
+    public partial class InitialAppDbMigration : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.CreateTable(
-                name: "AppSettings",
-                columns: table => new
-                {
-                    Key = table.Column<string>(type: "TEXT", nullable: false),
-                    Value = table.Column<string>(type: "TEXT", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AppSettings", x => x.Key);
-                });
-
             migrationBuilder.CreateTable(
                 name: "FileDetails",
                 columns: table => new
@@ -40,7 +27,8 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                     ShouldExport = table.Column<bool>(type: "INTEGER", nullable: false),
                     FileType = table.Column<int>(type: "INTEGER", nullable: false),
                     Extracted = table.Column<bool>(type: "INTEGER", nullable: false),
-                    Created = table.Column<DateTimeOffset>(type: "TEXT", nullable: false)
+                    Created = table.Column<long>(type: "INTEGER", nullable: false),
+                    RelativePath = table.Column<string>(type: "TEXT", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -58,7 +46,11 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                     Recursive = table.Column<bool>(type: "INTEGER", nullable: false),
                     ExtractArchives = table.Column<bool>(type: "INTEGER", nullable: false),
                     ExtractionDepth = table.Column<int>(type: "INTEGER", nullable: true),
-                    PerformDeepAnalysis = table.Column<bool>(type: "INTEGER", nullable: false)
+                    PerformDeepAnalysis = table.Column<bool>(type: "INTEGER", nullable: false),
+                    MinImageWidth = table.Column<long>(type: "INTEGER", nullable: true),
+                    MinImageHeight = table.Column<long>(type: "INTEGER", nullable: true),
+                    MinVideoWidth = table.Column<long>(type: "INTEGER", nullable: true),
+                    MinVideoHeight = table.Column<long>(type: "INTEGER", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -108,11 +100,11 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
 
             migrationBuilder.InsertData(
                 table: "SearchSettings",
-                columns: new[] { "Id", "Description", "ExtractArchives", "ExtractionDepth", "Name", "PerformDeepAnalysis", "Recursive" },
+                columns: new[] { "Id", "Description", "ExtractArchives", "ExtractionDepth", "MinImageHeight", "MinImageWidth", "MinVideoHeight", "MinVideoWidth", "Name", "PerformDeepAnalysis", "Recursive" },
                 values: new object[,]
                 {
-                    { 1, null, false, null, "Default", false, true },
-                    { 2, null, true, 5, "Testing", true, true }
+                    { 1, null, false, null, null, null, null, null, "Default", false, true },
+                    { 2, null, true, 5, 200L, 200L, 300L, 600L, "Testing", true, true }
                 });
 
             migrationBuilder.InsertData(
@@ -138,9 +130,6 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropTable(
-                name: "AppSettings");
-
             migrationBuilder.DropTable(
                 name: "FileProperties");
 

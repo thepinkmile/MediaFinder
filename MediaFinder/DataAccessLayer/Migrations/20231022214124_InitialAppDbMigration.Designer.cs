@@ -11,32 +11,18 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MediaFinder_v2.DataAccessLayer.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20231007164738_InitialV2Schema")]
-    partial class InitialV2Schema
+    [Migration("20231022214124_InitialAppDbMigration")]
+    partial class InitialAppDbMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "7.0.11")
+                .HasAnnotation("ProductVersion", "7.0.12")
                 .HasAnnotation("Proxies:ChangeTracking", false)
                 .HasAnnotation("Proxies:CheckEquality", false)
                 .HasAnnotation("Proxies:LazyLoading", true);
-
-            modelBuilder.Entity("MediaFinder_v2.DataAccessLayer.Models.AppSettingValue", b =>
-                {
-                    b.Property<string>("Key")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Value")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("Key");
-
-                    b.ToTable("AppSettings");
-                });
 
             modelBuilder.Entity("MediaFinder_v2.DataAccessLayer.Models.FileDetails", b =>
                 {
@@ -44,8 +30,8 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTimeOffset>("Created")
-                        .HasColumnType("TEXT");
+                    b.Property<long>("Created")
+                        .HasColumnType("INTEGER");
 
                     b.Property<bool>("Extracted")
                         .HasColumnType("INTEGER");
@@ -65,6 +51,10 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ParentPath")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("RelativePath")
                         .IsRequired()
                         .HasColumnType("TEXT");
 
@@ -157,6 +147,18 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                     b.Property<int?>("ExtractionDepth")
                         .HasColumnType("INTEGER");
 
+                    b.Property<long?>("MinImageHeight")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("MinImageWidth")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("MinVideoHeight")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<long?>("MinVideoWidth")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -185,6 +187,10 @@ namespace MediaFinder_v2.DataAccessLayer.Migrations
                             Id = 2,
                             ExtractArchives = true,
                             ExtractionDepth = 5,
+                            MinImageHeight = 200L,
+                            MinImageWidth = 200L,
+                            MinVideoHeight = 300L,
+                            MinVideoWidth = 600L,
                             Name = "Testing",
                             PerformDeepAnalysis = true,
                             Recursive = true
