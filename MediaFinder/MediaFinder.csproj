@@ -26,11 +26,13 @@
     <SelfContained>true</SelfContained>
     <PublishDir>bin\Publish\$(Configuration)\$(TargetFramework)</PublishDir>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
+    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <ApplicationDefinition Remove="App.xaml" />
     <None Remove="appsettings.json" />
+    <Content Include="app.ico" />
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

@@ -412,8 +412,8 @@
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
-                            <DataGridTemplateColumn>
-                                <DataGridTemplateColumn.CellTemplate Header="Show Info">
+                            <DataGridTemplateColumn Header="Show Info">
+                                <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Button
                                             Margin="4"

@@ -10,19 +10,12 @@ public class ZeroToBoolConverter : IValueConverter
     public bool FalseValue { get; set; }
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        if (double.TryParse((value ?? "")!.ToString(), out var result))
-        {
-            return Math.Abs(result) > 0.0
+        => double.TryParse((value ?? "")!.ToString(), out var result)
+            ? Math.Abs(result) > 0.0
                 ? FalseValue
-                : TrueValue;
-        }
-
-        return null;
-    }
+                : TrueValue
+            : Binding.DoNothing;
 
     public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
-    {
-        return Binding.DoNothing;
-    }
+        => Binding.DoNothing;
 }
