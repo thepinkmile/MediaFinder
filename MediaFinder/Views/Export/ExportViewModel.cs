@@ -58,7 +58,6 @@ public partial class ExportViewModel : ProgressableViewModel,
             : Path.GetTempPath();
     }
 
-
     #region Step2 - View Results
 
     public async void Receive(SearchCompletedMessage message)
@@ -73,6 +72,12 @@ public partial class ExportViewModel : ProgressableViewModel,
 
     [ObservableProperty]
     private ICollectionView _mediaFilesView;
+
+    [ObservableProperty]
+    private int _mediaFilesViewCount;
+
+    [ObservableProperty]
+    private int _mediaFilesTotalCount;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExportFilesCommand))]
@@ -103,17 +108,14 @@ public partial class ExportViewModel : ProgressableViewModel,
     public async Task OnLoadingResults()
     {
         ShowProgressIndicator("Populating Results...");
-        foreach (var mediaFile in DiscoveredFiles)
-        {
-            mediaFile.PropertyChanged -= MediaFile_PropertyChanged;
-        }
         DiscoveredFiles.Clear();
         await foreach (var file in _dbContext.FileDetails.AsAsyncEnumerable())
         {
             var mediaFile = MediaFile.Create(file);
-            mediaFile.PropertyChanged += MediaFile_PropertyChanged;
             DiscoveredFiles.Add(mediaFile);
         }
+        MediaFilesTotalCount = DiscoveredFiles.Count;
+        MediaFilesViewCount = DiscoveredFiles.Count(x => x.ShouldExport);
         HideProgressIndicator();
     }
 
@@ -143,6 +145,33 @@ public partial class ExportViewModel : ProgressableViewModel,
 
     [ObservableProperty]
     private MediaFile? _selectedExportFile;
+
+    [RelayCommand]
+    public async Task OnToggleExportFlag(MediaFile item)
+    {
+        var entity = await _dbContext.FileDetails.FindAsync(item.Id);
+        if (entity is null)
+        {
+            return;
+        }
+
+        var entityPropertyDescriptor = TypeDescriptor.GetProperties(entity)[nameof(MediaFile.ShouldExport)];
+        if (entityPropertyDescriptor is not null)
+        {
+            var originalValue = (bool)entityPropertyDescriptor.GetValue(entity)!;
+            var newValue = !item.ShouldExport;
+            if (newValue != originalValue)
+            {
+                item.ShouldExport = newValue;
+                entityPropertyDescriptor.SetValue(entity, newValue);
+                await _dbContext.SaveChangesAsync();
+
+                MediaFilesViewCount = DiscoveredFiles.Count(x => x.ShouldExport);
+                OnPropertyChanged(nameof(DiscoveredFiles));
+                MediaFilesView.Refresh();
+            }
+        }
+    }
 
     [RelayCommand]
     public void OnShowFileDetails(DrawerHost drawerHost)
@@ -273,33 +302,6 @@ public partial class ExportViewModel : ProgressableViewModel,
     private void OnNavigateNext()
     {
         _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));
-    }
-
-    private async void MediaFile_PropertyChanged(object? sender, PropertyChangedEventArgs e)
-    {
-        if (sender is not MediaFile item || e.PropertyName is null)
-        {
-            return;
-        }
-
-        var entity = await _dbContext.FileDetails.FindAsync(item.Id);
-        if (entity is null)
-        {
-            return;
-        }
-
-        var itemPropertyDescriptor = TypeDescriptor.GetProperties(item)[e.PropertyName];
-        var entityPropertyDescriptor = TypeDescriptor.GetProperties(entity)[e.PropertyName];
-        if (entityPropertyDescriptor is not null && itemPropertyDescriptor is not null)
-        {
-            var originalValue = entityPropertyDescriptor.GetValue(entity);
-            var newValue = itemPropertyDescriptor.GetValue(item);
-            if (newValue != originalValue)
-            {
-                entityPropertyDescriptor.SetValue(entity, newValue);
-                await _dbContext.SaveChangesAsync();
-            }
-        }
     }
 
     #endregion

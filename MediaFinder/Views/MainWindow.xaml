@@ -46,6 +46,8 @@
         <materialDesign:Snackbar
             HorizontalAlignment="Stretch"
             VerticalAlignment="Bottom"
+            Background="{DynamicResource PrimaryHueDarkBrush}"
+            Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
             MessageQueue="{Binding MessageQueue}" />
         <controls:ProgressOverlay
             CancelCommand="{Binding ProgressCancelCommand}"

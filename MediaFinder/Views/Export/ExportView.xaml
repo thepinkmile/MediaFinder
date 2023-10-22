@@ -29,6 +29,10 @@
             x:Key="MediaFileToIconConverter"
             ImageIcon="FileImageOutline"
             VideoIcon="FileVideoOutline" />
+        <converters:BoolToPackIconConverter
+            x:Key="BoolToPackIconConverter"
+            FalseValue="CheckboxBlankCircleOutline"
+            TrueValue="CheckboxMarkedCircleOutline" />
         <materialDesign:BooleanToVisibilityConverter
             x:Key="InverseBooleanToVisibilityConverter"
             FalseValue="Visible"
@@ -49,6 +53,7 @@
             TargetType="DataGridCell">
             <Setter Property="Focusable" Value="False" />
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+            <Setter Property="IsTabStop" Value="False" />
         </Style>
     </UserControl.Resources>
     <materialDesign:DrawerHost
@@ -291,52 +296,124 @@
                         <RowDefinition Height="*" />
                     </Grid.RowDefinitions>
                     <materialDesign:ColorZone
+                        Grid.Row="0"
                         CornerRadius="8,8,0,0"
                         Effect="{DynamicResource MaterialDesignShadowDepth5}"
                         Mode="PrimaryMid">
                         <TextBlock Margin="16" Text="Detected Files" />
                     </materialDesign:ColorZone>
+                    <StackPanel
+                        Grid.Row="0"
+                        Margin="0,0,4,0"
+                        HorizontalAlignment="Right"
+                        Orientation="Horizontal">
+                        <Border
+                            Margin="4,8"
+                            Padding="4"
+                            Background="{DynamicResource SecondaryHueMidBrush}"
+                            BorderBrush="{DynamicResource SecondaryHueMidBrush}"
+                            BorderThickness="1"
+                            ClipToBounds="True"
+                            CornerRadius="8">
+                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                <TextBlock
+                                    Margin="0,0,8,0"
+                                    Foreground="{DynamicResource SecondaryHueMidForegroundBrush}"
+                                    Text="Exporting" />
+                                <TextBlock Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" Text="{Binding MediaFilesViewCount}" />
+                            </StackPanel>
+                        </Border>
+                        <Border
+                            Margin="4,8"
+                            Padding="4"
+                            Background="{DynamicResource PrimaryHueLightBrush}"
+                            BorderBrush="{DynamicResource PrimaryHueLightBrush}"
+                            BorderThickness="1"
+                            ClipToBounds="True"
+                            CornerRadius="8">
+                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                                <TextBlock
+                                    Margin="0,0,8,0"
+                                    Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"
+                                    Text="Total" />
+                                <TextBlock Foreground="{DynamicResource PrimaryHueLightForegroundBrush}" Text="{Binding MediaFilesTotalCount}" />
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
                     <DataGrid
                         Grid.Row="1"
                         AutoGenerateColumns="False"
                         CanUserAddRows="False"
                         CanUserSortColumns="True"
+                        CellStyle="{StaticResource DGCellStyle}"
                         ItemsSource="{Binding MediaFilesView}"
                         SelectedItem="{Binding SelectedExportFile}"
                         SelectionUnit="FullRow">
                         <DataGrid.Columns>
-                            <DataGridCheckBoxColumn
-                                Binding="{Binding ShouldExport, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                CellStyle="{StaticResource DGCellStyle}"
-                                Header="Export"
-                                IsReadOnly="False" />
+                            <DataGridTemplateColumn Header="Export">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button
+                                            Command="{Binding DataContext.ToggleExportFlagCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}"
+                                            CommandParameter="{Binding .}"
+                                            Style="{StaticResource MaterialDesignIconForegroundButton}">
+                                            <materialDesign:PackIcon Kind="{Binding ShouldExport, Converter={StaticResource BoolToPackIconConverter}}" />
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn
                                 Binding="{Binding FileName}"
-                                CellStyle="{StaticResource DGCellStyle}"
                                 Header="Name"
-                                IsReadOnly="True" />
+                                IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
                             <DataGridTextColumn
                                 Binding="{Binding FileSize, Converter={StaticResource FormatKbSizeConverter}}"
-                                CellStyle="{StaticResource DGCellStyle}"
                                 Header="Size"
-                                IsReadOnly="True" />
+                                IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
                             <DataGridTextColumn
                                 Binding="{Binding DateCreated, Converter={StaticResource DateTimeOffsetToStringConverter}}"
-                                CellStyle="{StaticResource DGCellStyle}"
                                 Header="Created"
-                                IsReadOnly="True" />
+                                IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
                             <DataGridTextColumn
                                 Binding="{Binding IsImage, Converter={StaticResource BooleanToStringConverter}}"
-                                CellStyle="{StaticResource DGCellStyle}"
                                 Header="Is Image"
-                                IsReadOnly="True" />
+                                IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
                             <DataGridTextColumn
                                 Binding="{Binding IsVideo, Converter={StaticResource BooleanToStringConverter}}"
-                                CellStyle="{StaticResource DGCellStyle}"
                                 Header="Is Video"
-                                IsReadOnly="True" />
-                            <DataGridTemplateColumn CellStyle="{StaticResource DGCellStyle}">
-                                <DataGridTemplateColumn.CellTemplate>
+                                IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="VerticalAlignment" Value="Center" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTemplateColumn>
+                                <DataGridTemplateColumn.CellTemplate Header="Show Info">
                                     <DataTemplate>
                                         <Button
                                             Margin="4"

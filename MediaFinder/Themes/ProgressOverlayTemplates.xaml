@@ -70,6 +70,7 @@
                                 FontWeight="{Binding Path=FontWeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                                 Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                                 Text="{Binding Path=StatusMessage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                                TextTrimming="WordEllipsis"
                                 TextWrapping="WrapWithOverflow"
                                 Visibility="{Binding Path=StatusMessage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}, Converter={StaticResource StringIsEmptyVisibilityConverter}}" />
                         </StackPanel>
@@ -218,6 +219,7 @@
                             FontWeight="{Binding Path=FontWeight, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                             Foreground="{Binding Path=Foreground, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
                             Text="{Binding Path=StatusMessage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}}"
+                            TextTrimming="WordEllipsis"
                             TextWrapping="WrapWithOverflow"
                             Visibility="{Binding Path=StatusMessage, RelativeSource={RelativeSource Mode=FindAncestor, AncestorType={x:Type controls:ProgressOverlay}}, Converter={StaticResource StringIsEmptyVisibilityConverter}}" />
                         <ProgressBar
