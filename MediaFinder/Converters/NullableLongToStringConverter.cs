@@ -15,5 +15,5 @@ public class NullableLongToStringConverter : IValueConverter
             ? Binding.DoNothing
             : string.IsNullOrEmpty(strValue) || !long.TryParse(strValue, out var parsedValue)
                 ? null!
-                : (object)parsedValue;
+                : parsedValue;
 }

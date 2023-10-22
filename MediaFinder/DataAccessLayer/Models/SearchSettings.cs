@@ -1,4 +1,6 @@
-﻿namespace MediaFinder_v2.DataAccessLayer.Models;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace MediaFinder_v2.DataAccessLayer.Models;
 
 public record SearchSettings
 {
@@ -14,6 +16,7 @@ public record SearchSettings
 
     public bool ExtractArchives { get; set; }
 
+    [Range(0, 20)]
     public int? ExtractionDepth { get; set; }
 
     public bool PerformDeepAnalysis { get; set; }

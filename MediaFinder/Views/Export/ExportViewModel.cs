@@ -9,6 +9,7 @@ using MediaFinder_v2.Helpers;
 using MediaFinder_v2.Messages;
 
 using MediaFinder_v2.Services.Export;
+using MediaFinder_v2.Services.Search;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;

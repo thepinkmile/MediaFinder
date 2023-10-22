@@ -30,6 +30,7 @@ public abstract class ProgressableViewModel
     protected readonly object _progressToken;
 
     #region Progress Actions
+#pragma warning disable CA2254 // Template should be a static expression
 
     protected void ShowProgressIndicator(string message, ICommand? cancelCommand = null)
     {
@@ -55,6 +56,7 @@ public abstract class ProgressableViewModel
         _logger.LogInformation("Process Complete.");
     }
 
+#pragma warning restore CA2254 // Template should be a static expression
     #endregion
 
     #region Completion Actions

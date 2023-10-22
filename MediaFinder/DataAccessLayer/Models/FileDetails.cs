@@ -6,9 +6,9 @@ public class FileDetails
 {
     public int Id { get; set; }
 
-    public string ParentPath { get; set; } = null!;
+    public required string ParentPath { get; set; }
 
-    public string FileName { get; set; } = null!;
+    public required string FileName { get; set; }
 
     [MaxLength(32)]
     public string? MD5_Hash { get; set; }

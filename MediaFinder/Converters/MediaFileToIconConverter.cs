@@ -14,7 +14,7 @@ public class MediaFileToIconConverter : IValueConverter
     public PackIconKind VideoIcon { get; set; } = PackIconKind.FileVideoOutline;
 
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        => value is not MediaFile mf ? (object)PackIconKind.None
+        => value is not MediaFile mf ? PackIconKind.None
             : mf.IsImage ? ImageIcon
             : mf.IsVideo ? VideoIcon
             : (object)PackIconKind.None;

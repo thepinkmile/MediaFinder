@@ -151,7 +151,7 @@ public class HashStream : Stream
     {
         if (hashName.Name is null)
         {
-            throw new ArgumentException("Invalid HashAlgorithmName", nameof(hashName));
+            throw new ArgumentNullException(nameof(hashName), "Invalid HashAlgorithmName");
         }
         if (!_hashes.ContainsKey(hashName.Name))
         {

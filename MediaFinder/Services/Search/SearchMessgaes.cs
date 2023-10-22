@@ -124,3 +124,9 @@ public class FilterRequest : ReactiveBackgroundWorkerContextBase
 }
 
 #endregion
+
+public record SearchCompletedMessage
+{
+    public static SearchCompletedMessage Create()
+        => new();
+}

@@ -10,7 +10,7 @@ public class ZeroToBoolConverter : IValueConverter
     public bool FalseValue { get; set; }
 
     public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
-        => double.TryParse((value ?? "")!.ToString(), out var result)
+        => double.TryParse((value ?? string.Empty).ToString(), out var result)
             ? Math.Abs(result) > 0.0
                 ? FalseValue
                 : TrueValue
