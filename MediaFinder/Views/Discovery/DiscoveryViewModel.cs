@@ -122,11 +122,13 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
     partial void OnWorkingDirectoryChanged(string? value)
     {
+        CleanupWorkingDirectory();
         SearchComplete = false;
     }
 
     partial void OnSelectedConfigChanged(SearchConfiguration? value)
     {
+        CleanupWorkingDirectory();
         SearchComplete = false;
     }
 
@@ -308,26 +310,27 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     {
         if (e.Cancelled)
         {
-            _messenger.Send(SnackBarMessage.Create("Search cancelled"));
+            _messenger.Send(SnackBarMessage.Create("Discovery process cancelled"));
             _logger.LogInformation("Process cancelled by user.");
             SearchCleanup();
             return;
         }
         if (e.Error is not null)
         {
-            _messenger.Send(SnackBarMessage.Create($"Search failed: {e.Error.Message}"));
+            _messenger.Send(SnackBarMessage.Create($"Discovery failed: {e.Error.Message}"));
             _logger.LogError(e.Error, "Process Failed.");
             SearchCleanup();
             return;
         }
         if (e.Result is not bool result || !result)
         {
-            _messenger.Send(SnackBarMessage.Create($"Search returned invalid analysis result"));
+            _messenger.Send(SnackBarMessage.Create($"Discovery process returned invalid analysis result"));
             _logger.LogError("Invalid SearchWorker Result: Stage 3 returned false");
             SearchCleanup();
             return;
         }
 
+        _messenger.Send(SnackBarMessage.Create("Discovery process completed"));
         SearchFinished();
     }
 

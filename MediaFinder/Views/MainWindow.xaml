@@ -45,7 +45,7 @@
             Identifier="DialogHost" />
         <materialDesign:Snackbar
             HorizontalAlignment="Stretch"
-            VerticalAlignment="Bottom"
+            VerticalAlignment="Top"
             Background="{DynamicResource PrimaryHueDarkBrush}"
             Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
             MessageQueue="{Binding MessageQueue}" />
