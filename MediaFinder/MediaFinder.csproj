@@ -58,6 +58,7 @@
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog.Sinks.File" />
     <PackageReference Include="SevenZipExtractor" />
+    <PackageReference Include="taglib-sharp-netstandard2.0" />
   </ItemGroup>
 
   <ItemGroup>

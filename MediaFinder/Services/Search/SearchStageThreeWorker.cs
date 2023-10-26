@@ -28,14 +28,14 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
         
         var initialCount = _dbContext.FileDetails.Count(fd => fd.ShouldExport);
         _dbContext.FileDetails
-            .Where(fd => fd.FileType != MultiMediaType.Image && fd.FileType != MultiMediaType.Video)
+            .Where(fd => fd.FileType == MultiMediaType.Unknown)
             .ExecuteUpdate(s => s.SetProperty(fd => fd.ShouldExport, false));
         _dbContext.ChangeTracker.Clear();
         var filteredCountalCount = _dbContext.FileDetails.Count(fd => fd.ShouldExport);
 
         SetProgress($"Suppressing duplicates from export list...");
         var hashGroups = _dbContext.FileDetails
-            .Where(fd => fd.ShouldExport)
+            .Where(fd => fd.ShouldExport && fd.FileType != MultiMediaType.Unknown)
             .Select(fd => new { MD5 = fd.MD5_Hash, SHA256 = fd.SHA256_Hash, SHA512 = fd.SHA512_Hash })
             .Distinct();
         foreach(var group in hashGroups)
@@ -58,7 +58,9 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
         var deduplicatedCount = _dbContext.FileDetails.Count(fd => fd.ShouldExport);
 
         SetProgress($"Suppressing small results from export list...");
-        var mediaFiles = _dbContext.FileDetails.Include(fd => fd.FileProperties).Where(fd => fd.ShouldExport);
+        var mediaFiles = _dbContext.FileDetails
+            .Include(fd => fd.FileProperties)
+            .Where(fd => fd.ShouldExport && fd.FileType != MultiMediaType.Audio && fd.FileType != MultiMediaType.Unknown);
         foreach(var mediaFile in mediaFiles)
         {
             var heightValue = mediaFile.FileProperties.FirstOrDefault(fp => fp.Name == "height")?.Value;

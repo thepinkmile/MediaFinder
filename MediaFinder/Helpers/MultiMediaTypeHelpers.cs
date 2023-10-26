@@ -10,6 +10,7 @@ public static class MultiMediaTypeHelpers
         {
             "IMAGE" => MultiMediaType.Image,
             "VIDEO" => MultiMediaType.Video,
+            "AUDIO" => MultiMediaType.Audio,
             _ => MultiMediaType.Unknown,
         };
     }

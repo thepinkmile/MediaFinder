@@ -6,5 +6,7 @@ public enum MultiMediaType
 
     Image,
 
-    Video
+    Video,
+
+    Audio
 }

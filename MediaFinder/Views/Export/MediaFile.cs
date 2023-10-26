@@ -30,10 +30,7 @@ public partial class MediaFile : ObservableObject
     private bool _shouldExport = true;
 
     [ObservableProperty]
-    private bool _isImage;
-
-    [ObservableProperty]
-    private bool _isVideo;
+    private MultiMediaType _multiMediaType;
 
     [ObservableProperty]
     private string? _md5Hash;
@@ -53,8 +50,7 @@ public partial class MediaFile : ObservableObject
         FileSize = file.FileSize;
         DateCreated = file.Created;
         ShouldExport = file.ShouldExport;
-        IsImage = file.FileType == MultiMediaType.Image;
-        IsVideo = file.FileType == MultiMediaType.Video;
+        MultiMediaType = file.FileType;
         Md5Hash = file.MD5_Hash;
         Sha256Hash = file.SHA256_Hash;
         Sha512Hash = file.SHA512_Hash;
