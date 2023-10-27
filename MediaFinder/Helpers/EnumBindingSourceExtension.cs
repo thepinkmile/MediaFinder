@@ -14,26 +14,16 @@ public class EnumBindingSourceExtension : MarkupExtension
     public EnumBindingSourceExtension(Type enumType)
     {
         if (enumType is null || !enumType.IsEnum)
+        {
             throw new ArgumentException("Argument was not an enum type.", nameof(enumType));
+        }
 
         EnumType = enumType;
     }
 
     public override object ProvideValue(IServiceProvider serviceProvider)
-    {
-        if (EnumType == typeof(MultiMediaType))
-        {
-            return MultiMediaTypeExtensions.GetValues();
-        }
-        if (EnumType == typeof(ExportType))
-        {
-            return ExportTypeExtensions.GetValues();
-        }
-        if (EnumType == typeof(NavigateDirection))
-        {
-            return NavigationDirectionExtensions.GetValues();
-        }
-
-        return Enum.GetValues(EnumType);
-    }
+        => EnumType == typeof(MultiMediaType) ? MultiMediaTypeExtensions.GetValues()
+            : EnumType == typeof(ExportType) ? ExportTypeExtensions.GetValues()
+            : EnumType == typeof(NavigateDirection) ? NavigationDirectionExtensions.GetValues()
+            : (object)Enum.GetValues(EnumType);
 }

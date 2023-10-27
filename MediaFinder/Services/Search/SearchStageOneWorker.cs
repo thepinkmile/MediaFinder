@@ -5,6 +5,7 @@ using System.IO;
 using CommunityToolkit.Mvvm.Messaging;
 
 using MediaFinder_v2.Helpers;
+using MediaFinder_v2.Logging;
 
 using Microsoft.Extensions.Logging;
 
@@ -26,8 +27,8 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
         SetProgress("Preparing Working Directory...");
         var workingDirectory = Path.Combine(inputs.WorkingDirectory, Guid.NewGuid().ToString());
         Directory.CreateDirectory(workingDirectory);
-        ReportProgress(WorkingDirectoryCreated.Creatae(workingDirectory));
-        LogDebug($"Working directory created: {workingDirectory}");
+        ReportProgress(WorkingDirectoryCreated.Create(workingDirectory));
+        _logger.CreatedWorkingDirectory(workingDirectory);
 
         var files = IterateFiles(
             inputs.SourceDirectories,
@@ -81,20 +82,26 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
             {
                 break;
             }
-            SetProgress($"Iterating files in directory: {directory}");
+            ReportProgress($"Iterating files in directory: {directory}");
+            _logger.IteratingDirectory(directory);
 
             var isExtracted = false;
             if (extractArchive && extractionDepth != 0)
             {
-                LogDebug("Attempting archive extraction...");
+                _logger.Log("Attempting archive extraction...");
                 var extractionPath = Path.Combine(workingDirectory, $"Extracted_{Path.GetFileNameWithoutExtension(f)}");
-                if (ExtractArchive(f, extractionPath))
+                if (Directory.Exists(extractionPath))
                 {
-                    LogDebug("Archive extracted to: {extractionPath}", extractionPath);
+                    _logger.ExtractionPathExists(extractionPath);
+                }
+                else if (ExtractArchive(f, extractionPath))
+                {
                     isExtracted = true;
                     extracted.Add(extractionPath);
                 }
             }
+
+            // don't add file to list if it was an extracted archive
             if (!isExtracted)
             {
                 files.Add(f);
@@ -118,15 +125,17 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
     {
         try
         {
-            LogDebug("Performing archive detection: {filepath}", filepath);
+            _logger.PerformingArchiveDetection(filepath);
             using var archive = new ArchiveFile(filepath);
-            SetProgress($"Extracting Archive: {filepath}");
+            ReportProgress($"Extracting Archive: {filepath}");
+            _logger.PerformingArchiveExtraction(filepath);
             archive.Extract(destinationPath);
+            _logger.ArchiveExtracted(filepath);
             return true;
         }
         catch (SevenZipException ex)
         {
-            LogDebug(ex, "Archive detection failed for {filepath}", filepath);
+            _logger.ArchiveExtractionFailed(ex, filepath);
             return false;
         }
     }

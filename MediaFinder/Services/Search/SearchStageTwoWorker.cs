@@ -1,9 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.IO;
-using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 
@@ -11,6 +9,7 @@ using CommunityToolkit.Mvvm.Messaging;
 
 using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.Helpers;
+using MediaFinder_v2.Logging;
 
 using MetadataExtractor;
 
@@ -103,8 +102,6 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
     protected override void Execute(AnalyseRequest inputs, DoWorkEventArgs e)
     {
-        SetProgress("Initializing analizers...");
-
         var files = new List<FileDetails>();
         foreach(var filepath in inputs.Files)
         {
@@ -113,7 +110,8 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
                 break;
             }
 
-            SetProgress($"Analysing file: {filepath}");
+            ReportProgress($"Analysing file: {filepath}");
+            _logger.AnalysingFile(filepath);
 
             var details = new ConcurrentDictionary<string, string>();
 
@@ -145,7 +143,17 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             var cts = new CancellationTokenSource();
 
             // do initial basic media detection
-            GetMetadataInfo(filepath, details, inputs.PerformDeepAnalysis, cts.Token).Wait();
+            var metadataTask = GetMetadataInfo(filepath, details, inputs.PerformDeepAnalysis, cts.Token);
+            while ((!metadataTask.IsCompleted || metadataTask.IsCompletedSuccessfully || metadataTask.IsFaulted || metadataTask.IsCanceled)
+                && !cts.IsCancellationRequested)
+            {
+                Thread.Sleep(500);
+                if (CancellationPending)
+                {
+                    cts.Cancel();
+                }
+            }
+            metadataTask.Wait();
 
             // process detailed media info
             var processingTasks = new Task[] {
@@ -191,7 +199,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
     private bool TryDescribeFile(ConcurrentDictionary<string, string> details, out FileDetails? fileDetails)
     {
-        SetProgress($"Compilinig analysis result: {details[FULLPATH_DETAIL]}");
+        _logger.CompilingResults(details[FULLPATH_DETAIL]);
 
         try
         {
@@ -219,7 +227,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
         }
         catch (Exception ex)
         {
-            LogDebug(ex, "Failed to describe file: {filename}", details[FULLPATH_DETAIL]);
+            _logger.FailedToDescribeFile(ex, details[FULLPATH_DETAIL]);
             fileDetails = null;
             return false;
         }
@@ -237,17 +245,17 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
     {
         if (!performDeepAnalysis)
         {
-            LogDebug("Performing file extension video detection: {filepath}", filepath);
+            _logger.PerformingVideoDetection(filepath);
             await Task.Yield();
             if (KnownVideoExtensions.Contains(details[EXTENSION_DETAIL]))
             {
-                LogDebug("Video detected: {filepath}", filepath);
+                _logger.VideoDetected(filepath);
                 await Task.Yield();
                 details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Video.ToStringFast());
             }
             else
             {
-                LogDebug("No video detected: {filepath}", filepath);
+                _logger.NoVideoDetected(filepath);
                 await Task.Yield();
             }
             return;
@@ -255,7 +263,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
         try
         {
-            LogDebug("Performing video metadata detection: {filepath}", filepath);
+            _logger.PerformingVideoMetadataDetection(filepath);
             await Task.Yield();
 
             var videoInfo = _ffProbe.GetMediaInfo(filepath);
@@ -264,13 +272,14 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
                 || videoInfo.FormatName.EndsWith("_pipe")
                 || videoInfo.Streams.All(s => s.CodecType == "subtitle"))
             {
-                LogDebug("Failed to analyse file as video: {filename}", details[FILENAME_DETAIL]);
+                _logger.NoVideoDetected(filepath);
                 await Task.Yield();
                 return;
             }
 
             if (videoInfo.Streams.All(s => s.CodecType == "audio"))
             {
+                _logger.AudioDetected(filepath);
                 details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Audio.ToStringFast());
 
                 var dateProperty = videoInfo.FormatTags.FirstOrDefault(k => string.Equals("date", k.Key, StringComparison.OrdinalIgnoreCase));
@@ -282,12 +291,13 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
                     }
                     else
                     {
-                        LogDebug("Audio file unparsed creation date of: {dateFormat}", dateProperty.Value);
+                        _logger.FailedToParseAudioDate(filepath, dateProperty.Value);
                     }
                 }
             }
             else if (videoInfo.Streams.Any(s => s.CodecType == "video"))
             {
+                _logger.VideoDetected(filepath);
                 details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Video.ToStringFast());
 
                 var dateProperty = videoInfo.FormatTags.FirstOrDefault(k => string.Equals("creation_time", k.Key, StringComparison.OrdinalIgnoreCase));
@@ -306,7 +316,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             }
             else
             {
-                LogDebug("Failed to analyse file as video: {filename}", details[FILENAME_DETAIL]);
+                _logger.NoVideoDetected(filepath);
                 await Task.Yield();
                 return;
             }
@@ -333,14 +343,18 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
                 details.AddOrUpdate(EXPECTED_EXTENSION_DETAIL, "." + detectedExtension);
             }
         }
+        catch (OperationCanceledException)
+        {
+            _logger.UserCanceledOperation("Meatdata Detection");
+        }
         catch (Exception ex) when (ex is FFProbeException || ex.InnerException is FFProbeException)
         {
-            LogDebug(ex, "No video metadata detected: {filename}", details[FILENAME_DETAIL]);
+            _logger.FFProbeFailure(ex, filepath);
             await Task.Yield();
         }
         catch (Exception ex) when (ex.InnerException is not FFProbeException)
         {
-            LogDebug(ex, "Failed to analyse file as video: {filename}", details[FILENAME_DETAIL]);
+            _logger.NoVideoDetected(filepath, ex);
             await Task.Yield();
         }
     }
@@ -362,36 +376,35 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
     {
         if (!performDeepAnalysis)
         {
-            LogDebug("Performing file extension image detection: {filepath}", filepath);
-            await Task.Yield();
-
+            _logger.PerformingImageDetection(filepath);
             if (KnownImageExtensions.Contains(details[EXTENSION_DETAIL]))
             {
-                LogDebug("Image detected: {filepath}", filepath);
-                await Task.Yield();
+                _logger.ImageDetected(filepath);
                 details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
             }
             else
             {
-                LogDebug("No image detected: {filepath}", filepath);
-                await Task.Yield();
+                _logger.NoImageDetected(filepath);
             }
+            await Task.Yield();
             return;
         }
 
         try
         {
-            LogDebug("Performing image metadata detection: {filepath}", filepath);
+            _logger.PerformingImageMetadataDetection(filepath);
             await Task.Yield();
 
             using var fs = File.Open(filepath, FileMode.Open, FileAccess.Read, FileShare.Read);
             var img = ImageMetadataReader.ReadMetadata(fs);
             if (img.Count == 0)
             {
-                LogDebug("Failed to analyse file as image: {filename}", details[FILENAME_DETAIL]);
+                _logger.NoImageDetected(filepath);
                 await Task.Yield();
                 return;
             }
+            cancellationToken.ThrowIfCancellationRequested();
+            await Task.Yield();
 
             var result = new Dictionary<string, string>();
             foreach (var directory in img)
@@ -423,9 +436,13 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
                 details.AddOrUpdate(EXPECTED_EXTENSION_DETAIL, "." + result["File Type_Expected File Name Extension"]);
             }
         }
-        catch(Exception ex)
+        catch (OperationCanceledException)
         {
-            LogDebug(ex, "Failed to analyse file as image: {filename}", details[FILENAME_DETAIL]);
+            _logger.UserCanceledOperation("Image Detection");
+        }
+        catch (Exception ex)
+        {
+            _logger.NoImageDetected(filepath, ex);
             await Task.Yield();
         }
     }
@@ -454,7 +471,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
                 return;
             }
 
-            LogWarning($"Failed to parse dimension property: {outputPropertyIdentifier} - {widthProperty} - '{properties[widthProperty]}'");
+            _logger.FailedToParseDimensionDetail(outputPropertyIdentifier, widthProperty, properties[widthProperty]);
         }
     }
 
@@ -468,13 +485,13 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
         if (!performDeepAnalysis)
         {
-            LogDebug("Skipping basic metadata analysis: {filepath}", filepath);
+            _logger.SkippingBasicMetadataAnalysis(filepath);
             return;
         }
 
         try
         {
-            LogDebug("Performing basic metadata detection: {filepath}", filepath);
+            _logger.PerformingMetadataDetection(filepath);
             cancellation.ThrowIfCancellationRequested();
 
             var fileMetadata = TagLib.File.Create(filepath, TagLib.ReadStyle.Average);
@@ -493,20 +510,20 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             }
             if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.None))
             {
-                LogDebug("Unknown TagLib metadata - skipping");
+                _logger.UnknownMediaType(filepath);
             }
             if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.Text))
             {
-                LogDebug("Text file detected - skipping");
+                _logger.TextMediaTypeDetected(filepath);
             }
         }
-        catch (OperationCanceledException ex)
+        catch (OperationCanceledException)
         {
-            LogDebug(ex, "User cancelled metadata detection.");
+            _logger.UserCanceledOperation("Meatdata Detection");
         }
         catch (Exception ex)
         {
-            LogDebug(ex, "Failed to analyse file metadata: {filename}", details[FILENAME_DETAIL]);
+            _logger.FailedToReadMetadata(ex, filepath);
         }
     }
 
@@ -562,7 +579,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
     {
         try
         {
-            LogDebug($"Creating file checksum: {filepath}");
+            _logger.CreatingFileChecksum(filepath);
             await Task.Yield();
 
             using var fs = File.Open(filepath, FileMode.Open, FileAccess.Read, FileShare.Read);
@@ -582,11 +599,15 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             details.AddOrUpdate(SHA256_DETAIL, Convert.ToHexString(hashStream.Hash(HashAlgorithmName.SHA256)));
             details.AddOrUpdate(SHA512_DETAIL, Convert.ToHexString(hashStream.Hash(HashAlgorithmName.SHA512)));
         }
+        catch (OperationCanceledException)
+        {
+            _logger.UserCanceledOperation("Meatdata Detection");
+        }
         catch (Exception ex)
         {
-            LogDebug(ex, "Failed to generate checksum for file: {filename}", details[FILENAME_DETAIL]);
-            await Task.Yield();
+            _logger.FailedToCreateChecksum(ex, filepath);
         }
+        await Task.Yield();
     }
 
     #endregion

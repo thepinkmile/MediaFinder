@@ -47,7 +47,7 @@ public record SearchResponse(ICollection<string> Files)
 
 public record WorkingDirectoryCreated(string Directory)
 {
-    public static WorkingDirectoryCreated Creatae(string directory)
+    public static WorkingDirectoryCreated Create(string directory)
         => new(directory);
 }
 

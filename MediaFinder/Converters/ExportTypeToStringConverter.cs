@@ -8,7 +8,7 @@ namespace MediaFinder_v2.Converters;
 
 public class ExportTypeToStringConverter : IValueConverter
 {
-    private static Dictionary<string, ExportType> displayNameMapper
+    private static Dictionary<string, ExportType> DisplayNameMapper
         => ExportTypeExtensions.GetValues()
             .ToDictionary(x => x.ToStringFast(), x => x);
 
@@ -21,8 +21,8 @@ public class ExportTypeToStringConverter : IValueConverter
         => value is string name
             ? ExportTypeExtensions.TryParse(name, out var newValue, true, true)
                 ? newValue
-                : displayNameMapper.ContainsKey(name)
-                    ? displayNameMapper[name]
+                : DisplayNameMapper.ContainsKey(name)
+                    ? DisplayNameMapper[name]
                     : Binding.DoNothing
             : Binding.DoNothing;
 }
