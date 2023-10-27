@@ -143,17 +143,12 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             var cts = new CancellationTokenSource();
 
             // do initial basic media detection
-            var metadataTask = GetMetadataInfo(filepath, details, inputs.PerformDeepAnalysis, cts.Token);
-            while ((!metadataTask.IsCompleted || metadataTask.IsCompletedSuccessfully || metadataTask.IsFaulted || metadataTask.IsCanceled)
-                && !cts.IsCancellationRequested)
+            GetMetadataInfo(filepath, details, inputs.PerformDeepAnalysis);
+
+            if (CancellationPending)
             {
-                Thread.Sleep(500);
-                if (CancellationPending)
-                {
-                    cts.Cancel();
-                }
+                break;
             }
-            metadataTask.Wait();
 
             // process detailed media info
             var processingTasks = new Task[] {
@@ -479,10 +474,8 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
     #region Metadata Processing
 
-    private async Task GetMetadataInfo(string filepath, ConcurrentDictionary<string, string> details, bool performDeepAnalysis = false, CancellationToken cancellation = default)
+    private void GetMetadataInfo(string filepath, ConcurrentDictionary<string, string> details, bool performDeepAnalysis = false)
     {
-        await Task.Yield();
-
         if (!performDeepAnalysis)
         {
             _logger.SkippingBasicMetadataAnalysis(filepath);
@@ -492,10 +485,12 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
         try
         {
             _logger.PerformingMetadataDetection(filepath);
-            cancellation.ThrowIfCancellationRequested();
-
             var fileMetadata = TagLib.File.Create(filepath, TagLib.ReadStyle.Average);
-            cancellation.ThrowIfCancellationRequested();
+            if (CancellationPending)
+            {
+                throw new OperationCanceledException("User cancelled process");
+            }
+
             if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.Photo))
             {
                 SetImageMetadata(fileMetadata, details);

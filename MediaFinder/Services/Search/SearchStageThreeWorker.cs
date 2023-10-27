@@ -49,6 +49,7 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
                 .ToList();
             if (files.Any())
             {
+                _logger.DuplicateChecksum(group.MD5, group.SHA256, group.SHA512, files.Count);
                 foreach (var file in files)
                 {
                     file.ShouldExport = false;
@@ -59,6 +60,20 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
         var deduplicatedCount = _dbContext.FileDetails.Count(fd => fd.ShouldExport);
 
         SetProgress($"Suppressing small results from export list...");
+        var minImageWidth = inputs.MinImageWidth;
+        var minImageHeight = inputs.MinImageHeight;
+        if (minImageWidth < minImageHeight)
+        {
+            _logger.ProtraitOrientationDetected("image config dimensions");
+            (minImageHeight, minImageWidth) = (minImageWidth, minImageHeight);
+        }
+        var minVideoWidth = inputs.MinVideoWidth;
+        var minVideoHeight = inputs.MinVideoHeight;
+        if (minVideoWidth < minVideoHeight)
+        {
+            _logger.ProtraitOrientationDetected("video config dimensions");
+            (minVideoHeight, minVideoWidth) = (minVideoWidth, minVideoHeight);
+        }
         var mediaFiles = _dbContext.FileDetails
             .Include(fd => fd.FileProperties)
             .Where(fd => fd.ShouldExport && fd.FileType != MultiMediaType.Audio && fd.FileType != MultiMediaType.Unknown);
@@ -77,26 +92,22 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
             }
 
             var minWidth = mediaFile.FileType == MultiMediaType.Image
-                ? inputs.MinImageWidth
-                : inputs.MinVideoWidth;
+                ? minImageWidth
+                : minVideoWidth;
             var minHeight = mediaFile.FileType == MultiMediaType.Image
-                ? inputs.MinImageHeight
-                : inputs.MinVideoHeight;
+                ? minImageHeight
+                : minVideoHeight;
 
             // detect orientation and ensure "Landscape" for comparisons
             if (width < height)
             {
-                _logger.ProtraitOrientationDetected("actual dimensions");
+                _logger.ProtraitOrientationDetected(mediaFile.FileName);
                 (height, width) = (width, height);
-            }
-            if (minWidth < minHeight)
-            {
-                _logger.ProtraitOrientationDetected("config dimensions");
-                (minHeight, minWidth) = (minWidth, minHeight);
             }
 
             if (width < minWidth && height < minHeight)
             {
+                _logger.ExcludedBySize(mediaFile.FileName);
                 mediaFile.ShouldExport = false;
             }
         }
