@@ -1,4 +1,4 @@
-﻿namespace MediaFinder_v2.Views;
+﻿namespace MediaFinder_v2.Messages;
 
 public record FinishedMessage
 {

@@ -88,7 +88,6 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
             var isExtracted = false;
             if (extractArchive && extractionDepth != 0)
             {
-                _logger.Log("Attempting archive extraction...");
                 var extractionPath = Path.Combine(workingDirectory, $"Extracted_{Path.GetFileNameWithoutExtension(f)}");
                 if (Directory.Exists(extractionPath))
                 {

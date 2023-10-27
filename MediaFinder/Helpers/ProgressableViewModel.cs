@@ -1,6 +1,7 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 
 using MediaFinder_v2.DataAccessLayer;
+using MediaFinder_v2.Logging;
 using MediaFinder_v2.Messages;
 
 using Microsoft.EntityFrameworkCore;
@@ -35,25 +36,25 @@ public abstract class ProgressableViewModel
     protected void ShowProgressIndicator(string message, ICommand? cancelCommand = null)
     {
         _messenger.Send(ShowProgressMessage.Create(_progressToken, message, cancelCommand));
-        _logger.LogInformation(message);
+        _logger.ProgressUpdate(message);
     }
 
     protected void UpdateProgressIndicator(string message)
     {
         _messenger.Send(UpdateProgressMessage.Create(_progressToken, message));
-        _logger.LogInformation(message);
+        _logger.ProgressUpdate(message);
     }
 
     protected void CancelProgressIndicator(string message)
     {
         _messenger.Send(CancelProgressMessage.Create(_progressToken));
-        _logger.LogInformation(message);
+        _logger.ProgressUpdate(message);
     }
 
     protected void HideProgressIndicator()
     {
         _messenger.Send(CompleteProgressMessage.Create(_progressToken));
-        _logger.LogInformation("Process Complete.");
+        _logger.ProgressUpdate("Process Complete.");
     }
 
 #pragma warning restore CA2254 // Template should be a static expression

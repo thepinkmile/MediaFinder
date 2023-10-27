@@ -53,7 +53,7 @@ public abstract class ReactiveBackgroundWorker<T> : BackgroundWorker
     protected void SetProgress(string message, LogLevel logLevel = LogLevel.Debug)
     {
         ReportProgress(UpdateProgressMessage.Create(_progressToken, message));
-        _logger.Log("Preparing Working Directory...", logLevel);
+        _logger.Message(message, logLevel);
     }
 
     #endregion

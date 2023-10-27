@@ -6,6 +6,7 @@ using MaterialDesignThemes.Wpf;
 
 using MediaFinder_v2.DataAccessLayer;
 using MediaFinder_v2.Helpers;
+using MediaFinder_v2.Logging;
 using MediaFinder_v2.Messages;
 
 using MediaFinder_v2.Services.Export;
@@ -255,27 +256,27 @@ public partial class ExportViewModel : ProgressableViewModel,
         if (e.Cancelled)
         {
             _messenger.Send(SnackBarMessage.Create("Export cancelled"));
-            _logger.LogInformation("Process cancelled by user.");
+            _logger.UserCanceledOperation("Export");
             ExportCleanup();
             return;
         }
         if (e.Error is not null)
         {
-            _messenger.Send(SnackBarMessage.Create($"Export failed: {e.Error.Message}"));
-            _logger.LogError(e.Error, "Process Failed.");
+            _messenger.Send(SnackBarMessage.Create("Export failed"));
+            _logger.ProcessFailed(e.Error);
             ExportCleanup();
             return;
         }
         if (e.Result is not bool result || !result)
         {
             _messenger.Send(SnackBarMessage.Create($"Export returned invalid analysis result"));
-            _logger.LogError("Invalid ExportWorker Result");
+            _logger.InvalidResult("ExportWorker", e.Result!.GetType());
             ExportCleanup();
             return;
         }
 
         _messenger.Send(SnackBarMessage.Create("Export completed successfully"));
-        _logger.LogError("Export completed successfully");
+        _logger.ExportComplete();
         ExportCleanup(true);
     }
 
@@ -327,7 +328,7 @@ public partial class ExportViewModel : ProgressableViewModel,
     {
         if (ExportComplete)
         {
-            _logger.LogInformation("Cleaning up export session.");
+            _logger.SessionCleanup();
             ExportComplete = false;
             ExportDirectory = null;
         }

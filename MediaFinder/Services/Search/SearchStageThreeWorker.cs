@@ -5,6 +5,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using MediaFinder_v2.DataAccessLayer;
 using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.Helpers;
+using MediaFinder_v2.Logging;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -85,10 +86,12 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
             // detect orientation and ensure "Landscape" for comparisons
             if (width < height)
             {
+                _logger.ProtraitOrientationDetected("actual dimensions");
                 (height, width) = (width, height);
             }
             if (minWidth < minHeight)
             {
+                _logger.ProtraitOrientationDetected("config dimensions");
                 (minHeight, minWidth) = (minWidth, minHeight);
             }
 

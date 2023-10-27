@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Messaging;
 
 using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.Helpers;
+using MediaFinder_v2.Logging;
 
 using Microsoft.Extensions.Logging;
 
@@ -62,13 +63,14 @@ public class ExportWorker : ReactiveBackgroundWorker<ExportRequest>
         e.Result = true;
     }
 
-    private static void EnsureDestinationDirectoryExists(string path)
+    private void EnsureDestinationDirectoryExists(string path)
     {
         var parentPath = Path.GetDirectoryName(path);
         if (Directory.Exists(path) || parentPath is null)
             return;
 
         EnsureDestinationDirectoryExists(parentPath!);
+        _logger.CreatingDirectory(path);
         Directory.CreateDirectory(path);
     }
 
@@ -113,10 +115,11 @@ public class ExportWorker : ReactiveBackgroundWorker<ExportRequest>
         }
     }
 
-    private static Task CopyFile(string source, string destination, CancellationToken cancellationToken = default)
+    private Task CopyFile(string source, string destination, CancellationToken cancellationToken = default)
     {
         if (File.Exists(source))
         {
+            _logger.ExportingFile(source, destination);
             using var inputStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, 1024);
             using var outputStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, 1024);
 

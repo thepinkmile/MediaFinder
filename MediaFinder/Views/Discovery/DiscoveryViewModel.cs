@@ -12,6 +12,7 @@ using MaterialDesignThemes.Wpf;
 
 using MediaFinder_v2.DataAccessLayer;
 using MediaFinder_v2.Helpers;
+using MediaFinder_v2.Logging;
 using MediaFinder_v2.Messages;
 using MediaFinder_v2.Services.Search;
 
@@ -232,21 +233,21 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         if (e.Cancelled)
         {
             _messenger.Send(SnackBarMessage.Create("Search cancelled"));
-            _logger.LogInformation("Process cancelled by user.");
+            _logger.UserCanceledOperation("Media Discovery");
             SearchCleanup();
             return;
         }
         if (e.Error is not null)
         {
             _messenger.Send(SnackBarMessage.Create($"Search failed: {e.Error.Message}"));
-            _logger.LogError(e.Error, "Process Failed.");
+            _logger.ProcessFailed(e.Error);
             SearchCleanup();
             return;
         }
         if (e.Result is not SearchResponse result)
         {
-            _messenger.Send(SnackBarMessage.Create($"Search returned invalid result: {e.Result!.GetType()}"));
-            _logger.LogError("Invalid SearchWorker Result: {resultType}", e.Result.GetType());
+            _messenger.Send(SnackBarMessage.Create("Search returned invalid result"));
+            _logger.InvalidResult("SearchWorker1", e.Result!.GetType());
             SearchCleanup();
             return;
         }
@@ -265,21 +266,21 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         if (e.Cancelled)
         {
             _messenger.Send(SnackBarMessage.Create("Search cancelled"));
-            _logger.LogInformation("Process cancelled by user.");
+            _logger.UserCanceledOperation("File Analysis");
             SearchCleanup();
             return;
         }
         if (e.Error is not null)
         {
-            _messenger.Send(SnackBarMessage.Create($"Search failed: {e.Error.Message}"));
-            _logger.LogError(e.Error, "Process Failed.");
+            _messenger.Send(SnackBarMessage.Create($"Search failed"));
+            _logger.ProcessFailed(e.Error);
             SearchCleanup();
             return;
         }
         if (e.Result is not AnalysisResponse result)
         {
-            _messenger.Send(SnackBarMessage.Create($"Search returned invalid result: {e.Result!.GetType()}"));
-            _logger.LogError("Invalid SearchWorker Result: {resultType}", e.Result.GetType());
+            _messenger.Send(SnackBarMessage.Create("Search returned invalid result"));
+            _logger.InvalidResult("SearchWorker2", e.Result!.GetType());
             SearchCleanup();
             return;
         }
@@ -291,8 +292,8 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         }
         catch (DbException ex)
         {
-            _messenger.Send(SnackBarMessage.Create($"Failed to save search results"));
-            _logger.LogError(ex, "Failed to save initial search results");
+            _messenger.Send(SnackBarMessage.Create("Failed to save search results"));
+            _logger.DatabaseError(ex, "saving initial search results");
             SearchCleanup();
             return;
         }
@@ -311,21 +312,21 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         if (e.Cancelled)
         {
             _messenger.Send(SnackBarMessage.Create("Discovery process cancelled"));
-            _logger.LogInformation("Process cancelled by user.");
+            _logger.UserCanceledOperation("Filtering");
             SearchCleanup();
             return;
         }
         if (e.Error is not null)
         {
-            _messenger.Send(SnackBarMessage.Create($"Discovery failed: {e.Error.Message}"));
-            _logger.LogError(e.Error, "Process Failed.");
+            _messenger.Send(SnackBarMessage.Create("Discovery failed"));
+            _logger.ProcessFailed(e.Error);
             SearchCleanup();
             return;
         }
         if (e.Result is not bool result || !result)
         {
-            _messenger.Send(SnackBarMessage.Create($"Discovery process returned invalid analysis result"));
-            _logger.LogError("Invalid SearchWorker Result: Stage 3 returned false");
+            _messenger.Send(SnackBarMessage.Create("Discovery process returned invalid analysis result"));
+            _logger.InvalidResult("SearchWorker3", e.Result!.GetType());
             SearchCleanup();
             return;
         }
@@ -370,7 +371,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
             && Directory.Exists(_createdWorkingDirectory))
         {
             Directory.Delete(_createdWorkingDirectory, true);
-            _logger.LogDebug("Removed Working Directory: {WorkingDirectory}", _createdWorkingDirectory);
+            _logger.RemovedWorkingDIrectory(_createdWorkingDirectory);
             _createdWorkingDirectory = null;
         }
     }
@@ -394,7 +395,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
     internal async Task Cleanup()
     {
-        _logger.LogInformation("Cleaning up search session.");
+        _logger.SessionCleanup();
         await TruncateFileDetailState(_dbContext);
 
         CleanupWorkingDirectory();
