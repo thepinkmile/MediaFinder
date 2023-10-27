@@ -33,6 +33,7 @@
             ImageIcon="FileImageOutline"
             VideoIcon="FileVideoOutline" />
         <converters:MultiMediaTypeToStringConverter x:Key="MultiMediaTypeToStringConverter" />
+        <converters:ExportTypeToStringConverter x:Key="ExportTypeToStringConverter" />
         <converters:BoolToPackIconConverter
             x:Key="BoolToPackIconConverter"
             FalseValue="CheckboxBlankCircleOutline"
@@ -266,7 +267,13 @@
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
                             ItemsSource="{Binding Source={helpers:EnumBindingSource {x:Type exports:ExportType}}}"
-                            SelectedItem="{Binding ExportType}" />
+                            SelectedItem="{Binding ExportType}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Converter={StaticResource ExportTypeToStringConverter}}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
                     </StackPanel>
                     <CheckBox
                         Margin="24,8,0,0"

@@ -45,6 +45,10 @@
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
     <PackageVersion Include="Moq" Version="4.20.69" />
     <PackageVersion Include="Moq.AutoMock" Version="3.5.0" />
+    <PackageVersion Include="NetEscapades.EnumGenerators" Version="1.0.0-beta08">
+      <ExcludeAssets>runtime;</ExcludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageVersion>
     <PackageVersion Include="NReco.VideoInfo" Version="1.2.0" />
     <PackageVersion Include="Serilog" Version="3.0.1" />
     <PackageVersion Include="Serilog.Enrichers.AssemblyName" Version="1.0.9" />

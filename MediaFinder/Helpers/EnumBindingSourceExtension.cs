@@ -1,4 +1,9 @@
-﻿using System.Windows.Markup;
+﻿using System.Windows.Automation.Provider;
+using System.Windows.Markup;
+
+using MediaFinder_v2.DataAccessLayer.Models;
+using MediaFinder_v2.Messages;
+using MediaFinder_v2.Services.Export;
 
 namespace MediaFinder_v2.Helpers;
 
@@ -16,6 +21,19 @@ public class EnumBindingSourceExtension : MarkupExtension
 
     public override object ProvideValue(IServiceProvider serviceProvider)
     {
+        if (EnumType == typeof(MultiMediaType))
+        {
+            return MultiMediaTypeExtensions.GetValues();
+        }
+        if (EnumType == typeof(ExportType))
+        {
+            return ExportTypeExtensions.GetValues();
+        }
+        if (EnumType == typeof(NavigateDirection))
+        {
+            return NavigationDirectionExtensions.GetValues();
+        }
+
         return Enum.GetValues(EnumType);
     }
 }

@@ -140,7 +140,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             details.AddOrUpdate(PARENTPATH_DETAIL, fileInfo.DirectoryName!);
             details.AddOrUpdate(PARENTNAME_DETAIL, fileInfo.Directory!.Name);
             details.AddOrUpdate(EXTENSION_DETAIL, fileInfo.Extension.ToLowerInvariant());
-            details.AddOrUpdate(MEDIATYPE_DETAIL, Enum.GetName(MultiMediaType.Unknown)!);
+            details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Unknown.ToStringFast());
 
             var cts = new CancellationTokenSource();
 
@@ -204,7 +204,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
                         : DateTimeOffset.UnixEpoch,
                 FileSize = long.Parse(details[FILESIZE_DETAIL]),
                 ShouldExport = true,
-                FileType = details[MEDIATYPE_DETAIL].ToMultiMediaType(),
+                FileType = MultiMediaTypeExtensions.TryParse(details[MEDIATYPE_DETAIL], out var value, true, true) ? value : MultiMediaType.Unknown,
                 FileProperties = details.Select(x => new FileProperty() { Name = x.Key, Value = x.Value }).ToList(),
                 MD5_Hash = details.GetValueOrDefault(MD5_DETAIL),
                 SHA256_Hash = details.GetValueOrDefault(SHA256_DETAIL),
@@ -243,7 +243,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             {
                 LogDebug("Video detected: {filepath}", filepath);
                 await Task.Yield();
-                details.AddOrUpdate(MEDIATYPE_DETAIL, Enum.GetName(MultiMediaType.Video)!);
+                details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Video.ToStringFast());
             }
             else
             {
@@ -271,7 +271,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
             if (videoInfo.Streams.All(s => s.CodecType == "audio"))
             {
-                details.AddOrUpdate(MEDIATYPE_DETAIL, Enum.GetName(MultiMediaType.Audio)!);
+                details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Audio.ToStringFast());
 
                 var dateProperty = videoInfo.FormatTags.FirstOrDefault(k => string.Equals("date", k.Key, StringComparison.OrdinalIgnoreCase));
                 if (!string.IsNullOrEmpty(dateProperty.Value))
@@ -288,7 +288,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             }
             else if (videoInfo.Streams.Any(s => s.CodecType == "video"))
             {
-                details.AddOrUpdate(MEDIATYPE_DETAIL, Enum.GetName(MultiMediaType.Video)!);
+                details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Video.ToStringFast());
 
                 var dateProperty = videoInfo.FormatTags.FirstOrDefault(k => string.Equals("creation_time", k.Key, StringComparison.OrdinalIgnoreCase));
                 if (!string.IsNullOrEmpty(dateProperty.Value) && DateTimeOffset.TryParseExact(dateProperty.Value, IsoDateFormats, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var createdDate))
@@ -320,7 +320,6 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
                 .ToArray();
             var detectedExtension = FindMatchingExtension(potentialExtensions, details[EXTENSION_DETAIL])
                 ?? FindMatchingExtension(potentialExtensions, videoInfo.FormatLongName);
-            var tmp = details[EXTENSION_DETAIL];
             if (detectedExtension is not null)
             {
                 if (detectedExtension is "asf")
@@ -370,7 +369,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             {
                 LogDebug("Image detected: {filepath}", filepath);
                 await Task.Yield();
-                details.AddOrUpdate(MEDIATYPE_DETAIL, Enum.GetName(MultiMediaType.Image)!);
+                details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
             }
             else
             {
@@ -408,7 +407,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             cancellationToken.ThrowIfCancellationRequested();
             await Task.Yield();
 
-            details.AddOrUpdate(MEDIATYPE_DETAIL, Enum.GetName(MultiMediaType.Image)!);
+            details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
 
             var dateProperty = result.Keys.FirstOrDefault(k => k.Contains("Date/Time", StringComparison.InvariantCultureIgnoreCase));
             if (dateProperty is not null && DateTimeOffset.TryParseExact(result[dateProperty], IsoDateFormats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var tmp))
@@ -465,80 +464,94 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
     private async Task GetMetadataInfo(string filepath, ConcurrentDictionary<string, string> details, bool performDeepAnalysis = false, CancellationToken cancellation = default)
     {
+        await Task.Yield();
+
         if (!performDeepAnalysis)
         {
             LogDebug("Skipping basic metadata analysis: {filepath}", filepath);
-            await Task.Yield();
             return;
         }
 
         try
         {
             LogDebug("Performing basic metadata detection: {filepath}", filepath);
-            await Task.Yield();
+            cancellation.ThrowIfCancellationRequested();
 
-            var test = TagLib.File.Create(filepath, TagLib.ReadStyle.Average);
-            if (test.Properties.MediaTypes == TagLib.MediaTypes.Photo)
+            var fileMetadata = TagLib.File.Create(filepath, TagLib.ReadStyle.Average);
+            cancellation.ThrowIfCancellationRequested();
+            if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.Photo))
             {
-                details.AddOrUpdate(MEDIATYPE_DETAIL, Enum.GetName(MultiMediaType.Image)!);
-                details.AddOrUpdate(WIDTH_DETAIL, test.Properties.PhotoWidth.ToString());
-                details.AddOrUpdate(HEIGHT_DETAIL, test.Properties.PhotoHeight.ToString());
+                SetImageMetadata(fileMetadata, details);
+            }
+            if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.Audio))
+            {
+                SetImageMetadata(fileMetadata, details);
+            }
+            if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.Video))
+            {
+                SetImageMetadata(fileMetadata, details);
+            }
+            if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.None))
+            {
+                LogDebug("Unknown TagLib metadata - skipping");
+            }
+            if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.Text))
+            {
+                LogDebug("Text file detected - skipping");
+            }
+        }
+        catch (OperationCanceledException ex)
+        {
+            LogDebug(ex, "User cancelled metadata detection.");
+        }
+        catch (Exception ex)
+        {
+            LogDebug(ex, "Failed to analyse file metadata: {filename}", details[FILENAME_DETAIL]);
+        }
+    }
 
-                if (test.Tag is TagLib.Image.CombinedImageTag imageTag)
-                {
-                    if (imageTag.DateTime.HasValue)
-                    {
-                        details.AddOrUpdate(CREATEDDATE_DETAIL, imageTag.DateTime.Value.ToUniversalTime().ToString("O"));
-                    }
-                }
-            }
-            else if (test.Properties.MediaTypes is TagLib.MediaTypes.Video)
-            {
-                details.AddOrUpdate(MEDIATYPE_DETAIL, Enum.GetName(MultiMediaType.Video)!);
-                details.AddOrUpdate(WIDTH_DETAIL, test.Properties.VideoWidth.ToString());
-                details.AddOrUpdate(HEIGHT_DETAIL, test.Properties.VideoHeight.ToString());
-                details.AddOrUpdate("duration", test.Properties.Duration.ToString("c", CultureInfo.InvariantCulture));
-            }
-            else if (test.Properties.MediaTypes is (TagLib.MediaTypes.Video | TagLib.MediaTypes.Audio))
-            {
-                details.AddOrUpdate(MEDIATYPE_DETAIL, Enum.GetName(MultiMediaType.Video)!);
-                details.AddOrUpdate(WIDTH_DETAIL, test.Properties.VideoWidth.ToString());
-                details.AddOrUpdate(HEIGHT_DETAIL, test.Properties.VideoHeight.ToString());
-                details.AddOrUpdate("duration", test.Properties.Duration.ToString("c", CultureInfo.InvariantCulture));
-                details.AddOrUpdate("audio_bitRate", test.Properties.AudioBitrate.ToString("c", CultureInfo.InvariantCulture));
-                details.AddOrUpdate("audio_chanels", test.Properties.AudioChannels.ToString());
-                details.AddOrUpdate("audio_sampleRate", test.Properties.AudioSampleRate.ToString());
-            }
-            else if (test.Properties.MediaTypes is TagLib.MediaTypes.Audio)
-            {
-                details.AddOrUpdate(MEDIATYPE_DETAIL, Enum.GetName(MultiMediaType.Audio)!);
-                details.AddOrUpdate("duration", test.Properties.Duration.ToString("c", CultureInfo.InvariantCulture));
-                details.AddOrUpdate("audio_bitRate", test.Properties.AudioBitrate.ToString("c", CultureInfo.InvariantCulture));
-                details.AddOrUpdate("audio_chanels", test.Properties.AudioChannels.ToString());
-                details.AddOrUpdate("audio_sampleRate", test.Properties.AudioSampleRate.ToString());
+    private void SetImageMetadata(TagLib.File metadata, ConcurrentDictionary<string, string> details)
+    {
+        details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
+        details.AddOrUpdate(WIDTH_DETAIL, metadata.Properties.PhotoWidth.ToString());
+        details.AddOrUpdate(HEIGHT_DETAIL, metadata.Properties.PhotoHeight.ToString());
 
-                var earliestYear = MetadataTags
-                    .Where(test.TagTypes.HasFlag)
+        if (metadata.Tag is TagLib.Image.CombinedImageTag imageTag)
+        {
+            if (imageTag.DateTime.HasValue)
+            {
+                details.AddOrUpdate(CREATEDDATE_DETAIL, imageTag.DateTime.Value.ToUniversalTime().ToString("O"));
+            }
+        }
+    }
+
+    private void SetVideoMetadata(TagLib.File metadata, ConcurrentDictionary<string, string> details)
+    {
+        details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Video.ToStringFast());
+        details.AddOrUpdate(WIDTH_DETAIL, metadata.Properties.VideoWidth.ToString());
+        details.AddOrUpdate(HEIGHT_DETAIL, metadata.Properties.VideoHeight.ToString());
+        details.AddOrUpdate("duration", metadata.Properties.Duration.ToString("c", CultureInfo.InvariantCulture));
+    }
+
+    private void SetAudioMetadata(TagLib.File metadata, ConcurrentDictionary<string, string> details)
+    {
+        details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Audio.ToStringFast());
+        details.AddOrUpdate("duration", metadata.Properties.Duration.ToString("c", CultureInfo.InvariantCulture));
+        details.AddOrUpdate("audio_bitRate", metadata.Properties.AudioBitrate.ToString("c", CultureInfo.InvariantCulture));
+        details.AddOrUpdate("audio_chanels", metadata.Properties.AudioChannels.ToString());
+        details.AddOrUpdate("audio_sampleRate", metadata.Properties.AudioSampleRate.ToString());
+
+        var earliestYear = MetadataTags
+                    .Where(metadata.TagTypes.HasFlag)
                     .Cast<TagLib.TagTypes>()
                     .Where(tt => tt != TagLib.TagTypes.None)
-                    .Select(tt => test.GetTag(tt))
+                    .Select(tt => metadata.GetTag(tt))
                     .Where(tag => tag is not null && tag.Year != 0)
                     .Select(x => x.Year)
                     .Concat(new[] { Convert.ToUInt32(DateTimeOffset.UtcNow.Year) })
                     .Min()
                     .ToString();
-                details.AddOrUpdate("published_year", earliestYear);
-            }
-            else
-            {
-                var tmp = test.Properties.Description;
-            }
-        }
-        catch (Exception ex)
-        {
-            LogDebug(ex, "Failed to analyse file metadata: {filename}", details[FILENAME_DETAIL]);
-            await Task.Yield();
-        }
+        details.AddOrUpdate("published_year", earliestYear);
     }
 
     #endregion

@@ -1,5 +1,8 @@
-﻿namespace MediaFinder_v2.DataAccessLayer.Models;
+﻿using NetEscapades.EnumGenerators;
 
+namespace MediaFinder_v2.DataAccessLayer.Models;
+
+[EnumExtensions]
 public enum MultiMediaType
 {
     Unknown,
