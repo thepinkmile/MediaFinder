@@ -19,6 +19,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 
 using System.IO;
+using System.Windows.Controls;
 using System.Windows.Data;
 
 namespace MediaFinder_v2.Views.Export;
@@ -47,6 +48,7 @@ public partial class ExportViewModel : ProgressableViewModel,
 
         // Bind CollectionViewSource.Source to MyCollection
         _mediaFilesViewSource = new CollectionViewSource();
+        _mediaFilesViewSource.Filter += CollectionViewSource_Filter;
         Binding myBind = new() { Source = DiscoveredFiles };
         BindingOperations.SetBinding(_mediaFilesViewSource, CollectionViewSource.SourceProperty, myBind);
         MediaFilesView = _mediaFilesViewSource.View;
@@ -71,6 +73,14 @@ public partial class ExportViewModel : ProgressableViewModel,
     }
 
     private readonly CollectionViewSource _mediaFilesViewSource;
+
+    private void CollectionViewSource_Filter(object sender, FilterEventArgs e)
+    {
+        if (sender is DataGrid)
+        {
+            var tmp = e.Item;
+        }
+    }
 
     [ObservableProperty]
     private ICollectionView _mediaFilesView;
