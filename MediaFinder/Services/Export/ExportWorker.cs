@@ -119,6 +119,20 @@ public class ExportWorker : ReactiveBackgroundWorker<ExportRequest>
     {
         if (File.Exists(source))
         {
+            if (File.Exists(destination))
+            {
+                var originalDestination = destination;
+                var path = Path.GetDirectoryName(destination)!;
+                var extension = Path.GetExtension(destination);
+                var filename = Path.GetFileNameWithoutExtension(destination);
+                var index = 0;
+                while (File.Exists(destination))
+                {
+                    destination = Path.Combine(path, $"{filename}({++index}){extension}");
+                }
+                _logger.FilenameCollisionDetected(originalDestination, destination);
+            }
+
             _logger.ExportingFile(source, destination);
             using var inputStream = new FileStream(source, FileMode.Open, FileAccess.Read, FileShare.Read, 1024);
             using var outputStream = new FileStream(destination, FileMode.Create, FileAccess.Write, FileShare.None, 1024);

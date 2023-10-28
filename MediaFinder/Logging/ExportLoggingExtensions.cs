@@ -12,4 +12,7 @@ public static partial class ExportLoggingExtensions
 
     [LoggerMessage(4003, LogLevel.Debug, "Export completed successfully")]
     public static partial void ExportComplete(this ILogger logger);
+
+    [LoggerMessage(4004, LogLevel.Debug, "Potential file collision detected: Original = '{FilePath}', Actual = '{ResolvedFilePath}'")]
+    public static partial void FilenameCollisionDetected(this ILogger logger, string filePath, string resolvedFilePath);
 }
