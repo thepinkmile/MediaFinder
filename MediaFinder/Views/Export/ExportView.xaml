@@ -26,7 +26,7 @@
         <converters:PathToBitmapImageConverter x:Key="PathToBitmapImageConverter" DecodePixelWidth="400" />
         <converters:PercentageConverter x:Key="FileDetailsDrawerWidthConverter" Percentage="50" />
         <converters:MultiMediaTypeToVisibilityConverter x:Key="IsImageVisibleConverter" RequiredType="Image" />
-        <converters:MultiMediaTypeToVisibilityConverter x:Key="IsVideoVisibleConverter" RequiredType="Video" />
+        <converters:MultiMediaTypeToVisibilityConverter x:Key="IsVideoVisibleConverter" RequiredType="PlayableMedia" />
         <converters:MultiMediaTypeToVisibilityConverter x:Key="IsAudioVisibleConverter" RequiredType="Audio" />
         <converters:MediaFileToIconConverter
             x:Key="MediaFileToIconConverter"

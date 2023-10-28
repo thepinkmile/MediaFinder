@@ -2,14 +2,17 @@
 
 namespace MediaFinder_v2.DataAccessLayer.Models;
 
+[Flags]
 [EnumExtensions]
 public enum MultiMediaType
 {
-    Unknown,
+    Unknown = 0,
 
-    Image,
+    Image = 1,
 
-    Video,
+    Video = 2,
 
-    Audio
+    Audio = 4,
+
+    PlayableMedia = Video | Audio
 }

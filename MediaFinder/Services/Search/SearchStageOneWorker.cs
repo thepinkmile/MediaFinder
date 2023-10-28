@@ -113,18 +113,12 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
             var isExtracted = false;
             if (extractArchive && extractionDepth != 0)
             {
-                var extractionPath = new DirectoryInfo(
-                    Path.Combine(workingDirectory, $"Extracted_{Path.GetFileNameWithoutExtension(f.Name)}")
-                    );
-                if (extractionPath.Exists)
+                var extractionDirectory = GetExtractionPath(workingDirectory, f.Name);
+                if (ExtractArchive(f, extractionDirectory))
                 {
-                    _logger.ExtractionPathExists(extractionPath.FullName);
-                }
-                else if (ExtractArchive(f, extractionPath))
-                {
-                    extractionPath.Refresh();
+                    extractionDirectory.Refresh();
                     isExtracted = true;
-                    extracted.Add(extractionPath);
+                    extracted.Add(extractionDirectory);
                 }
             }
 
@@ -146,6 +140,24 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
         }
 
         return files.ToList();
+    }
+
+    private DirectoryInfo GetExtractionPath(string rottDirectory, string archiveName)
+    {
+        var nameWithoutExtension = Path.GetFileNameWithoutExtension(archiveName);
+        var extractionPath = new DirectoryInfo(
+            Path.Combine(rottDirectory, $"Extracted_{nameWithoutExtension}")
+            );
+        var index = 0;
+        while (extractionPath.Exists)
+        {
+            _logger.ExtractionPathExists(extractionPath.FullName);
+            extractionPath = new DirectoryInfo(
+                Path.Combine(rottDirectory, $"Extracted_{nameWithoutExtension}({++index})")
+                );
+        }
+
+        return extractionPath;
     }
 
     private static readonly string[] KnownNonArchiveExtensions = new[] { ".exe", ".ipa", ".ibooks", ".epub", ".app" };
