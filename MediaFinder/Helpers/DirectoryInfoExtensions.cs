@@ -11,7 +11,8 @@ public static class DirectoryInfoExtensions
     {
         "OneDrive",
         "iCloud Drive",
-        "Creative Cloud Files"
+        "Creative Cloud Files",
+        "Album Artwork"
     };
 
     private static readonly EnumerationOptions _enumerationOptions = new EnumerationOptions
