@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Data.Common;
 using System.IO;
+using System.Reflection;
 using System.Windows.Data;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -25,7 +26,8 @@ namespace MediaFinder_v2.Views.Discovery;
 public partial class DiscoveryViewModel : ProgressableViewModel,
     IRecipient<SearchSettingUpdated>,
     IRecipient<WorkingDirectoryCreated>,
-    IRecipient<FinishedMessage>
+    IRecipient<FinishedMessage>,
+    IRecipient<FileExtracted>
 {
     private readonly ILogger<DiscoveryViewModel> _logger;
     private readonly SearchStageOneWorker _searchStageOneWorker;
@@ -56,7 +58,9 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         _searchStagaeThreeWorker.RunWorkerCompleted += SearchStageThreeCompleted;
 
         SearchConfigViewModel = searchConfigViewModel;
-        WorkingDirectory = Path.GetTempPath();
+        WorkingDirectory = Path.Combine(
+            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
+            "TEMP");
     }
 
     #region Settings Configurations
@@ -107,6 +111,9 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
     private string? _workingDirectory;
 
+    [ObservableProperty]
+    private ulong _workingDirectorySize;
+
     private string? _createdWorkingDirectory;
 
     [ObservableProperty]
@@ -145,6 +152,24 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     public void Receive(WorkingDirectoryCreated message)
     {
         _createdWorkingDirectory = message.Directory;
+    }
+
+    public void Receive(FileExtracted message)
+    {
+        if (WorkingDirectory is null)
+        {
+            WorkingDirectorySize = 0UL;
+            return;
+        }
+
+        var workingDir = new DirectoryInfo(WorkingDirectory!);
+        if (!workingDir.Exists)
+        {
+            WorkingDirectorySize = 0UL;
+            return;
+        }
+
+        WorkingDirectorySize = workingDir.GetDirectorySize();
     }
 
     [RelayCommand]
@@ -373,6 +398,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
             Directory.Delete(_createdWorkingDirectory, true);
             _logger.RemovedWorkingDIrectory(_createdWorkingDirectory);
             _createdWorkingDirectory = null;
+            WorkingDirectorySize = 0UL;
         }
     }
 

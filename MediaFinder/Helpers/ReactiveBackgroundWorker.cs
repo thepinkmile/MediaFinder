@@ -69,6 +69,10 @@ public abstract class ReactiveBackgroundWorker<T> : BackgroundWorker
             case string stateMessage: _messenger.Send(UpdateProgressMessage.Create(_progressToken, stateMessage)); break;
             case UpdateProgressMessage updateStatusMessage: _messenger.Send(updateStatusMessage); break;
             case WorkingDirectoryCreated workingDirectoryCreated: _messenger.Send(workingDirectoryCreated); break;
+            default:
+                if (e.UserState is not null)
+                    _messenger.Send(e.UserState);
+                break;
         }
     }
 

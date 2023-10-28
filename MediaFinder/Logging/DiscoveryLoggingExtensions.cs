@@ -1,5 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 
+using SevenZipExtractor;
+
 namespace MediaFinder_v2.Logging;
 
 public static partial class DiscoveryLoggingExtensions
@@ -23,5 +25,11 @@ public static partial class DiscoveryLoggingExtensions
     public static partial void PerformingArchiveExtraction(this ILogger logger, string filePath);
 
     [LoggerMessage(1007, LogLevel.Information, "Archive detection failed for {FilePath}")]
+    public static partial void ArchiveExtractionFailed(this ILogger logger, SevenZipException ex, string filePath);
+
+    [LoggerMessage(1008, LogLevel.Debug, "Skipping known non archive file: {FilePath}")]
+    public static partial void KnownNonArchive(this ILogger logger, string filePath);
+
+    [LoggerMessage(1009, LogLevel.Information, "Archive extraction failed for {FilePath}")]
     public static partial void ArchiveExtractionFailed(this ILogger logger, Exception ex, string filePath);
 }

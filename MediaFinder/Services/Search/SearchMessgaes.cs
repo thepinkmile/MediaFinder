@@ -51,6 +51,12 @@ public record WorkingDirectoryCreated(string Directory)
         => new(directory);
 }
 
+public record FileExtracted(string Filenamaae)
+{
+    public static FileExtracted Create(string filename)
+        => new(filename);
+}
+
 #endregion
 
 #region Analysis

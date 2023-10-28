@@ -103,6 +103,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
     protected override void Execute(AnalyseRequest inputs, DoWorkEventArgs e)
     {
         var files = new List<FileDetails>();
+        var index = 0;
         foreach(var filepath in inputs.Files)
         {
             if (CancellationPending)
@@ -110,7 +111,8 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
                 break;
             }
 
-            ReportProgress($"Analysing file: {filepath}");
+            ++index;
+            ReportProgress($"Analysing file: {filepath}\nFile {index} of {inputs.Files.Count}");
             _logger.AnalysingFile(filepath);
 
             var details = new ConcurrentDictionary<string, string>();

@@ -20,6 +20,7 @@
             FalseValue="No"
             TrueValue="Yes" />
         <converters:StringsToContentConverter x:Key="ListToStringConverter" Delimeter="\n" />
+        <converters:FormatKbSizeConverter x:Key="FormatKbSizeConverter" />
         <materialDesign:BooleanToVisibilityConverter
             x:Key="InverseBooleanToVisibilityConverter"
             FalseValue="Visible"
@@ -203,47 +204,65 @@
                         Visibility="{Binding Items.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=ConfigurationsGrid}" />
                 </Grid>
             </Border>
-            <StackPanel
+            <DockPanel
                 Grid.Row="3"
-                HorizontalAlignment="Right"
-                Orientation="Horizontal">
-                <Button
-                    Margin="0,0,8,0"
-                    Command="{Binding PerformSearchCommand}"
-                    Visibility="{Binding SearchComplete, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon
-                            Width="15"
-                            Height="15"
-                            Margin="0,0,8,0"
-                            Kind="RunFast" />
-                        <TextBlock Text="Run" />
-                    </StackPanel>
-                </Button>
-                <Button
-                    Margin="0,0,8,0"
-                    Command="{Binding MoveToReviewCommand}"
-                    Visibility="{Binding SearchComplete, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon
-                            Width="15"
-                            Height="15"
-                            Margin="0,0,8,0"
-                            Kind="ArrowrightBoldOutline" />
-                        <TextBlock Text="Next" />
-                    </StackPanel>
-                </Button>
-                <Button Command="{Binding FinishSearchCommand}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon
-                            Width="15"
-                            Height="15"
-                            Margin="0,2,8,0"
-                            Kind="TickCircleOutline" />
-                        <TextBlock Text="Finish" />
-                    </StackPanel>
-                </Button>
-            </StackPanel>
+                Margin="0,8,0,0"
+                LastChildFill="False">
+                <StackPanel
+                    DockPanel.Dock="Left"
+                    Orientation="Horizontal"
+                    Visibility="{Binding WorkingDirectorySize, Converter={StaticResource NotZeroToVisibilityConverter}}">
+                    <TextBlock
+                        Margin="0,0,8,0"
+                        VerticalAlignment="Center"
+                        Text="Working Directory Size:" />
+                    <TextBlock
+                        Margin="0,0,8,0"
+                        VerticalAlignment="Center"
+                        Text="{Binding WorkingDirectorySize, Converter={StaticResource FormatKbSizeConverter}}" />
+                </StackPanel>
+                <StackPanel
+                    HorizontalAlignment="Right"
+                    DockPanel.Dock="Right"
+                    Orientation="Horizontal">
+                    <Button
+                        Margin="0,0,8,0"
+                        Command="{Binding PerformSearchCommand}"
+                        Visibility="{Binding SearchComplete, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon
+                                Width="15"
+                                Height="15"
+                                Margin="0,0,8,0"
+                                Kind="RunFast" />
+                            <TextBlock Text="Run" />
+                        </StackPanel>
+                    </Button>
+                    <Button
+                        Margin="0,0,8,0"
+                        Command="{Binding MoveToReviewCommand}"
+                        Visibility="{Binding SearchComplete, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon
+                                Width="15"
+                                Height="15"
+                                Margin="0,0,8,0"
+                                Kind="ArrowrightBoldOutline" />
+                            <TextBlock Text="Next" />
+                        </StackPanel>
+                    </Button>
+                    <Button Command="{Binding FinishSearchCommand}">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon
+                                Width="15"
+                                Height="15"
+                                Margin="0,2,8,0"
+                                Kind="TickCircleOutline" />
+                            <TextBlock Text="Finish" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </DockPanel>
         </Grid>
     </materialDesign:DrawerHost>
 </UserControl>

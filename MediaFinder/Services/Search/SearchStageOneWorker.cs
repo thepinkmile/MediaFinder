@@ -15,11 +15,11 @@ namespace MediaFinder_v2.Services.Search;
 
 public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
 {
-    private const int SixteenKBytes = 1024 * 16;
-
+    private readonly IMessenger _messenger;
     public SearchStageOneWorker(ILogger<SearchStageOneWorker> logger, IMessenger messenger)
         : base(logger, messenger)
     {
+        _messenger = messenger;
     }
 
     protected override void Execute(SearchRequest inputs, DoWorkEventArgs e)
@@ -30,8 +30,8 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
         ReportProgress(WorkingDirectoryCreated.Create(workingDirectory));
         _logger.CreatedWorkingDirectory(workingDirectory);
 
-        var files = IterateFiles(
-            inputs.SourceDirectories,
+        var files = IterateDirectories(
+            inputs.SourceDirectories.Select(x => new DirectoryInfo(x)),
             inputs.Recursive,
             inputs.ExtractArchives,
             inputs.ExtractionDepth ?? 0,
@@ -43,58 +43,86 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
         }
 
         SetProgress("Finalising Search Results...");
-        e.Result = SearchResponse.Create(files.Distinct().ToList());
+        e.Result = SearchResponse.Create(
+            files
+                .Distinct()
+                .Select(f => f.FullName)
+                .ToList());
     }
 
-    private List<string> IterateFiles(
-        IEnumerable<string> directories,
+    protected override void UpdateProgress(object? sender, ProgressChangedEventArgs e)
+    {
+        switch (e.UserState)
+        {
+            case FileExtracted extractedMessage: _messenger.Send(extractedMessage); break;
+        }
+        base.UpdateProgress(sender, e);
+    }
+
+    private List<FileInfo> IterateDirectories(
+        IEnumerable<DirectoryInfo> directories,
         bool recursive,
         bool extractArchive,
         int extractionDepth,
         string workingDirectory)
     {
-        var files = new List<string>();
-        foreach (var directory in directories.Where(Directory.Exists))
+        var files = new List<FileInfo>();
+        foreach (var directory in directories.Where(d => d.Exists))
         {
             if (CancellationPending)
             {
                 break;
             }
 
-            files.AddRange(IterateFiles(directory, recursive, extractArchive, extractionDepth, workingDirectory));
+            ReportProgress($"Iterating files in directory: {directory.FullName}");
+            _logger.IteratingDirectory(directory.FullName);
+
+            files.AddRange(IterateFiles(directory, extractArchive, extractionDepth, workingDirectory));
+
+            if (recursive)
+            {
+                var subDirectories = directory.EnumerateSubDirectories();
+                files.AddRange(IterateDirectories(subDirectories, recursive, extractArchive, extractionDepth, workingDirectory));
+            }
         }
         return files;
     }
 
-    private List<string> IterateFiles(
-        string directory,
-        bool recursive,
+    private List<FileInfo> IterateFiles(
+        DirectoryInfo directory,
         bool extractArchive,
         int extractionDepth,
         string workingDirectory)
     {
-        var files = new ConcurrentBag<string>();
-        var extracted = new ConcurrentBag<string>();
+        var files = new ConcurrentBag<FileInfo>();
+        var extracted = new ConcurrentBag<DirectoryInfo>();
 
-        foreach(var f in Directory.EnumerateFiles(directory, "*", GetEnumerationOptions(recursive)))
+        var enumeratedFiles = directory.EnumerateFiles().ToList();
+        var index = 0;
+        foreach (var f in enumeratedFiles)
         {
             if (CancellationPending)
             {
                 break;
             }
-            ReportProgress($"Iterating files in directory: {directory}");
-            _logger.IteratingDirectory(directory);
+
+            ++index;
+            var percent = (int)Math.Round((index / enumeratedFiles.Count) * (decimal)100, 0, MidpointRounding.AwayFromZero);
+            ReportProgress(percent, $"Iterating files in directory: {directory.FullName}\nFile {index} of {enumeratedFiles.Count}");
 
             var isExtracted = false;
             if (extractArchive && extractionDepth != 0)
             {
-                var extractionPath = Path.Combine(workingDirectory, $"Extracted_{Path.GetFileNameWithoutExtension(f)}");
-                if (Directory.Exists(extractionPath))
+                var extractionPath = new DirectoryInfo(
+                    Path.Combine(workingDirectory, $"Extracted_{Path.GetFileNameWithoutExtension(f.Name)}")
+                    );
+                if (extractionPath.Exists)
                 {
-                    _logger.ExtractionPathExists(extractionPath);
+                    _logger.ExtractionPathExists(extractionPath.FullName);
                 }
                 else if (ExtractArchive(f, extractionPath))
                 {
+                    extractionPath.Refresh();
                     isExtracted = true;
                     extracted.Add(extractionPath);
                 }
@@ -107,7 +135,7 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
             }
         }
 
-        foreach (var file in IterateFiles(extracted, recursive, extractArchive, extractionDepth - 1, workingDirectory))
+        foreach (var file in IterateDirectories(extracted, true, extractArchive, extractionDepth - 1, workingDirectory))
         {
             if (CancellationPending)
             {
@@ -117,32 +145,40 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
             files.Add(file);
         }
 
-        return files.Distinct().ToList();
+        return files.ToList();
     }
 
-    private bool ExtractArchive(string filepath, string destinationPath)
+    private static readonly string[] KnownNonArchiveExtensions = new[] { ".exe", ".ipa", ".ibooks", ".epub", ".app" };
+
+    private bool ExtractArchive(FileInfo filepath, DirectoryInfo destinationPath)
     {
+        var extension = filepath.Extension.ToLowerInvariant();
+        if (KnownNonArchiveExtensions.Contains(extension, StringComparer.InvariantCultureIgnoreCase))
+        {
+            _logger.KnownNonArchive(filepath.FullName);
+            return false;
+        }
+
         try
         {
-            _logger.PerformingArchiveDetection(filepath);
-            using var archive = new ArchiveFile(filepath);
-            ReportProgress($"Extracting Archive: {filepath}");
-            _logger.PerformingArchiveExtraction(filepath);
-            archive.Extract(destinationPath);
-            _logger.ArchiveExtracted(filepath);
+            _logger.PerformingArchiveDetection(filepath.FullName);
+            using var archive = new ArchiveFile(filepath.FullName);
+            ReportProgress($"Extracting Archive: {filepath.FullName}");
+            _logger.PerformingArchiveExtraction(filepath.FullName);
+            archive.Extract(destinationPath.FullName, true);
+            _logger.ArchiveExtracted(filepath.FullName);
+            ReportProgress(FileExtracted.Create(filepath.FullName));
             return true;
         }
         catch (SevenZipException ex)
         {
-            _logger.ArchiveExtractionFailed(ex, filepath);
+            _logger.ArchiveExtractionFailed(ex, filepath.FullName);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            _logger.ArchiveExtractionFailed(ex, filepath.FullName);
             return false;
         }
     }
-    private static EnumerationOptions GetEnumerationOptions(bool recursive)
-        => new()
-        {
-            BufferSize = SixteenKBytes,
-            IgnoreInaccessible = true,
-            RecurseSubdirectories = recursive,
-        };
 }
