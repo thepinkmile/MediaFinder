@@ -160,7 +160,7 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
         return extractionPath;
     }
 
-    private static readonly string[] KnownNonArchiveExtensions = new[] { ".exe", ".ipa", ".ibooks", ".epub", ".app", ".dll" };
+    private static readonly string[] KnownNonArchiveExtensions = new[] { ".ipa", ".ibooks", ".epub" };
 
     private bool ExtractArchive(FileInfo filepath, DirectoryInfo destinationPath)
     {

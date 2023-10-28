@@ -15,6 +15,14 @@ public static class DirectoryInfoExtensions
         "Album Artwork"
     };
 
+    public static readonly List<string> ExtensionExclusions = new()
+    {
+        ".lnk",
+        ".exe",
+        ".dll",
+        ".app"
+    };
+
     private static readonly EnumerationOptions _enumerationOptions = new()
     {
         BufferSize = SixteenKBytes,
@@ -28,7 +36,9 @@ public static class DirectoryInfoExtensions
             .Where(subDir => !DirectoryExclusions.Contains(subDir.Name, StringComparer.InvariantCultureIgnoreCase));
 
     public static IEnumerable<FileInfo> EnumerateFiles(this DirectoryInfo directoryInfo)
-        => directoryInfo.EnumerateFiles("*", _enumerationOptions);
+        => directoryInfo
+            .EnumerateFiles("*", _enumerationOptions)
+            .Where(file => !ExtensionExclusions.Contains(file.Extension, StringComparer.InvariantCultureIgnoreCase));
 
     public static ulong GetDirectorySize(this DirectoryInfo directory)
         => directory.Exists
