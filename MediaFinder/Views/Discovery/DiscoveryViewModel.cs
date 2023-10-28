@@ -59,7 +59,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
         SearchConfigViewModel = searchConfigViewModel;
         WorkingDirectory = Path.Combine(
-            Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!,
+            Directory.GetCurrentDirectory(),
             "TEMP");
     }
 
