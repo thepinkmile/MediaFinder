@@ -1,7 +1,4 @@
-﻿using System.Collections;
-using System.IO;
-
-using MetadataExtractor;
+﻿using System.IO;
 
 namespace MediaFinder_v2.Helpers;
 
@@ -33,30 +30,10 @@ public static class DirectoryInfoExtensions
         => directoryInfo.EnumerateFiles("*", _enumerationOptions);
 
     public static ulong GetDirectorySize(this DirectoryInfo directory)
-    {
-        var size = 0UL;
-        foreach (var dir in directory.EnumerateDirectories("*", new EnumerationOptions
-        {
-            BufferSize = SixteenKBytes,
-            IgnoreInaccessible = true,
-            RecurseSubdirectories = false,
-        }))
-        {
-            size += GetDirectorySize(dir);
-        }
-
-        foreach (var file in directory.EnumerateFiles("*", new EnumerationOptions
-        {
-            BufferSize = SixteenKBytes,
-            IgnoreInaccessible = true,
-            RecurseSubdirectories = false,
-        }))
-        {
-            size += GetFileSize(file);
-        }
-
-        return size;
-    }
+        => directory.Exists
+            ? Convert.ToUInt64(directory.EnumerateSubDirectories().Sum(d => (decimal)d.GetDirectorySize()))
+                + Convert.ToUInt64(directory.EnumerateFiles().Sum(f => (decimal)f.GetFileSize()))
+            : 0UL;
 
     public static ulong GetFileSize(this FileInfo file)
         => Convert.ToUInt64(file.Length);
