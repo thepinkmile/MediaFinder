@@ -15,7 +15,7 @@ public static class DirectoryInfoExtensions
         "Album Artwork"
     };
 
-    private static readonly EnumerationOptions _enumerationOptions = new EnumerationOptions
+    private static readonly EnumerationOptions _enumerationOptions = new()
     {
         BufferSize = SixteenKBytes,
         IgnoreInaccessible = true,
