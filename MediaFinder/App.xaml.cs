@@ -109,6 +109,7 @@ public partial class App : Application
             services.AddSingleton<MainWindow>();
             services.AddSingleton<MainWindowsViewModel>();
             services.AddSingleton<AddSearchSettingViewModel>();
+            services.AddSingleton<EditSearchSettingViewModel>();
             services.AddSingleton<DiscoveryViewModel>();
             services.AddSingleton<ExportViewModel>();
             services.AddSingleton<ProcessCompletedViewModel>();

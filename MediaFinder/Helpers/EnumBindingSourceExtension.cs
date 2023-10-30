@@ -25,5 +25,6 @@ public class EnumBindingSourceExtension : MarkupExtension
         => EnumType == typeof(MultiMediaType) ? MultiMediaTypeExtensions.GetValues()
             : EnumType == typeof(ExportType) ? ExportTypeExtensions.GetValues()
             : EnumType == typeof(NavigateDirection) ? NavigationDirectionExtensions.GetValues()
+            : EnumType == typeof(TriStateBoolean) ? TriStateBooleanExtensions.GetValues()
             : (object)Enum.GetValues(EnumType);
 }

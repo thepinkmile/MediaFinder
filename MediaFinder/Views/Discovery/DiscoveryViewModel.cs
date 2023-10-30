@@ -2,7 +2,6 @@
 using System.ComponentModel;
 using System.Data.Common;
 using System.IO;
-using System.Reflection;
 using System.Windows.Data;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -36,6 +35,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
     public DiscoveryViewModel(
         AddSearchSettingViewModel searchConfigViewModel,
+        EditSearchSettingViewModel editSearchSettingViewModel,
         AppDbContext dbContext,
         IMessenger messenger,
         ILogger<DiscoveryViewModel> logger,
@@ -58,6 +58,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         _searchStagaeThreeWorker.RunWorkerCompleted += SearchStageThreeCompleted;
 
         SearchConfigViewModel = searchConfigViewModel;
+        EditSearchConfigViewModel = editSearchSettingViewModel;
         WorkingDirectory = Path.Combine(
             Directory.GetCurrentDirectory(),
             "TEMP");
@@ -65,11 +66,25 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
     #region Settings Configurations
 
+    [ObservableProperty]
+    private bool _drawEntityIsNew;
+
     public AddSearchSettingViewModel SearchConfigViewModel { get; set; }
 
+    public EditSearchSettingViewModel EditSearchConfigViewModel { get; set; }
+
     [RelayCommand]
-    private static void OnAddSearchSetting(DrawerHost drawerHost)
+    private void OnAddSearchSetting(DrawerHost drawerHost)
     {
+        DrawEntityIsNew = true;
+        drawerHost!.IsRightDrawerOpen = true;
+    }
+
+    [RelayCommand]
+    private async Task OnEditSearchSetting(DrawerHost drawerHost)
+    {
+        DrawEntityIsNew = false;
+        await EditSearchConfigViewModel.Initialize(SelectedConfig!.Id);
         drawerHost!.IsRightDrawerOpen = true;
     }
 

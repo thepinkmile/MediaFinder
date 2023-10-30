@@ -8,6 +8,8 @@
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mde="clr-namespace:MaterialDesignExtensions.Controls;assembly=MaterialDesignExtensions"
+    xmlns:models="clr-namespace:MediaFinder_v2.Services.Search"
+    x:Name="discoveryPage"
     d:DataContext="{d:DesignInstance Type=local:DiscoveryViewModel,
                                      IsDesignTimeCreatable=False}"
     d:DesignHeight="450"
@@ -43,24 +45,46 @@
         OpenMode="Modal"
         OverlayBackground="{DynamicResource PrimaryHueMidBrush}">
         <materialDesign:DrawerHost.RightDrawerContent>
-            <GroupBox
-                MaxWidth="450"
-                Margin="16"
-                materialDesign:ColorZoneAssist.Mode="PrimaryMid"
-                Foreground="{DynamicResource MaterialDesignBody}"
-                Header="Add Search Configuration"
-                Style="{StaticResource MaterialDesignCardGroupBox}">
-                <GroupBox.HeaderTemplate>
-                    <DataTemplate>
-                        <TextBlock
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                            Text="{Binding .}" />
-                    </DataTemplate>
-                </GroupBox.HeaderTemplate>
-                <local:AddSearchSetting DataContext="{Binding SearchConfigViewModel, Mode=TwoWay}" />
-            </GroupBox>
+            <StackPanel>
+                <GroupBox
+                    MaxWidth="450"
+                    Margin="16"
+                    materialDesign:ColorZoneAssist.Mode="PrimaryMid"
+                    Foreground="{DynamicResource MaterialDesignBody}"
+                    Header="Add Search Configuration"
+                    Style="{StaticResource MaterialDesignCardGroupBox}"
+                    Visibility="{Binding DrawEntityIsNew, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <GroupBox.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                Text="{Binding .}" />
+                        </DataTemplate>
+                    </GroupBox.HeaderTemplate>
+                    <local:AddSearchSetting DataContext="{Binding SearchConfigViewModel, Mode=TwoWay}" />
+                </GroupBox>
+                <GroupBox
+                    MaxWidth="450"
+                    Margin="16"
+                    materialDesign:ColorZoneAssist.Mode="PrimaryMid"
+                    Foreground="{DynamicResource MaterialDesignBody}"
+                    Header="Edit Search Configuration"
+                    Style="{StaticResource MaterialDesignCardGroupBox}"
+                    Visibility="{Binding DrawEntityIsNew, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <GroupBox.HeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                Text="{Binding .}" />
+                        </DataTemplate>
+                    </GroupBox.HeaderTemplate>
+                    <local:EditSearchSetting DataContext="{Binding EditSearchConfigViewModel, Mode=TwoWay}" />
+                </GroupBox>
+            </StackPanel>
         </materialDesign:DrawerHost.RightDrawerContent>
         <Grid>
             <Grid.RowDefinitions>
@@ -127,6 +151,7 @@
                         Grid.Row="1"
                         AutoGenerateColumns="False"
                         CanUserAddRows="False"
+                        CanUserDeleteRows="False"
                         HorizontalScrollBarVisibility="Auto"
                         IsReadOnly="True"
                         ItemsSource="{Binding Configurations}"
@@ -134,7 +159,22 @@
                         SelectionUnit="FullRow"
                         VerticalScrollBarVisibility="Auto">
                         <DataGrid.Columns>
+                            <DataGridTemplateColumn
+                                Width="100"
+                                MinWidth="100"
+                                CanUserResize="False">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate DataType="{x:Type models:SearchConfiguration}">
+                                        <Button
+                                            Command="{Binding DataContext.EditSearchSettingCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}"
+                                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type materialDesign:DrawerHost}}}"
+                                            Content="{materialDesign:PackIcon Kind=PencilOutline}"
+                                            Style="{StaticResource MaterialDesignRaisedButton}" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                             <DataGridTextColumn
+                                MinWidth="100"
                                 Binding="{Binding Name}"
                                 CellStyle="{StaticResource DGCellStyle}"
                                 Header="Name"
@@ -188,6 +228,7 @@
                                 Header="Min Video Height"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
+                                Width="*"
                                 Binding="{Binding Directories, Converter={StaticResource ListToStringConverter}}"
                                 CanUserSort="False"
                                 CellStyle="{StaticResource DGCellStyle}"

@@ -1,4 +1,6 @@
-﻿using NetEscapades.EnumGenerators;
+﻿using System.ComponentModel.DataAnnotations;
+
+using NetEscapades.EnumGenerators;
 
 namespace MediaFinder_v2.DataAccessLayer.Models;
 
@@ -6,13 +8,21 @@ namespace MediaFinder_v2.DataAccessLayer.Models;
 [EnumExtensions]
 public enum MultiMediaType
 {
-    Unknown = 0,
+    None = 0,
 
-    Image = 1,
+    Unknown = 1,
 
-    Video = 2,
+    Image = 2,
 
-    Audio = 4,
+    Video = 4,
 
-    PlayableMedia = Video | Audio
+    Audio = 8,
+
+    [Display(Name = "Playable")]
+    PlayableMedia = Video | Audio,
+
+    [Display(Name = "Media")]
+    MultiMedia = Video | Audio | Image,
+
+    All = ~(~0 << 4)
 }

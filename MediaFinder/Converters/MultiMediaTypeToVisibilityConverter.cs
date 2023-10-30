@@ -17,7 +17,7 @@ public class MultiMediaTypeToVisibilityConverter : IValueConverter
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value is not MultiMediaType mediaType
             ? Binding.DoNothing
-            : RequiredType.HasFlag(mediaType)
+            : RequiredType.HasFlagFast(mediaType)
                 ? VisibleStatae
                 : InvisibleState;
 

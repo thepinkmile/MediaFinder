@@ -5,24 +5,16 @@ using System.Windows.Controls;
 namespace MediaFinder_v2.Views.Discovery;
 
 /// <summary>
-/// Interaction logic for AddSearchSetting.xaml
+/// Interaction logic for EditSearchSetting.xaml
 /// </summary>
-public partial class AddSearchSetting : UserControl
+public partial class EditSearchSetting : UserControl
 {
     [GeneratedRegex("\\d+", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Singleline | RegexOptions.CultureInvariant)]
     private static partial Regex NumbersOnlyRegex();
 
-    public AddSearchSetting()
+    public EditSearchSetting()
     {
         InitializeComponent();
-    }
-
-    private void UserControl_Loaded(object sender, RoutedEventArgs e)
-    {
-        if (DataContext is AddSearchSettingViewModel viewModel)
-        {
-            viewModel.ClearFormCommand.Execute(this);
-        }
     }
 
     private void TextBox_PreviewTextInput_NumericOnly(object sender, System.Windows.Input.TextCompositionEventArgs e)
