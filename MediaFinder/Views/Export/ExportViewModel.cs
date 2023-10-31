@@ -18,10 +18,7 @@ using Microsoft.Extensions.Logging;
 
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Configuration;
 using System.IO;
-using System.Runtime.InteropServices;
-using System.Windows.Controls;
 using System.Windows.Data;
 
 namespace MediaFinder_v2.Views.Export;
@@ -57,10 +54,14 @@ public partial class ExportViewModel : ProgressableViewModel,
         // default filters
         TypeFilter = MultiMediaType.All;
         ExportingFilter = TriStateBoolean.True;
+        CreatedAfterFilter = null;
+        CreatedBeforeFilter = null;
 
         // attach filter delegates
         _mediaFilesViewSource.Filter += ApplyExportingFilter;
         _mediaFilesViewSource.Filter += ApplyMediaTypeFilter;
+        _mediaFilesViewSource.Filter += ApplyCreatedAfterFilter;
+        _mediaFilesViewSource.Filter += ApplyCreatedBeforeilter;
 
         _exportWorker.RunWorkerCompleted += ExportCompleted;
 
@@ -70,6 +71,8 @@ public partial class ExportViewModel : ProgressableViewModel,
     }
 
     #region Filtering
+
+    #region Media Type Filter
 
     [ObservableProperty]
     private MultiMediaType _typeFilter;
@@ -87,8 +90,24 @@ public partial class ExportViewModel : ProgressableViewModel,
             return;
         }
 
+        if (TypeFilter == MultiMediaType.All)
+        {
+            e.Accepted &= true;
+            return;
+        }
+
+        if (TypeFilter == MultiMediaType.None)
+        {
+            e.Accepted &= false;
+            return;
+        }
+
         e.Accepted &= TypeFilter.HasFlagFast(item.MultiMediaType);
     }
+
+    #endregion
+
+    #region IsExporting Filter
 
     [ObservableProperty]
     private TriStateBoolean _exportingFilter;
@@ -106,10 +125,81 @@ public partial class ExportViewModel : ProgressableViewModel,
             return;
         }
 
+        if (ExportingFilter == TriStateBoolean.All)
+        {
+            e.Accepted &= true;
+            return;
+        }
+
+        if (ExportingFilter == TriStateBoolean.None)
+        {
+            e.Accepted &= false;
+            return;
+        }
         
         var itemExportFlag = item.ShouldExport ? TriStateBoolean.True : TriStateBoolean.False;
         e.Accepted &= ExportingFilter.HasFlagFast(itemExportFlag);
     }
+
+    #endregion
+
+    #region Created After Filter
+
+    [ObservableProperty]
+    private DateTime? _createdAfterFilter;
+
+    partial void OnCreatedAfterFilterChanged(DateTime? value)
+    {
+        MediaFilesView.Refresh();
+    }
+
+    private void ApplyCreatedAfterFilter(object sender, FilterEventArgs e)
+    {
+        if (!e.Accepted || e.Item is not MediaFile item)
+        {
+            e.Accepted = false;
+            return;
+        }
+
+        if (!CreatedAfterFilter.HasValue || CreatedAfterFilter == DateTime.MinValue)
+        {
+            e.Accepted &= true;
+            return;
+        }
+
+        e.Accepted &= CreatedAfterFilter.Value.Date <= item.DateCreated.DateTime.Date;
+    }
+
+    #endregion
+
+    #region Created Before Filter
+
+    [ObservableProperty]
+    private DateTime? _createdBeforeFilter;
+
+    partial void OnCreatedBeforeFilterChanged(DateTime? value)
+    {
+        MediaFilesView.Refresh();
+    }
+
+    private void ApplyCreatedBeforeilter(object sender, FilterEventArgs e)
+    {
+        if (!e.Accepted || e.Item is not MediaFile item)
+        {
+            e.Accepted = false;
+            return;
+        }
+
+        if (!CreatedBeforeFilter.HasValue || CreatedBeforeFilter == DateTime.MaxValue)
+        {
+            e.Accepted &= true;
+            return;
+        }
+
+        e.Accepted &= CreatedBeforeFilter.Value.Date >= item.DateCreated.DateTime.Date;
+    }
+
+    #endregion
 
     #endregion
 
@@ -210,7 +300,7 @@ public partial class ExportViewModel : ProgressableViewModel,
                 await _dbContext.SaveChangesAsync();
 
                 MediaFilesViewCount = DiscoveredFiles.Count(x => x.ShouldExport);
-                OnPropertyChanged(nameof(DiscoveredFiles));
+                ExportFilesCommand.NotifyCanExecuteChanged();
                 MediaFilesView.Refresh();
             }
         }
@@ -242,11 +332,6 @@ public partial class ExportViewModel : ProgressableViewModel,
     [RelayCommand(CanExecute = nameof(CanExportFiles))]
     public async Task OnExportFiles(CancellationToken cancellationToken)
     {
-        var temp = ExportingFilter;
-        var temp2 = TypeFilter;
-
-        return;
-
         if (ExportComplete)
         {
             _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));

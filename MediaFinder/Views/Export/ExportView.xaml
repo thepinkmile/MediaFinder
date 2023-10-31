@@ -62,6 +62,13 @@
             <Setter Property="FocusVisualStyle" Value="{x:Null}" />
             <Setter Property="IsTabStop" Value="False" />
         </Style>
+
+        <Style
+            x:Key="ClearableDatePicker"
+            BasedOn="{StaticResource MaterialDesignFloatingHintDatePicker}"
+            TargetType="{x:Type DatePicker}">
+            <Setter Property="materialDesign:TextFieldAssist.HasClearButton" Value="True" />
+        </Style>
     </UserControl.Resources>
     <materialDesign:DrawerHost
         x:Name="DrawerHost"
@@ -379,7 +386,10 @@
                             </Style>
                         </DataGrid.Resources>
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn MinWidth="130" CanUserResize="False">
+                            <DataGridTemplateColumn
+                                MinWidth="130"
+                                CanUserResize="False"
+                                HeaderStyle="{StaticResource DataHeaderStyle}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate DataType="{x:Type local:MediaFile}">
                                         <Button
@@ -394,7 +404,10 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
-                            <DataGridTemplateColumn CanUserResize="False" HeaderStyle="{StaticResource DataHeaderStyle}">
+                            <DataGridTemplateColumn
+                                MinWidth="90"
+                                CanUserResize="False"
+                                HeaderStyle="{StaticResource DataHeaderStyle}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate DataType="{x:Type local:MediaFile}">
                                         <Button
@@ -432,18 +445,21 @@
                                 </DataGridTemplateColumn.Header>
                             </DataGridTemplateColumn>
                             <DataGridTextColumn
+                                MinWidth="150"
                                 Binding="{Binding FileName}"
                                 ElementStyle="{StaticResource DataTextBlock}"
                                 Header="Name"
                                 HeaderStyle="{StaticResource DataHeaderStyle}"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
+                                MinWidth="80"
                                 Binding="{Binding FileSize, Converter={StaticResource FormatKbSizeConverter}}"
                                 ElementStyle="{StaticResource DataTextBlock}"
                                 Header="Size"
                                 HeaderStyle="{StaticResource DataHeaderStyle}"
                                 IsReadOnly="True" />
                             <DataGridTextColumn
+                                MinWidth="200"
                                 Binding="{Binding DateCreated, Converter={StaticResource DateTimeOffsetToStringConverter}}"
                                 ElementStyle="{StaticResource DataTextBlock}"
                                 HeaderStyle="{StaticResource DataHeaderStyle}"
@@ -451,20 +467,35 @@
                                 <DataGridTextColumn.Header>
                                     <StackPanel>
                                         <TextBlock Text="Created" />
-                                        <!--
                                         <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
                                             <materialDesign:PackIcon
                                                 Margin="0,0,8,0"
                                                 VerticalAlignment="Center"
                                                 Kind="Filter" />
-                                            TODO: Add DatePicker Here
+                                            <DatePicker
+                                                Width="140"
+                                                materialDesign:HintAssist.Hint="After"
+                                                DisplayDateEnd="{x:Static system:DateTime.Today}"
+                                                SelectedDate="{Binding DataContext.CreatedAfterFilter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                Style="{StaticResource ClearableDatePicker}" />
                                         </StackPanel>
-                                        -->
+                                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                                            <materialDesign:PackIcon
+                                                Margin="0,0,8,0"
+                                                VerticalAlignment="Center"
+                                                Kind="Filter" />
+                                            <DatePicker
+                                                Width="140"
+                                                materialDesign:HintAssist.Hint="Before"
+                                                DisplayDateEnd="{x:Static system:DateTime.Today}"
+                                                SelectedDate="{Binding DataContext.CreatedBeforeFilter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                Style="{StaticResource ClearableDatePicker}" />
+                                        </StackPanel>
                                     </StackPanel>
                                 </DataGridTextColumn.Header>
                             </DataGridTextColumn>
                             <DataGridTextColumn
-                                Width="*"
+                                MinWidth="90"
                                 Binding="{Binding MultiMediaType, Converter={StaticResource MultiMediaTypeToStringConverter}}"
                                 ElementStyle="{StaticResource DataTextBlock}"
                                 HeaderStyle="{StaticResource DataHeaderStyle}"
@@ -494,6 +525,14 @@
                                     </StackPanel>
                                 </DataGridTextColumn.Header>
                             </DataGridTextColumn>
+                            <DataGridTextColumn
+                                MinWidth="280"
+                                Binding="{Binding Md5Hash}"
+                                ElementStyle="{StaticResource DataTextBlock}"
+                                Header="Checksum"
+                                HeaderStyle="{StaticResource DataHeaderStyle}"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn Width="*" IsReadOnly="True" />
                         </DataGrid.Columns>
                     </DataGrid>
                     <TextBlock
