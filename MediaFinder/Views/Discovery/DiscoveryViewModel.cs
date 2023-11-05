@@ -14,6 +14,7 @@ using MediaFinder_v2.DataAccessLayer;
 using MediaFinder_v2.Helpers;
 using MediaFinder_v2.Logging;
 using MediaFinder_v2.Messages;
+using MediaFinder_v2.Models;
 using MediaFinder_v2.Services.Search;
 
 using Microsoft.EntityFrameworkCore;
@@ -81,10 +82,16 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     }
 
     [RelayCommand]
+#pragma warning disable CRR0034
+#pragma warning disable CRR0035
     private async Task OnEditSearchSetting(DrawerHost drawerHost)
+#pragma warning restore CRR0035
+#pragma warning restore CRR0034
     {
         DrawEntityIsNew = false;
-        await EditSearchConfigViewModel.Initialize(SelectedConfig!.Id);
+#pragma warning disable CRR0039
+        await EditSearchConfigViewModel.InitializeAsync(SelectedConfig!.Id).ConfigureAwait(true);
+#pragma warning restore CRR0039
         drawerHost!.IsRightDrawerOpen = true;
     }
 
@@ -92,27 +99,44 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         => SelectedConfig is not null;
 
     [RelayCommand(CanExecute = nameof(CanRemoveSearchSetting))]
+#pragma warning disable CRR0034
+#pragma warning disable CRR0035
     private async Task OnRemoveSearchSetting()
+#pragma warning restore CRR0035
+#pragma warning restore CRR0034
     {
         var config = SelectedConfig!;
-        var entity = await _dbContext.SearchSettings.FirstOrDefaultAsync(x => x.Id == config.Id);
+#pragma warning disable CRR0039
+        var entity = await _dbContext.SearchSettings
+            .FirstOrDefaultAsync(x => x.Id == config.Id)
+            .ConfigureAwait(true);
+#pragma warning restore CRR0039
         if (entity is null)
         {
             return;
         }
 
         _dbContext.SearchSettings.Remove(entity);
-        await _dbContext.SaveChangesAsync();
+#pragma warning disable CRR0039
+        await _dbContext.SaveChangesAsync().ConfigureAwait(true);
+#pragma warning restore CRR0039
         _messenger.Send(SearchSettingUpdated.Create(config));
         _messenger.Send(SnackBarMessage.Create($"Removed configuration: {config.Name}"));
     }
 
     public async void Receive(SearchSettingUpdated message)
     {
-        if (LoadConfigurationsCommand.IsRunning)
-            return;
+        try
+        {
+            if (LoadConfigurationsCommand.IsRunning)
+                return;
 
-        await LoadConfigurationsCommand.ExecuteAsync(null);
+            await LoadConfigurationsCommand.ExecuteAsync(null).ConfigureAwait(false);
+        }
+        catch
+        {
+            // do nothing
+        }
     }
 
     #endregion
@@ -188,7 +212,11 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     }
 
     [RelayCommand]
+#pragma warning disable CRR0034
+#pragma warning disable CRR0035
     public async Task LoadConfigurations()
+#pragma warning restore CRR0035
+#pragma warning restore CRR0034
     {
         ShowProgressIndicator("Loading...");
 
@@ -212,7 +240,11 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
             && !_searchStagaeThreeWorker.IsBusy;
 
     [RelayCommand(CanExecute = nameof(CanPerformSearch))]
+#pragma warning disable CRR0034
+#pragma warning disable CRR0035
     public async Task OnPerformSearch()
+#pragma warning restore CRR0035
+#pragma warning restore CRR0034
     {
         if (SelectedConfig is null)
         {
@@ -230,7 +262,9 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         {
             ShowProgressIndicator("Initializing search parameters", CancelSearchCommand);
 
-            await TruncateFileDetailState(_dbContext);
+#pragma warning disable CRR0039
+            await TruncateFileDetailStateAsync(_dbContext).ConfigureAwait(true);
+#pragma warning restore CRR0039
 
             _searchStageOneWorker.RunWorkerAsync(SearchRequest.Create(_progressToken, WorkingDirectory!, SelectedConfig!));
             CancelSearchCommand.NotifyCanExecuteChanged();
@@ -417,13 +451,13 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         }
     }
 
-    public bool CanFinishSearach()
+    public bool CanFinishSearch()
         => (_createdWorkingDirectory is not null || _dbContext.FileDetails.Any())
             && !_searchStageOneWorker.IsBusy
             && !_searchStagaeTwoWorker.IsBusy
             && !_searchStagaeThreeWorker.IsBusy;
 
-    [RelayCommand(CanExecute = nameof(CanFinishSearach))]
+    [RelayCommand(CanExecute = nameof(CanFinishSearch))]
     public void OnFinishSearch()
     {
         _messenger.Send(FinishedMessage.Create());
@@ -431,13 +465,23 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
     public async void Receive(FinishedMessage message)
     {
-        await Cleanup();
+        try
+        {
+#pragma warning disable CRR0039
+            await CleanupAsync().ConfigureAwait(true);
+#pragma warning restore CRR0039
+        }
+        catch
+        {
+            // do nothing
+        }
     }
 
-    internal async Task Cleanup()
+    internal async Task CleanupAsync(CancellationToken cancellationToken = default)
     {
         _logger.SessionCleanup();
-        await TruncateFileDetailState(_dbContext);
+
+        await TruncateFileDetailStateAsync(_dbContext, cancellationToken).ConfigureAwait(true);
 
         CleanupWorkingDirectory();
 

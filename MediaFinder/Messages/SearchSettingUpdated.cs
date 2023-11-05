@@ -1,4 +1,4 @@
-﻿using MediaFinder_v2.Services.Search;
+﻿using MediaFinder_v2.Models;
 
 namespace MediaFinder_v2.Messages;
 

@@ -8,7 +8,7 @@
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mde="clr-namespace:MaterialDesignExtensions.Controls;assembly=MaterialDesignExtensions"
-    xmlns:models="clr-namespace:MediaFinder_v2.Services.Search"
+    xmlns:models="clr-namespace:MediaFinder_v2.Models"
     x:Name="discoveryPage"
     d:DataContext="{d:DesignInstance Type=local:DiscoveryViewModel,
                                      IsDesignTimeCreatable=False}"

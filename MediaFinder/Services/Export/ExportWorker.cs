@@ -4,9 +4,12 @@ using System.IO;
 
 using CommunityToolkit.Mvvm.Messaging;
 
+using MediaFinder_v2.DataAccessLayer;
 using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.Helpers;
 using MediaFinder_v2.Logging;
+using MediaFinder_v2.Messages;
+using MediaFinder_v2.Models;
 
 using Microsoft.Extensions.Logging;
 
@@ -41,7 +44,7 @@ public class ExportWorker : ReactiveBackgroundWorker<ExportRequest>
 
             EnsureDestinationDirectoryExists(path);
 
-            exportTasks.Add(CopyFile(originalFilePath, fullpath, cts.Token));
+            exportTasks.Add(CopyFileAsync(originalFilePath, fullpath, cts.Token));
         }
         while (!exportTasks.All(t => t.IsCompleted || t.IsCompletedSuccessfully || t.IsFaulted || t.IsCanceled)
                 && !cts.IsCancellationRequested)
@@ -85,7 +88,7 @@ public class ExportWorker : ReactiveBackgroundWorker<ExportRequest>
         var expectedExtension = file.GetExpectedExtension();
         return file.GetExtension().Equals(expectedExtension, StringComparison.InvariantCultureIgnoreCase)
             ? filename
-            : Path.GetFileNameWithoutExtension(filename) + expectedExtension;
+            : $"{Path.GetFileNameWithoutExtension(filename)}{expectedExtension}";
     }
 
     private static string GetDestinationPath(FileDetails file, string exportDirectory, ExportType type)
@@ -115,7 +118,7 @@ public class ExportWorker : ReactiveBackgroundWorker<ExportRequest>
         }
     }
 
-    private Task CopyFile(string source, string destination, CancellationToken cancellationToken = default)
+    private Task CopyFileAsync(string source, string destination, CancellationToken cancellationToken = default)
     {
         if (File.Exists(source))
         {

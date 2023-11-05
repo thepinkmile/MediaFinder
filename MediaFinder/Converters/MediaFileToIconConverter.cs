@@ -3,7 +3,7 @@ using System.Windows.Data;
 
 using MaterialDesignThemes.Wpf;
 
-using MediaFinder_v2.Views.Export;
+using MediaFinder_v2.Models;
 
 namespace MediaFinder_v2.Converters;
 

@@ -13,6 +13,7 @@ using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.DataAccessLayer;
 
 using MediaFinder_v2.Messages;
+using Microsoft.EntityFrameworkCore;
 
 namespace MediaFinder_v2.Views.Discovery;
 
@@ -79,21 +80,28 @@ public partial class EditSearchSettingViewModel : ObservableObject
         _messenger = messenger;
     }
 
-    public async Task Initialize(int settingId)
+    public async Task InitializeAsync(int settingId, CancellationToken cancellationToken = default)
     {
-        _entity = await _dbContext.SearchSettings.FindAsync(settingId)
+        _entity = await _dbContext.SearchSettings
+            .Include(ss => ss.Directories)
+            .FirstOrDefaultAsync(ss => ss.Id == settingId, cancellationToken: cancellationToken)
+            .ConfigureAwait(true)
             ?? throw new InvalidOperationException("Cannot edit configuration as it does not exist.");
 
         ResetFormCommand.Execute(null);
     }
 
     [RelayCommand]
+#pragma warning disable CRR0034
+#pragma warning disable CRR0035
     private async Task OnAddSearchDirectory()
+#pragma warning restore CRR0035
+#pragma warning restore CRR0034
     {
         var dialogResult = await OpenDirectoryDialog.ShowDialogAsync("DialogHost", new OpenDirectoryDialogArguments
         {
             CurrentDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments),
-        });
+        }).ConfigureAwait(true);
         if (dialogResult.Confirmed && !string.IsNullOrEmpty(dialogResult.Directory))
         {
             SettingsDirectories.Add(dialogResult.Directory);
@@ -113,11 +121,36 @@ public partial class EditSearchSettingViewModel : ObservableObject
         => !string.IsNullOrEmpty(SelectedDirectory);
 
     [RelayCommand(CanExecute = nameof(CanSubmit))]
+#pragma warning disable CRR0034
+#pragma warning disable CRR0035
     private async Task OnSubmit()
+#pragma warning restore CRR0035
+#pragma warning restore CRR0034
     {
-        _entity!.Name = SettingName!;
+        if (_entity is null)
+        {
+            return;
+        }
+
+        if (!(_entity.Directories.All(d => SettingsDirectories.Contains(d.Path))
+            && SettingsDirectories.All(p => _entity.Directories.Any(ed => ed.Path.Equals(p, StringComparison.InvariantCultureIgnoreCase)))))
+        {
+            // updating the selected directories
+            var remainingDirectories = _entity.Directories
+                .Where(d => SettingsDirectories.Contains(d.Path));
+            var deletedDirectories = _entity.Directories
+                .Where(d => !SettingsDirectories.Contains(d.Path));
+            var addedDirectories = SettingsDirectories
+                .Where(d => !_entity.Directories.Any(ed => ed.Path.Equals(d, StringComparison.InvariantCultureIgnoreCase)))
+                .Select(p => new SearchDirectory { Path = p, Settings = _entity, SettingsId = _entity.Id });
+
+            _dbContext.SearchDirectories.RemoveRange(deletedDirectories);
+            _dbContext.SearchDirectories.AddRange(addedDirectories);
+            _entity.Directories = remainingDirectories.Concat(addedDirectories).ToList();
+        }
+
+        _entity.Name = SettingName!;
         _entity.Description = SettingDescription;
-        _entity.Directories = SettingsDirectories.Select(p => new SearchDirectory { Path = p }).ToList();
         _entity.Recursive = SettingRecursive;
         _entity.ExtractArchives = SettingExtractArchives;
         _entity.ExtractionDepth = SettingExtractArchives ? SettingExtractionDepth : null;
@@ -128,7 +161,9 @@ public partial class EditSearchSettingViewModel : ObservableObject
         _entity.MinVideoHeight = VideoSizesDefined ? MinVideoHeight : null;
 
         _dbContext.SearchSettings.Update(_entity);
-        await _dbContext.SaveChangesAsync();
+#pragma warning disable CRR0039
+        await _dbContext.SaveChangesAsync().ConfigureAwait(true);
+#pragma warning restore CRR0039
 
         _messenger.Send(SnackBarMessage.Create("Search configuration updated"));
         _messenger.Send(SearchSettingUpdated.Create(_entity));

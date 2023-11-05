@@ -10,7 +10,7 @@ public class MultiMediaTypeToVisibilityConverter : IValueConverter
 {
     public MultiMediaType RequiredType { get; set; }
 
-    public Visibility VisibleStatae { get; set; } = Visibility.Visible;
+    public Visibility VisibleState { get; set; } = Visibility.Visible;
 
     public Visibility InvisibleState { get; set; } = Visibility.Collapsed;
 
@@ -18,7 +18,7 @@ public class MultiMediaTypeToVisibilityConverter : IValueConverter
         => value is not MultiMediaType mediaType
             ? Binding.DoNothing
             : RequiredType.HasFlagFast(mediaType)
-                ? VisibleStatae
+                ? VisibleState
                 : InvisibleState;
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

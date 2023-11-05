@@ -12,11 +12,20 @@ namespace MediaFinder_v2.Views.Discovery
             InitializeComponent();
         }
 
+#pragma warning disable CRR0034
         private async void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
+#pragma warning restore CRR0034
         {
-            if (DataContext is DiscoveryViewModel viewModel)
+            try
             {
-                await viewModel.LoadConfigurationsCommand.ExecuteAsync(null);
+                if (DataContext is DiscoveryViewModel viewModel)
+                {
+                    await viewModel.LoadConfigurationsCommand.ExecuteAsync(null).ConfigureAwait(true);
+                }
+            }
+            catch
+            {
+                // do nothing
             }
         }
     }

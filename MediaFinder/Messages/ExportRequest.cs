@@ -1,7 +1,8 @@
 ﻿using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.Helpers;
+using MediaFinder_v2.Models;
 
-namespace MediaFinder_v2.Services.Export;
+namespace MediaFinder_v2.Messages;
 
 public class ExportRequest : ReactiveBackgroundWorkerContextBase
 {

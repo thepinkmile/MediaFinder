@@ -6,6 +6,7 @@ using MediaFinder_v2.DataAccessLayer;
 using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.Helpers;
 using MediaFinder_v2.Logging;
+using MediaFinder_v2.Messages;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -25,14 +26,14 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
 
     protected override void Execute(FilterRequest inputs, DoWorkEventArgs e)
     {
+#pragma warning disable CRRSP06
         SetProgress($"Finalising Analysis Results...");
-        
-        var initialCount = _dbContext.FileDetails.Count(fd => fd.ShouldExport);
+#pragma warning restore CRRSP06
+
         _dbContext.FileDetails
             .Where(fd => fd.FileType == MultiMediaType.Unknown)
             .ExecuteUpdate(s => s.SetProperty(fd => fd.ShouldExport, false));
         _dbContext.ChangeTracker.Clear();
-        var filteredCountalCount = _dbContext.FileDetails.Count(fd => fd.ShouldExport);
 
         SetProgress($"Suppressing duplicates from export list...");
         var hashGroups = _dbContext.FileDetails
@@ -42,7 +43,10 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
         foreach(var group in hashGroups)
         {
             var files = _dbContext.FileDetails
-                .Where(fd => fd.MD5_Hash == group.MD5 && fd.SHA256_Hash == group.SHA256 && fd.SHA512_Hash == group.SHA512 && fd.ShouldExport)
+                .Where(fd => fd.MD5_Hash!.Equals(group.MD5, StringComparison.InvariantCultureIgnoreCase)
+                        && fd.SHA256_Hash!.Equals(group.SHA256, StringComparison.InvariantCultureIgnoreCase)
+                        && fd.SHA512_Hash!.Equals(group.SHA512, StringComparison.InvariantCultureIgnoreCase)
+                        && fd.ShouldExport)
                 .OrderBy(fd => fd.Extracted)
                 .ThenBy(fd => fd.Created)
                 .Skip(1)
@@ -57,7 +61,6 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
             }
         }
         _dbContext.SaveChanges();
-        var deduplicatedCount = _dbContext.FileDetails.Count(fd => fd.ShouldExport);
 
         SetProgress($"Suppressing small results from export list...");
         var minImageWidth = inputs.MinImageWidth;
@@ -79,13 +82,17 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
             .Where(fd => fd.ShouldExport && fd.FileType != MultiMediaType.Audio && fd.FileType != MultiMediaType.Unknown);
         foreach(var mediaFile in mediaFiles)
         {
-            var heightValue = mediaFile.FileProperties.FirstOrDefault(fp => fp.Name == "height")?.Value;
+            var heightValue = mediaFile.FileProperties
+                .FirstOrDefault(fp => fp.Name.Equals("height", StringComparison.InvariantCultureIgnoreCase))
+                ?.Value;
             if (string.IsNullOrEmpty(heightValue) || !long.TryParse(heightValue, out var height))
             {
                 continue;
             }
 
-            var widthValue = mediaFile.FileProperties.FirstOrDefault(fp => fp.Name == "width")?.Value;
+            var widthValue = mediaFile.FileProperties
+                .FirstOrDefault(fp => fp.Name.Equals("width", StringComparison.InvariantCultureIgnoreCase))
+                ?.Value;
             if (string.IsNullOrEmpty(widthValue) || !long.TryParse(widthValue, out var width))
             {
                 continue;
@@ -112,7 +119,6 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
             }
         }
         _dbContext.SaveChanges();
-        var finalCount = _dbContext.FileDetails.Count(fd => fd.ShouldExport);
 
         if (CancellationPending)
         {

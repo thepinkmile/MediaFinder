@@ -6,6 +6,7 @@ using CommunityToolkit.Mvvm.Messaging;
 
 using MediaFinder_v2.Helpers;
 using MediaFinder_v2.Logging;
+using MediaFinder_v2.Messages;
 
 using Microsoft.Extensions.Logging;
 
@@ -42,7 +43,9 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
             return;
         }
 
+#pragma warning disable CRRSP06
         SetProgress("Finalising Search Results...");
+#pragma warning restore CRRSP06
         e.Result = SearchResponse.Create(
             files
                 .Distinct()
@@ -160,7 +163,9 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
         return extractionPath;
     }
 
+#pragma warning disable CRRSP06
     private static readonly string[] KnownNonArchiveExtensions = new[] { ".ipa", ".ibooks", ".epub" };
+#pragma warning restore CRRSP06
 
     private bool ExtractArchive(FileInfo filepath, DirectoryInfo destinationPath)
     {

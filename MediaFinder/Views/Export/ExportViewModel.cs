@@ -9,9 +9,8 @@ using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.Helpers;
 using MediaFinder_v2.Logging;
 using MediaFinder_v2.Messages;
-
+using MediaFinder_v2.Models;
 using MediaFinder_v2.Services.Export;
-using MediaFinder_v2.Services.Search;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -207,10 +206,17 @@ public partial class ExportViewModel : ProgressableViewModel,
 
     public async void Receive(SearchCompletedMessage message)
     {
-        if (LoadingResultsCommand.IsRunning)
-            return;
+        try
+        {
+            if (LoadingResultsCommand.IsRunning)
+                return;
 
-        await LoadingResultsCommand.ExecuteAsync(null);
+            await LoadingResultsCommand.ExecuteAsync(null).ConfigureAwait(true);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "Failed to handle Search Completed message.");
+        }
     }
 
     private readonly CollectionViewSource _mediaFilesViewSource;
@@ -247,7 +253,11 @@ public partial class ExportViewModel : ProgressableViewModel,
     private bool _exportComplete;
 
     [RelayCommand]
+#pragma warning disable CRR0034
+#pragma warning disable CRR0035
     public async Task OnLoadingResults()
+#pragma warning restore CRR0035
+#pragma warning restore CRR0034
     {
         ShowProgressIndicator("Populating Results...");
         DiscoveredFiles.Clear();
@@ -280,9 +290,15 @@ public partial class ExportViewModel : ProgressableViewModel,
     private MediaFile? _selectedExportFile;
 
     [RelayCommand]
+#pragma warning disable CRR0034
+#pragma warning disable CRR0035
     public async Task OnToggleExportFlag(MediaFile item)
+#pragma warning restore CRR0035
+#pragma warning restore CRR0034
     {
-        var entity = await _dbContext.FileDetails.FindAsync(item.Id);
+        var entity = await _dbContext.FileDetails
+            .FindAsync(item.Id)
+            .ConfigureAwait(true);
         if (entity is null)
         {
             return;
@@ -297,7 +313,9 @@ public partial class ExportViewModel : ProgressableViewModel,
             {
                 item.ShouldExport = newValue;
                 entityPropertyDescriptor.SetValue(entity, newValue);
-                await _dbContext.SaveChangesAsync();
+#pragma warning disable CRR0039
+                await _dbContext.SaveChangesAsync().ConfigureAwait(true);
+#pragma warning restore CRR0039
 
                 MediaFilesViewCount = DiscoveredFiles.Count(x => x.ShouldExport);
                 ExportFilesCommand.NotifyCanExecuteChanged();
@@ -330,7 +348,9 @@ public partial class ExportViewModel : ProgressableViewModel,
             && !_exportWorker.IsBusy;
 
     [RelayCommand(CanExecute = nameof(CanExportFiles))]
+#pragma warning disable CRR0034
     public async Task OnExportFiles(CancellationToken cancellationToken)
+#pragma warning restore CRR0034
     {
         if (ExportComplete)
         {
@@ -352,7 +372,8 @@ public partial class ExportViewModel : ProgressableViewModel,
             var filesToExport = await _dbContext.FileDetails
                 .Include(fd => fd.FileProperties)
                 .Where(fd => fd.ShouldExport)
-                .ToListAsync(cancellationToken);
+                .ToListAsync(cancellationToken)
+                .ConfigureAwait(true);
             _dbContext.ChangeTracker.LazyLoadingEnabled = originalLazyLoadSetting;
 
             _exportWorker.RunWorkerAsync(
@@ -441,10 +462,10 @@ public partial class ExportViewModel : ProgressableViewModel,
 
     #region Finish
 
-    public bool CanFinishSearach()
+    public bool CanFinishSearch()
         => !_exportWorker.IsBusy;
 
-    [RelayCommand(CanExecute = nameof(CanFinishSearach))]
+    [RelayCommand(CanExecute = nameof(CanFinishSearch))]
     public void Finish()
     {
         _messenger.Send(FinishedMessage.Create());

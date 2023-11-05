@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Windows.Input;
 
+using Microsoft.Extensions.Logging;
+
 namespace MediaFinder_v2.Views;
 
 /// <summary>
@@ -8,8 +10,11 @@ namespace MediaFinder_v2.Views;
 /// </summary>
 public partial class MainWindow
 {
-    public MainWindow(MainWindowsViewModel mainWindowViewModel)
+    private readonly ILogger<MainWindow> _logger;
+
+    public MainWindow(MainWindowsViewModel mainWindowViewModel, ILogger<MainWindow> logger)
     {
+        _logger = logger;
         DataContext = mainWindowViewModel;
 
         InitializeComponent();
@@ -19,12 +24,22 @@ public partial class MainWindow
 
     protected override async void OnClosing(CancelEventArgs e)
     {
-        if (DataContext is MainWindowsViewModel viewModel)
+        try
         {
-            await viewModel.DiscoveryViewModel.Cleanup();
-            viewModel.ExportViewModel.Cleanup();
+            if (DataContext is MainWindowsViewModel viewModel)
+            {
+
+#pragma warning disable CRR0039
+                await viewModel.DiscoveryViewModel.CleanupAsync().ConfigureAwait(true);
+#pragma warning restore CRR0039
+                viewModel.ExportViewModel.Cleanup();
+            }
+            base.OnClosing(e);
         }
-        base.OnClosing(e);
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Exception occurred while closing MainWindow");
+        }
     }
 
     private void OnClose(object sender, ExecutedRoutedEventArgs e)

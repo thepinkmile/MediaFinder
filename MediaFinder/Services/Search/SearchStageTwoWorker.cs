@@ -10,6 +10,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.Helpers;
 using MediaFinder_v2.Logging;
+using MediaFinder_v2.Messages;
 
 using MetadataExtractor;
 
@@ -21,6 +22,9 @@ namespace MediaFinder_v2.Services.Search;
 
 public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequest>
 {
+#pragma warning disable CRRSP06
+    private const string YearDateFormatString = "yyyy";
+
     private static readonly string[] IsoDateFormats = { 
         // Basic formats
         "yyyyMMddTHHmmsszzz",
@@ -69,6 +73,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
         "yyyy:MM:dd HH:mm:ssZ",
         "yyyy:MM:dd HH:mm:ss"
         };
+#pragma warning restore CRRSP06
     private static readonly Enum[] MetadataTags = Enum.GetValues(typeof(TagLib.TagTypes)).Cast<Enum>().ToArray();
 
     internal const string FILENAME_DETAIL = "filename";
@@ -112,7 +117,9 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             }
 
             ++index;
+#pragma warning disable CRRSP06
             ReportProgress($"Analysing file: {filepath}\nFile {index} of {inputs.Files.Count}");
+#pragma warning restore CRRSP06
             _logger.AnalysingFile(filepath);
 
             var details = new ConcurrentDictionary<string, string>();
@@ -154,9 +161,9 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
             // process detailed media info
             var processingTasks = new Task[] {
-                GetVideoInfo(filepath, details, inputs.PerformDeepAnalysis, cts.Token),
-                GetImageInfo(filepath, details, inputs.PerformDeepAnalysis, cts.Token),
-                GetHashDetails(filepath, details, cts.Token)
+                GetVideoInfoAsync(filepath, details, inputs.PerformDeepAnalysis, cts.Token),
+                GetImageInfoAsync(filepath, details, inputs.PerformDeepAnalysis, cts.Token),
+                GetHashDetailsAsync(filepath, details, cts.Token)
             };
             while (!processingTasks.All(t => t.IsCompleted || t.IsCompletedSuccessfully || t.IsFaulted || t.IsCanceled)
                 && !cts.IsCancellationRequested)
@@ -214,7 +221,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
                 MD5_Hash = details.GetValueOrDefault(MD5_DETAIL),
                 SHA256_Hash = details.GetValueOrDefault(SHA256_DETAIL),
                 SHA512_Hash = details.GetValueOrDefault(SHA512_DETAIL),
-                Extracted = details.GetValueOrDefault(WAS_EXTRACTED_DETAIL, "false") == "true",
+                Extracted = details.GetValueOrDefault(WAS_EXTRACTED_DETAIL, "false").Equals("true", StringComparison.InvariantCultureIgnoreCase),
                 RelativePath = details.TryGetValue(RELATIVE_PATH_DETAIL, out var path)
                     ? path
                     : details[PARENTNAME_DETAIL]
@@ -232,49 +239,47 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
     #region Video Processing
 
+#pragma warning disable CRRSP06
     private static readonly string[] KnownVideoExtensions = new[] {
         "webm", "mkv", "flv", "vob", "ogv", "ogg", "rrc", "gifv", "mng", "mov",
         "avi", "qt", "wmv", "yuv", "rm", "asf", "amv", "mp4", "m4p", "m4v", "mpg",
         "mp2", "mpeg", "mpe", "mpv", "m4v", "svi", "3gp", "3g2", "mxf", "roq",
         "nsv", "flv", "f4v", "f4p", "f4a", "f4b", "mod" };
+#pragma warning restore CRRSP06
 
-    private async Task GetVideoInfo(string filepath, ConcurrentDictionary<string, string> details, bool performDeepAnalysis = false, CancellationToken cancellation = default)
+    private Task GetVideoInfoAsync(string filepath, ConcurrentDictionary<string, string> details, bool performDeepAnalysis = false, CancellationToken cancellationToken = default)
     {
         if (!performDeepAnalysis)
         {
             _logger.PerformingVideoDetection(filepath);
-            await Task.Yield();
             if (KnownVideoExtensions.Contains(details[EXTENSION_DETAIL]))
             {
                 _logger.VideoDetected(filepath);
-                await Task.Yield();
                 details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Video.ToStringFast());
             }
             else
             {
                 _logger.NoVideoDetected(filepath);
-                await Task.Yield();
             }
-            return;
+            return Task.CompletedTask;
         }
 
         try
         {
             _logger.PerformingVideoMetadataDetection(filepath);
-            await Task.Yield();
 
             var videoInfo = _ffProbe.GetMediaInfo(filepath);
             if (videoInfo!.Duration == TimeSpan.Zero
                 || videoInfo.FormatName.StartsWith("image2")
                 || videoInfo.FormatName.EndsWith("_pipe")
-                || videoInfo.Streams.All(s => s.CodecType == "subtitle"))
+                || videoInfo.Streams.All(s => s.CodecType.Equals("subtitle", StringComparison.InvariantCultureIgnoreCase)))
             {
                 _logger.NoVideoDetected(filepath);
-                await Task.Yield();
-                return;
+                return Task.CompletedTask;
             }
 
-            if (videoInfo.Streams.All(s => s.CodecType == "audio"))
+            cancellationToken.ThrowIfCancellationRequested();
+            if (videoInfo.Streams.All(s => s.CodecType.Equals("audio", StringComparison.InvariantCultureIgnoreCase)))
             {
                 _logger.AudioDetected(filepath);
                 details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Audio.ToStringFast());
@@ -282,7 +287,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
                 var dateProperty = videoInfo.FormatTags.FirstOrDefault(k => string.Equals("date", k.Key, StringComparison.OrdinalIgnoreCase));
                 if (!string.IsNullOrEmpty(dateProperty.Value))
                 {
-                    if (DateTimeOffset.TryParseExact(dateProperty.Value, "yyyy", CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal | DateTimeStyles.AdjustToUniversal, out var createdYear))
+                    if (DateTimeOffset.TryParseExact(dateProperty.Value, YearDateFormatString, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal | DateTimeStyles.AdjustToUniversal, out var createdYear))
                     {
                         details.AddOrUpdate("published_year", createdYear.ToUniversalTime().ToString("O"));
                     }
@@ -292,7 +297,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
                     }
                 }
             }
-            else if (videoInfo.Streams.Any(s => s.CodecType == "video"))
+            else if (videoInfo.Streams.Any(s => s.CodecType.Equals("video", StringComparison.InvariantCultureIgnoreCase)))
             {
                 _logger.VideoDetected(filepath);
                 details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Video.ToStringFast());
@@ -314,13 +319,13 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             else
             {
                 _logger.NoVideoDetected(filepath);
-                await Task.Yield();
-                return;
+                return Task.CompletedTask;
             }
             details.AddOrUpdate("formatLongName", videoInfo!.FormatLongName);
             details.AddOrUpdate("formatName", videoInfo.FormatName);
             details.AddOrUpdate("duration", videoInfo.Duration.ToString("c", CultureInfo.InvariantCulture));
 
+            cancellationToken.ThrowIfCancellationRequested();
             var potentialExtensions = videoInfo.FormatName
                 .Split(',')
                 .Select(x => x.Trim().ToLowerInvariant())
@@ -337,23 +342,23 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
                         : "wma";
                 }
 
-                details.AddOrUpdate(EXPECTED_EXTENSION_DETAIL, "." + detectedExtension);
+                details.AddOrUpdate(EXPECTED_EXTENSION_DETAIL, $".{detectedExtension}");
             }
         }
         catch (OperationCanceledException)
         {
-            _logger.UserCanceledOperation("Meatdata Detection");
+            _logger.UserCanceledOperation("Metadata Detection");
         }
         catch (Exception ex) when (ex is FFProbeException || ex.InnerException is FFProbeException)
         {
             _logger.FFProbeFailure(ex, filepath);
-            await Task.Yield();
         }
         catch (Exception ex) when (ex.InnerException is not FFProbeException)
         {
             _logger.NoVideoDetected(filepath, ex);
-            await Task.Yield();
         }
+
+        return Task.CompletedTask;
     }
 
     private string? FindMatchingExtension(string[] options, string extension)
@@ -363,13 +368,15 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
     #region Image Processing
 
+#pragma warning disable CRRSP06
     private static readonly string[] KnownImageExtensions = new[] { ".bmp", ".jpg", ".jpeg", ".jfif", ".png", ".tif", ".tiff", ".gif", ".svg" };
+#pragma warning restore CRRSP06
 
     private const string REGEX_GROUP_PIXELS = "pixels";
     [GeneratedRegex($"(?<{REGEX_GROUP_PIXELS}>(\\d+))( {REGEX_GROUP_PIXELS})?", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Singleline | RegexOptions.CultureInvariant)]
     private static partial Regex PixelsRegex();
 
-    private async Task GetImageInfo(string filepath, ConcurrentDictionary<string, string> details, bool performDeepAnalysis = false, CancellationToken cancellationToken = default)
+    private Task GetImageInfoAsync(string filepath, ConcurrentDictionary<string, string> details, bool performDeepAnalysis = false, CancellationToken cancellationToken = default)
     {
         if (!performDeepAnalysis)
         {
@@ -383,25 +390,22 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             {
                 _logger.NoImageDetected(filepath);
             }
-            await Task.Yield();
-            return;
+            return Task.CompletedTask;
         }
 
         try
         {
             _logger.PerformingImageMetadataDetection(filepath);
-            await Task.Yield();
 
             using var fs = File.Open(filepath, FileMode.Open, FileAccess.Read, FileShare.Read);
             var img = ImageMetadataReader.ReadMetadata(fs);
             if (img.Count == 0)
             {
                 _logger.NoImageDetected(filepath);
-                await Task.Yield();
-                return;
+                return Task.CompletedTask;
             }
+
             cancellationToken.ThrowIfCancellationRequested();
-            await Task.Yield();
 
             var result = new Dictionary<string, string>();
             foreach (var directory in img)
@@ -414,8 +418,8 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
                     }
                 }
             }
+
             cancellationToken.ThrowIfCancellationRequested();
-            await Task.Yield();
 
             details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
 
@@ -430,7 +434,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
             if (result.ContainsKey("File Type_Expected File Name Extension"))
             {
-                details.AddOrUpdate(EXPECTED_EXTENSION_DETAIL, "." + result["File Type_Expected File Name Extension"]);
+                details.AddOrUpdate(EXPECTED_EXTENSION_DETAIL, $".{result["File Type_Expected File Name Extension"]}");
             }
         }
         catch (OperationCanceledException)
@@ -440,8 +444,9 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
         catch (Exception ex)
         {
             _logger.NoImageDetected(filepath, ex);
-            await Task.Yield();
         }
+
+        return Task.CompletedTask;
     }
 
     private void ParseDimensionProperty(
@@ -499,11 +504,11 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             }
             if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.Audio))
             {
-                SetImageMetadata(fileMetadata, details);
+                SetAudioMetadata(fileMetadata, details);
             }
             if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.Video))
             {
-                SetImageMetadata(fileMetadata, details);
+                SetVideoMetadata(fileMetadata, details);
             }
             if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.None))
             {
@@ -516,7 +521,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
         }
         catch (OperationCanceledException)
         {
-            _logger.UserCanceledOperation("Meatdata Detection");
+            _logger.UserCanceledOperation("Metadata Detection");
         }
         catch (Exception ex)
         {
@@ -552,7 +557,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
         details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Audio.ToStringFast());
         details.AddOrUpdate("duration", metadata.Properties.Duration.ToString("c", CultureInfo.InvariantCulture));
         details.AddOrUpdate("audio_bitRate", metadata.Properties.AudioBitrate.ToString("c", CultureInfo.InvariantCulture));
-        details.AddOrUpdate("audio_chanels", metadata.Properties.AudioChannels.ToString());
+        details.AddOrUpdate("audio_channels", metadata.Properties.AudioChannels.ToString());
         details.AddOrUpdate("audio_sampleRate", metadata.Properties.AudioSampleRate.ToString());
 
         var earliestYear = MetadataTags
@@ -572,12 +577,11 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
     #region Hash Generation
 
-    private async Task GetHashDetails(string filepath, ConcurrentDictionary<string, string> details, CancellationToken cancellationToken = default)
+    private Task GetHashDetailsAsync(string filepath, ConcurrentDictionary<string, string> details, CancellationToken cancellationToken = default)
     {
         try
         {
             _logger.CreatingFileChecksum(filepath);
-            await Task.Yield();
 
             using var fs = File.Open(filepath, FileMode.Open, FileAccess.Read, FileShare.Read);
             using var hashStream = new HashStream(fs, HashAlgorithmName.MD5, HashAlgorithmName.SHA256, HashAlgorithmName.SHA512);
@@ -587,24 +591,23 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             do
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                await Task.Yield();
                 read = hashStream.Read(buffer, 0, buffer.Length);
             } while (read != 0);
 
-            await Task.Yield();
             details.AddOrUpdate(MD5_DETAIL, Convert.ToHexString(hashStream.Hash(HashAlgorithmName.MD5)));
             details.AddOrUpdate(SHA256_DETAIL, Convert.ToHexString(hashStream.Hash(HashAlgorithmName.SHA256)));
             details.AddOrUpdate(SHA512_DETAIL, Convert.ToHexString(hashStream.Hash(HashAlgorithmName.SHA512)));
         }
         catch (OperationCanceledException)
         {
-            _logger.UserCanceledOperation("Meatdata Detection");
+            _logger.UserCanceledOperation("Metadata Detection");
         }
         catch (Exception ex)
         {
             _logger.FailedToCreateChecksum(ex, filepath);
         }
-        await Task.Yield();
+
+        return Task.CompletedTask;
     }
 
     #endregion

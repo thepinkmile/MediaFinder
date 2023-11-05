@@ -5,3 +5,5 @@ public record FinishedMessage
     public static FinishedMessage Create()
         => new();
 }
+
+

@@ -6,7 +6,7 @@ public static class DirectoryInfoExtensions
 {
     public const int SixteenKBytes = 1024 * 16;
 
-    // a list of known directories that cuase issues with dowloading files from the cloud
+    // a list of known directories that cause issues with downloading files from the cloud
     public static readonly List<string> DirectoryExclusions = new()
     {
         "OneDrive",

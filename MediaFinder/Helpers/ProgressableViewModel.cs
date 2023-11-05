@@ -11,11 +11,15 @@ using System.Windows.Input;
 
 namespace MediaFinder_v2.Helpers;
 
+#pragma warning disable CRRSP08
 public abstract class ProgressableViewModel
+#pragma warning restore CRRSP08
 {
     private readonly ILogger _logger;
 
+#pragma warning disable CRRSP11
     protected ProgressableViewModel(
+#pragma warning restore CRRSP11
         IMessenger messenger,
         ILogger logger,
         AppDbContext dbContext)
@@ -62,9 +66,9 @@ public abstract class ProgressableViewModel
 
     #region Completion Actions
 
-    protected static async Task TruncateFileDetailState(AppDbContext dbContext)
+    protected static async Task TruncateFileDetailStateAsync(AppDbContext dbContext, CancellationToken cancellationToken = default)
     {
-        await dbContext.FileDetails.Include(fd => fd.FileProperties).ExecuteDeleteAsync();
+        await dbContext.FileDetails.Include(fd => fd.FileProperties).ExecuteDeleteAsync(cancellationToken).ConfigureAwait(true);
         dbContext.ChangeTracker.Clear();
     }
 

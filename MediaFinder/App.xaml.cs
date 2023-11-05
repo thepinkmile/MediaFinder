@@ -46,7 +46,9 @@ public partial class App : Application
                 path: "logs/mediaFinder-.log",
                 rollingInterval: RollingInterval.Day,
                 retainedFileCountLimit: 15,
+#pragma warning disable CRRSP06
                 outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}|{Level:u3}|{SourceContext}|{Message:lj}{NewLine}{Exception}")
+#pragma warning restore CRRSP06
             .CreateLogger();
 
         try
@@ -57,7 +59,7 @@ public partial class App : Application
             AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
             {
                 var logger = host.Services.GetRequiredService<ILogger<App>>();
-                logger.LogError(args.ExceptionObject as Exception, "An unexpected exception occured.");
+                logger.LogError(args.ExceptionObject as Exception, "An unexpected exception occurred.");
             };
 
             using var scope = host.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
@@ -70,7 +72,7 @@ public partial class App : Application
             app.DispatcherUnhandledException += (sender, args) =>
             {
                 var logger = host.Services.GetRequiredService<ILogger<App>>();
-                logger.LogError(args.Exception, "An unexpected exception occured.");
+                logger.LogError(args.Exception, "An unexpected exception occurred.");
             };
             app.MainWindow = host.Services.GetRequiredService<MainWindow>();
             app.MainWindow.Visibility = Visibility.Visible;

@@ -2,7 +2,7 @@
 
 using NetEscapades.EnumGenerators;
 
-namespace MediaFinder_v2.Services.Export;
+namespace MediaFinder_v2.Models;
 
 [EnumExtensions]
 public enum ExportType

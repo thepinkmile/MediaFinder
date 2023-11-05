@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Text;
 
 namespace MediaFinder_v2.Helpers;
+#pragma warning disable CRRSP05
 // Copyright 2018 Steve Streeting
 // 
 // Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -22,6 +23,7 @@ namespace MediaFinder_v2.Helpers;
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 // SOFTWARE.
+#pragma warning restore CRRSP05
 
 /// <summary>
 /// Passthrough stream which calculates a hash on all the bytes read or written.
@@ -32,7 +34,9 @@ public class HashStream : Stream
 {
 
     protected Stream _target;
+#pragma warning disable CRRSP11
     protected byte[] _passphrase;
+#pragma warning restore CRRSP11
     protected Dictionary<string, HashAlgorithm?> _hashes;
     protected bool _finalized;
 
@@ -135,6 +139,7 @@ public class HashStream : Stream
         }
     }
 
+#pragma warning disable CRRSP04
     /// <summary>
     /// Calculate final hash for the content which has been written or read to
     /// the target stream so far.
@@ -147,6 +152,7 @@ public class HashStream : Stream
     /// <returns>The hash value</returns>
     /// <exception cref="ArgumentException">Thrown if the requested algorithm name is <see langword="null"/>.</exception>
     /// <exception cref="InvalidOperationException">Thrown if the requested algorithm was not specified in the constructor.</exception>
+#pragma warning restore CRRSP04
     public byte[] Hash(HashAlgorithmName hashName)
     {
         if (hashName.Name is null)

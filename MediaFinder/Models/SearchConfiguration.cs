@@ -1,4 +1,4 @@
-﻿namespace MediaFinder_v2.Services.Search;
+﻿namespace MediaFinder_v2.Models;
 
 public class SearchConfiguration
 {

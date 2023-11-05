@@ -4,13 +4,14 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:converters="clr-namespace:MediaFinder_v2.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:dbmodels="clr-namespace:MediaFinder_v2.DataAccessLayer.Models"
     xmlns:exports="clr-namespace:MediaFinder_v2.Services.Export"
     xmlns:helpers="clr-namespace:MediaFinder_v2.Helpers"
     xmlns:local="clr-namespace:MediaFinder_v2.Views.Export"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mde="clr-namespace:MaterialDesignExtensions.Controls;assembly=MaterialDesignExtensions"
-    xmlns:models="clr-namespace:MediaFinder_v2.DataAccessLayer.Models"
+    xmlns:models="clr-namespace:MediaFinder_v2.Models"
     xmlns:system="clr-namespace:System;assembly=mscorlib"
     d:DataContext="{d:DesignInstance Type=local:ExportViewModel,
                                      IsDesignTimeCreatable=False}"
@@ -391,7 +392,7 @@
                                 CanUserResize="False"
                                 HeaderStyle="{StaticResource DataHeaderStyle}">
                                 <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate DataType="{x:Type local:MediaFile}">
+                                    <DataTemplate DataType="{x:Type models:MediaFile}">
                                         <Button
                                             Command="{Binding DataContext.ShowFileDetailsCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}"
                                             CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type materialDesign:DrawerHost}}}"
@@ -409,7 +410,7 @@
                                 CanUserResize="False"
                                 HeaderStyle="{StaticResource DataHeaderStyle}">
                                 <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate DataType="{x:Type local:MediaFile}">
+                                    <DataTemplate DataType="{x:Type models:MediaFile}">
                                         <Button
                                             Margin="-10"
                                             Command="{Binding DataContext.ToggleExportFlagCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}"
@@ -513,7 +514,7 @@
                                                 VerticalAlignment="Center"
                                                 VerticalContentAlignment="Center"
                                                 IsSynchronizedWithCurrentItem="True"
-                                                ItemsSource="{Binding Source={helpers:EnumBindingSource {x:Type models:MultiMediaType}}}"
+                                                ItemsSource="{Binding Source={helpers:EnumBindingSource {x:Type dbmodels:MultiMediaType}}}"
                                                 SelectedItem="{Binding DataContext.TypeFilter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                                 <ComboBox.ItemTemplate>
                                                     <DataTemplate>

@@ -7,6 +7,7 @@ namespace MediaFinder_v2.DataAccessLayer
     public class AppDbContext : DbContext
     {
         public DbSet<SearchSettings> SearchSettings => Set<SearchSettings>();
+        public DbSet<SearchDirectory> SearchDirectories => Set<SearchDirectory>();
         public DbSet<FileDetails> FileDetails => Set<FileDetails>();
         public DbSet<FileProperty> FileProperties => Set<FileProperty>();
 
@@ -21,7 +22,7 @@ namespace MediaFinder_v2.DataAccessLayer
         {
             base.OnModelCreating(modelBuilder);
 
-            // Handle datetimes in SQLite src: https://blog.dangl.me/archive/handling-datetimeoffset-in-sqlite-with-entity-framework-core/
+            // Handle DateTime(s) in SQLite src: https://blog.dangl.me/archive/handling-datetimeoffset-in-sqlite-with-entity-framework-core/
             if (Database.IsSqlite())
             {
                 // SQLite does not have proper support for DateTimeOffset via Entity Framework Core, see the limitations

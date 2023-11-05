@@ -3,7 +3,7 @@ using System.Windows.Markup;
 
 using MediaFinder_v2.DataAccessLayer.Models;
 using MediaFinder_v2.Messages;
-using MediaFinder_v2.Services.Export;
+using MediaFinder_v2.Models;
 
 namespace MediaFinder_v2.Helpers;
 
