@@ -42,15 +42,17 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
             .Distinct();
         foreach(var group in hashGroups)
         {
+#pragma warning disable CRR0050
             var files = _dbContext.FileDetails
-                .Where(fd => fd.MD5_Hash!.Equals(group.MD5, StringComparison.InvariantCultureIgnoreCase)
-                        && fd.SHA256_Hash!.Equals(group.SHA256, StringComparison.InvariantCultureIgnoreCase)
-                        && fd.SHA512_Hash!.Equals(group.SHA512, StringComparison.InvariantCultureIgnoreCase)
+                .Where(fd => fd.MD5_Hash == group.MD5
+                        && fd.SHA256_Hash == group.SHA256
+                        && fd.SHA512_Hash == group.SHA512
                         && fd.ShouldExport)
                 .OrderBy(fd => fd.Extracted)
                 .ThenBy(fd => fd.Created)
                 .Skip(1)
                 .ToList();
+#pragma warning restore CRR0050
             if (files.Any())
             {
                 _logger.DuplicateChecksum(group.MD5, group.SHA256, group.SHA512, files.Count);
