@@ -276,7 +276,7 @@
                             MinWidth="150"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            ItemsSource="{Binding Source={helpers:EnumBindingSource {x:Type exports:ExportType}}}"
+                            ItemsSource="{Binding Source={helpers:EnumBindingSource {x:Type models:ExportType}}}"
                             SelectedItem="{Binding ExportType}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
