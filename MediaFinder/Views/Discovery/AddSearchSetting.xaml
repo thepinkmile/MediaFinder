@@ -23,10 +23,7 @@
             TrueValue="Visible" />
         <converters:NullableLongToStringConverter x:Key="NullableLongToStringConverter" />
     </UserControl.Resources>
-    <ScrollViewer
-        HorizontalAlignment="Center"
-        VerticalAlignment="Top"
-        VerticalScrollBarVisibility="Auto">
+    <Grid HorizontalAlignment="Center" VerticalAlignment="Top">
         <StackPanel Margin="4">
             <TextBox
                 Height="60"
@@ -239,5 +236,5 @@
                     Style="{StaticResource MaterialDesignRaisedDarkButton}" />
             </DockPanel>
         </StackPanel>
-    </ScrollViewer>
+    </Grid>
 </UserControl>

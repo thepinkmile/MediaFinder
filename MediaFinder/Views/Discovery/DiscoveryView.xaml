@@ -45,46 +45,51 @@
         OpenMode="Modal"
         OverlayBackground="{DynamicResource PrimaryHueMidBrush}">
         <materialDesign:DrawerHost.RightDrawerContent>
-            <StackPanel>
-                <GroupBox
-                    MaxWidth="450"
-                    Margin="16"
-                    materialDesign:ColorZoneAssist.Mode="PrimaryMid"
-                    Foreground="{DynamicResource MaterialDesignBody}"
-                    Header="Add Search Configuration"
-                    Style="{StaticResource MaterialDesignCardGroupBox}"
-                    Visibility="{Binding DrawEntityIsNew, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <GroupBox.HeaderTemplate>
-                        <DataTemplate>
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                                Text="{Binding .}" />
-                        </DataTemplate>
-                    </GroupBox.HeaderTemplate>
-                    <local:AddSearchSetting DataContext="{Binding SearchConfigViewModel, Mode=TwoWay}" />
-                </GroupBox>
-                <GroupBox
-                    MaxWidth="450"
-                    Margin="16"
-                    materialDesign:ColorZoneAssist.Mode="PrimaryMid"
-                    Foreground="{DynamicResource MaterialDesignBody}"
-                    Header="Edit Search Configuration"
-                    Style="{StaticResource MaterialDesignCardGroupBox}"
-                    Visibility="{Binding DrawEntityIsNew, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                    <GroupBox.HeaderTemplate>
-                        <DataTemplate>
-                            <TextBlock
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                                Text="{Binding .}" />
-                        </DataTemplate>
-                    </GroupBox.HeaderTemplate>
-                    <local:EditSearchSetting DataContext="{Binding EditSearchConfigViewModel, Mode=TwoWay}" />
-                </GroupBox>
-            </StackPanel>
+            <ScrollViewer
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <GroupBox
+                        MaxWidth="450"
+                        Margin="16"
+                        materialDesign:ColorZoneAssist.Mode="PrimaryMid"
+                        Foreground="{DynamicResource MaterialDesignBody}"
+                        Header="Add Search Configuration"
+                        Style="{StaticResource MaterialDesignCardGroupBox}"
+                        Visibility="{Binding DrawEntityIsNew, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <GroupBox.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                    Text="{Binding .}" />
+                            </DataTemplate>
+                        </GroupBox.HeaderTemplate>
+                        <local:AddSearchSetting DataContext="{Binding SearchConfigViewModel, Mode=TwoWay}" />
+                    </GroupBox>
+                    <GroupBox
+                        MaxWidth="450"
+                        Margin="16"
+                        materialDesign:ColorZoneAssist.Mode="PrimaryMid"
+                        Foreground="{DynamicResource MaterialDesignBody}"
+                        Header="Edit Search Configuration"
+                        Style="{StaticResource MaterialDesignCardGroupBox}"
+                        Visibility="{Binding DrawEntityIsNew, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                        <GroupBox.HeaderTemplate>
+                            <DataTemplate>
+                                <TextBlock
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                    Text="{Binding .}" />
+                            </DataTemplate>
+                        </GroupBox.HeaderTemplate>
+                        <local:EditSearchSetting DataContext="{Binding EditSearchConfigViewModel, Mode=TwoWay}" />
+                    </GroupBox>
+                </StackPanel>
+            </ScrollViewer>
         </materialDesign:DrawerHost.RightDrawerContent>
         <Grid>
             <Grid.RowDefinitions>
