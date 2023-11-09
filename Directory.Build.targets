@@ -15,5 +15,8 @@ See: https://learn.microsoft.com/visualstudio/msbuild/customize-your-build
     <Compile Update="**\MainWindowViewModel.cs">
       <DependentUpon>$([System.String]::Copy(%(Filename)).Replace('ViewModel', '.xaml'))</DependentUpon>
     </Compile>
+    <None Update="appsettings.*.json">
+      <DependentUpon>appsettings.json</DependentUpon>
+    </None>
   </ItemGroup>
 </Project>
