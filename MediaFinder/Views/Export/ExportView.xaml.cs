@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-namespace MediaFinder_v2.Views.Export
+namespace MediaFinder.Views.Export
 {
     /// <summary>
     /// Interaction logic for ViewResults.xaml

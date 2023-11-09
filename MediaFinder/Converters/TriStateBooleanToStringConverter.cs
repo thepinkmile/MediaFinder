@@ -1,10 +1,10 @@
-﻿using MediaFinder_v2.DataAccessLayer.Models;
-using MediaFinder_v2.Helpers;
+﻿using MediaFinder.DataAccessLayer.Models;
+using MediaFinder.Helpers;
 
 using System.Globalization;
 using System.Windows.Data;
 
-namespace MediaFinder_v2.Converters;
+namespace MediaFinder.Converters;
 
 public class TriStateBooleanToStringConverter : IValueConverter
 {

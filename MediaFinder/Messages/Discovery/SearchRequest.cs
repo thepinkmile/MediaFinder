@@ -1,7 +1,7 @@
-﻿using MediaFinder_v2.Helpers;
-using MediaFinder_v2.Models;
+﻿using MediaFinder.Helpers;
+using MediaFinder.Models;
 
-namespace MediaFinder_v2.Messages;
+namespace MediaFinder.Messages;
 
 public class SearchRequest : ReactiveBackgroundWorkerContextBase
 {

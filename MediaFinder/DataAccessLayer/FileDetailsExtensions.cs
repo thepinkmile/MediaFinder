@@ -1,9 +1,9 @@
 ﻿using System.IO;
 
-using MediaFinder_v2.DataAccessLayer.Models;
-using MediaFinder_v2.Services.Search;
+using MediaFinder.DataAccessLayer.Models;
+using MediaFinder.Services.Search;
 
-namespace MediaFinder_v2.DataAccessLayer;
+namespace MediaFinder.DataAccessLayer;
 
 public static class FileDetailsExtensions
 {

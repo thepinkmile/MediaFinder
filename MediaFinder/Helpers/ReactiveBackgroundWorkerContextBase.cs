@@ -1,4 +1,4 @@
-﻿namespace MediaFinder_v2.Helpers;
+﻿namespace MediaFinder.Helpers;
 
 public abstract class ReactiveBackgroundWorkerContextBase
 {

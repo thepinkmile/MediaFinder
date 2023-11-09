@@ -10,17 +10,17 @@ using CommunityToolkit.Mvvm.Messaging;
 
 using MaterialDesignThemes.Wpf;
 
-using MediaFinder_v2.DataAccessLayer;
-using MediaFinder_v2.Helpers;
-using MediaFinder_v2.Logging;
-using MediaFinder_v2.Messages;
-using MediaFinder_v2.Models;
-using MediaFinder_v2.Services.Search;
+using MediaFinder.DataAccessLayer;
+using MediaFinder.Helpers;
+using MediaFinder.Logging;
+using MediaFinder.Messages;
+using MediaFinder.Models;
+using MediaFinder.Services.Search;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace MediaFinder_v2.Views.Discovery;
+namespace MediaFinder.Views.Discovery;
 
 [ObservableObject]
 public partial class DiscoveryViewModel : ProgressableViewModel,

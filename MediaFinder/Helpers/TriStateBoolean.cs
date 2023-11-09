@@ -1,6 +1,6 @@
 ﻿using NetEscapades.EnumGenerators;
 
-namespace MediaFinder_v2.Helpers;
+namespace MediaFinder.Helpers;
 
 [Flags]
 [EnumExtensions]

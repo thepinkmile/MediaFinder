@@ -3,7 +3,7 @@ using System.IO;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
 
-namespace MediaFinder_v2.Converters;
+namespace MediaFinder.Converters;
 
 public class PathToBitmapImageConverter : IValueConverter
 {

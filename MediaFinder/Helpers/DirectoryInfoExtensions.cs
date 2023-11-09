@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace MediaFinder_v2.Helpers;
+namespace MediaFinder.Helpers;
 
 public static class DirectoryInfoExtensions
 {

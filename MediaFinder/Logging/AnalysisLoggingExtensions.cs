@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 
-namespace MediaFinder_v2.Logging;
+namespace MediaFinder.Logging;
 
 public static partial class AnalysisLoggingExtensions
 {

@@ -5,8 +5,8 @@
     <TargetFramework>net7.0-windows</TargetFramework>
 
     <UseWPF>true</UseWPF>
-    <StartupObject>MediaFinder_v2.App</StartupObject>
-    <RootNamespace>MediaFinder_v2</RootNamespace>
+    <StartupObject>MediaFinder.App</StartupObject>
+    <RootNamespace>MediaFinder</RootNamespace>
   </PropertyGroup>
 
   <!--

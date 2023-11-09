@@ -1,6 +1,6 @@
 ﻿using System.Windows.Input;
 
-namespace MediaFinder_v2.Messages;
+namespace MediaFinder.Messages;
 
 public record ShowProgressMessage(object Token, int Progress = 0, string? Message = null, ICommand? CancelCommand = null)
 {

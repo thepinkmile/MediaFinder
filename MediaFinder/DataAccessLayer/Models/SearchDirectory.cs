@@ -1,4 +1,4 @@
-﻿namespace MediaFinder_v2.DataAccessLayer.Models;
+﻿namespace MediaFinder.DataAccessLayer.Models;
 
 public class SearchDirectory
 {

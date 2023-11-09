@@ -1,14 +1,14 @@
 ﻿<UserControl
-    x:Class="MediaFinder_v2.Views.Discovery.DiscoveryView"
+    x:Class="MediaFinder.Views.Discovery.DiscoveryView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converters="clr-namespace:MediaFinder_v2.Converters"
+    xmlns:converters="clr-namespace:MediaFinder.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:MediaFinder_v2.Views.Discovery"
+    xmlns:local="clr-namespace:MediaFinder.Views.Discovery"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mde="clr-namespace:MaterialDesignExtensions.Controls;assembly=MaterialDesignExtensions"
-    xmlns:models="clr-namespace:MediaFinder_v2.Models"
+    xmlns:models="clr-namespace:MediaFinder.Models"
     x:Name="discoveryPage"
     d:DataContext="{d:DesignInstance Type=local:DiscoveryViewModel,
                                      IsDesignTimeCreatable=False}"

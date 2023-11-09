@@ -6,14 +6,14 @@ using CommunityToolkit.Mvvm.Messaging;
 using MaterialDesignThemes.Wpf;
 using MaterialDesignThemes.Wpf.Transitions;
 
-using MediaFinder_v2.Messages;
-using MediaFinder_v2.Views.Discovery;
-using MediaFinder_v2.Views.Export;
-using MediaFinder_v2.Views.Status;
+using MediaFinder.Messages;
+using MediaFinder.Views.Discovery;
+using MediaFinder.Views.Export;
+using MediaFinder.Views.Status;
 
-namespace MediaFinder_v2.Views;
+namespace MediaFinder.Views;
 
-public partial class MainWindowsViewModel : ObservableObject,
+public partial class MainWindowViewModel : ObservableObject,
     IRecipient<WizardNavigationMessage>,
     IRecipient<SnackBarMessage>,
     IRecipient<ShowProgressMessage>,
@@ -24,7 +24,7 @@ public partial class MainWindowsViewModel : ObservableObject,
 {
     private readonly IMessenger _messenger;
 
-    public MainWindowsViewModel(
+    public MainWindowViewModel(
         IMessenger messenger,
         ISnackbarMessageQueue snackbarMessageQueue,
         DiscoveryViewModel discoveryViewModel,

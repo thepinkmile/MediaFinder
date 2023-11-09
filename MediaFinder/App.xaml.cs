@@ -2,15 +2,15 @@
 
 using MaterialDesignThemes.Wpf;
 
-using MediaFinder_v2.DataAccessLayer;
-using MediaFinder_v2.Services.Export;
-using MediaFinder_v2.Services.Search;
+using MediaFinder.DataAccessLayer;
+using MediaFinder.Services.Export;
+using MediaFinder.Services.Search;
 
-using MediaFinder_v2.Views;
+using MediaFinder.Views;
 
-using MediaFinder_v2.Views.Discovery;
-using MediaFinder_v2.Views.Export;
-using MediaFinder_v2.Views.Status;
+using MediaFinder.Views.Discovery;
+using MediaFinder.Views.Export;
+using MediaFinder.Views.Status;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -26,7 +26,7 @@ using Serilog.Events;
 using System.Windows;
 using System.Windows.Threading;
 
-namespace MediaFinder_v2;
+namespace MediaFinder;
 
 /// <summary>
 /// Interaction logic for App.xaml
@@ -109,7 +109,7 @@ public partial class App : Application
             services.AddTransient<FFProbe>();
 
             services.AddSingleton<MainWindow>();
-            services.AddSingleton<MainWindowsViewModel>();
+            services.AddSingleton<MainWindowViewModel>();
             services.AddSingleton<AddSearchSettingViewModel>();
             services.AddSingleton<EditSearchSettingViewModel>();
             services.AddSingleton<DiscoveryViewModel>();

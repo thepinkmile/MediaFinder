@@ -4,16 +4,16 @@ using System.IO;
 
 using CommunityToolkit.Mvvm.Messaging;
 
-using MediaFinder_v2.DataAccessLayer;
-using MediaFinder_v2.DataAccessLayer.Models;
-using MediaFinder_v2.Helpers;
-using MediaFinder_v2.Logging;
-using MediaFinder_v2.Messages;
-using MediaFinder_v2.Models;
+using MediaFinder.DataAccessLayer;
+using MediaFinder.DataAccessLayer.Models;
+using MediaFinder.Helpers;
+using MediaFinder.Logging;
+using MediaFinder.Messages;
+using MediaFinder.Models;
 
 using Microsoft.Extensions.Logging;
 
-namespace MediaFinder_v2.Services.Export;
+namespace MediaFinder.Services.Export;
 
 public class ExportWorker : ReactiveBackgroundWorker<ExportRequest>
 {

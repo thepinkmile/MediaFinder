@@ -2,9 +2,9 @@
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
-using MediaFinder_v2.DataAccessLayer.Models;
+using MediaFinder.DataAccessLayer.Models;
 
-namespace MediaFinder_v2.Models;
+namespace MediaFinder.Models;
 
 public partial class MediaFile : ObservableObject
 {

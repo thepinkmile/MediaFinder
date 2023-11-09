@@ -3,7 +3,7 @@ using System.Windows.Input;
 
 using Microsoft.Extensions.Logging;
 
-namespace MediaFinder_v2.Views;
+namespace MediaFinder.Views;
 
 /// <summary>
 /// Interaction logic for MainWindow.xaml
@@ -12,7 +12,7 @@ public partial class MainWindow
 {
     private readonly ILogger<MainWindow> _logger;
 
-    public MainWindow(MainWindowsViewModel mainWindowViewModel, ILogger<MainWindow> logger)
+    public MainWindow(MainWindowViewModel mainWindowViewModel, ILogger<MainWindow> logger)
     {
         _logger = logger;
         DataContext = mainWindowViewModel;
@@ -26,7 +26,7 @@ public partial class MainWindow
     {
         try
         {
-            if (DataContext is MainWindowsViewModel viewModel)
+            if (DataContext is MainWindowViewModel viewModel)
             {
 
 #pragma warning disable CRR0039

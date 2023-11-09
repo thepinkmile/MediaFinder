@@ -1,6 +1,6 @@
-﻿using MediaFinder_v2.Models;
+﻿using MediaFinder.Models;
 
-namespace MediaFinder_v2.Messages;
+namespace MediaFinder.Messages;
 
 public record SearchSettingUpdated(SearchConfiguration SearchSetting)
 {

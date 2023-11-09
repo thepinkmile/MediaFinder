@@ -1,6 +1,6 @@
 ﻿using System.Collections.Concurrent;
 
-namespace MediaFinder_v2.Helpers
+namespace MediaFinder.Helpers
 {
     public static class ConcurrentDictionaryExtensions
     {

@@ -1,15 +1,15 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 
-using MediaFinder_v2.DataAccessLayer;
-using MediaFinder_v2.Logging;
-using MediaFinder_v2.Messages;
+using MediaFinder.DataAccessLayer;
+using MediaFinder.Logging;
+using MediaFinder.Messages;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 using System.Windows.Input;
 
-namespace MediaFinder_v2.Helpers;
+namespace MediaFinder.Helpers;
 
 #pragma warning disable CRRSP08
 public abstract class ProgressableViewModel

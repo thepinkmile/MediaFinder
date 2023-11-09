@@ -1,9 +1,9 @@
 ﻿using System.Globalization;
 using System.Windows.Data;
 
-using MediaFinder_v2.Models;
+using MediaFinder.Models;
 
-namespace MediaFinder_v2.Converters;
+namespace MediaFinder.Converters;
 
 public class MediaFilePropertyConverter : IValueConverter
 {

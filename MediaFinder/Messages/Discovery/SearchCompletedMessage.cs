@@ -1,4 +1,4 @@
-﻿namespace MediaFinder_v2.Messages;
+﻿namespace MediaFinder.Messages;
 
 public record SearchCompletedMessage
 {

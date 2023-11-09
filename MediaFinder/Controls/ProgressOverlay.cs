@@ -6,7 +6,7 @@ using System.Windows.Media;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 
-namespace MediaFinder_v2.Controls;
+namespace MediaFinder.Controls;
 
 /// <summary>
 /// A control for displaying some kind of progress indication over the complete user interface while a long running operation is in progress.
