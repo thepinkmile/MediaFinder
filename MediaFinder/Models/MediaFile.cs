@@ -33,6 +33,9 @@ public partial class MediaFile : ObservableObject
     private MultiMediaType _multiMediaType;
 
     [ObservableProperty]
+    private Dictionary<string, string> _properties;
+
+    [ObservableProperty]
     private string? _md5Hash;
 
     [ObservableProperty]
@@ -54,6 +57,13 @@ public partial class MediaFile : ObservableObject
         Md5Hash = file.MD5_Hash;
         Sha256Hash = file.SHA256_Hash;
         Sha512Hash = file.SHA512_Hash;
+
+        // add properties with case insensitive key search
+        Properties = new Dictionary<string, string>(StringComparer.InvariantCultureIgnoreCase);
+        foreach (var prop in file.FileProperties)
+        {
+            Properties.TryAdd(prop.Name, prop.Value);
+        }
     }
 
     public static MediaFile Create(FileDetails file)

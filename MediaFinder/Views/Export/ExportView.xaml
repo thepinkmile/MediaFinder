@@ -34,6 +34,8 @@
             x:Key="MediaFileToIconConverter"
             ImageIcon="FileImageOutline"
             VideoIcon="FileVideoOutline" />
+        <converters:MediaFilePropertyConverter x:Key="MediaFileWidthPropertyConverter" PropertyName="Width" />
+        <converters:MediaFilePropertyConverter x:Key="MediaFileHeightPropertyConverter" PropertyName="Height" />
         <converters:MultiMediaTypeToStringConverter x:Key="MultiMediaTypeToStringConverter" />
         <converters:ExportTypeToStringConverter x:Key="ExportTypeToStringConverter" />
         <converters:TriStateBooleanToStringConverter x:Key="TriStateBooleanToStringConverter" />
@@ -526,6 +528,20 @@
                                     </StackPanel>
                                 </DataGridTextColumn.Header>
                             </DataGridTextColumn>
+                            <DataGridTextColumn
+                                MinWidth="100"
+                                Binding="{Binding ., Converter={StaticResource MediaFileHeightPropertyConverter}, Mode=OneWay}"
+                                ElementStyle="{StaticResource DataTextBlock}"
+                                Header="Height"
+                                HeaderStyle="{StaticResource DataHeaderStyle}"
+                                IsReadOnly="True" />
+                            <DataGridTextColumn
+                                MinWidth="100"
+                                Binding="{Binding ., Converter={StaticResource MediaFileWidthPropertyConverter}, Mode=OneWay}"
+                                ElementStyle="{StaticResource DataTextBlock}"
+                                Header="Width"
+                                HeaderStyle="{StaticResource DataHeaderStyle}"
+                                IsReadOnly="True" />
                             <DataGridTextColumn
                                 MinWidth="280"
                                 Binding="{Binding Md5Hash}"
