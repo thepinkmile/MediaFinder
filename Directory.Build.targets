@@ -7,4 +7,16 @@ See: https://learn.microsoft.com/visualstudio/msbuild/customize-your-build
   Uncomment if you need to enable inclusion of another Directory.Build.targets file from a parent directory
   <Import Project="$([MSBuild]::GetPathOfFileAbove('Directory.Build.targets', '$(MSBuildThisFileDirectory)../'))" />
   -->
+  
+  <ItemGroup>
+    <Compile Update="**\*ViewModel.cs">
+      <DependentUpon>$([System.String]::Copy(%(Filename)).Replace('ViewModel', 'View.xaml'))</DependentUpon>
+    </Compile>
+    <Compile Update="**\MainWindowViewModel.cs">
+      <DependentUpon>$([System.String]::Copy(%(Filename)).Replace('ViewModel', '.xaml'))</DependentUpon>
+    </Compile>
+    <None Update="appsettings.*.json">
+      <DependentUpon>appsettings.json</DependentUpon>
+    </None>
+  </ItemGroup>
 </Project>

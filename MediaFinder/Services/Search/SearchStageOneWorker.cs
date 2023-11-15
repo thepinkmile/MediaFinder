@@ -4,15 +4,15 @@ using System.IO;
 
 using CommunityToolkit.Mvvm.Messaging;
 
-using MediaFinder_v2.Helpers;
-using MediaFinder_v2.Logging;
-using MediaFinder_v2.Messages;
+using MediaFinder.Helpers;
+using MediaFinder.Logging;
+using MediaFinder.Messages;
 
 using Microsoft.Extensions.Logging;
 
 using SevenZipExtractor;
 
-namespace MediaFinder_v2.Services.Search;
+namespace MediaFinder.Services.Search;
 
 public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
 {

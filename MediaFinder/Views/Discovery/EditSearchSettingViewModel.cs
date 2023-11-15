@@ -8,14 +8,14 @@ using MaterialDesignExtensions.Controls;
 
 using MaterialDesignThemes.Wpf;
 
-using MediaFinder_v2.DataAccessLayer.Models;
+using MediaFinder.DataAccessLayer.Models;
 
-using MediaFinder_v2.DataAccessLayer;
+using MediaFinder.DataAccessLayer;
 
-using MediaFinder_v2.Messages;
+using MediaFinder.Messages;
 using Microsoft.EntityFrameworkCore;
 
-namespace MediaFinder_v2.Views.Discovery;
+namespace MediaFinder.Views.Discovery;
 
 public partial class EditSearchSettingViewModel : ObservableObject
 {

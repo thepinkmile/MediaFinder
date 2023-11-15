@@ -1,8 +1,8 @@
-﻿using MediaFinder_v2.DataAccessLayer.Models;
+﻿using MediaFinder.DataAccessLayer.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace MediaFinder_v2.DataAccessLayer
+namespace MediaFinder.DataAccessLayer
 {
     public class AppDbContext : DbContext
     {

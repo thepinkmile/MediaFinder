@@ -2,16 +2,16 @@
 
 using CommunityToolkit.Mvvm.Messaging;
 
-using MediaFinder_v2.DataAccessLayer;
-using MediaFinder_v2.DataAccessLayer.Models;
-using MediaFinder_v2.Helpers;
-using MediaFinder_v2.Logging;
-using MediaFinder_v2.Messages;
+using MediaFinder.DataAccessLayer;
+using MediaFinder.DataAccessLayer.Models;
+using MediaFinder.Helpers;
+using MediaFinder.Logging;
+using MediaFinder.Messages;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
-namespace MediaFinder_v2.Services.Search;
+namespace MediaFinder.Services.Search;
 
 public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
 {

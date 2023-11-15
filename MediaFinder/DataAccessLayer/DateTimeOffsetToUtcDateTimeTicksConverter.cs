@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
-namespace MediaFinder_v2.DataAccessLayer;
+namespace MediaFinder.DataAccessLayer;
 
 /// <summary>
 ///     Converts <see cref="DateTimeOffset" /> to and from a long representing UTC DateTime ticks.

@@ -4,7 +4,7 @@ using System.Text;
 using System.Windows.Data;
 using System.Windows;
 
-namespace MediaFinder_v2.Converters;
+namespace MediaFinder.Converters;
 
 public class FormatKbSizeConverter : IValueConverter
 {

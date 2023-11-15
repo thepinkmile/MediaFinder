@@ -1,6 +1,6 @@
 ﻿using MaterialDesignThemes.Wpf.Converters;
 
-namespace MediaFinder_v2.Converters;
+namespace MediaFinder.Converters;
 
 public class BooleanToStringConverter : BooleanConverter<string>
 {

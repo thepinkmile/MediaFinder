@@ -1,6 +1,6 @@
-﻿using MediaFinder_v2.DataAccessLayer.Models;
+﻿using MediaFinder.DataAccessLayer.Models;
 
-namespace MediaFinder_v2.Messages;
+namespace MediaFinder.Messages;
 
 public record AnalysisResponse(ICollection<FileDetails> Files)
 {

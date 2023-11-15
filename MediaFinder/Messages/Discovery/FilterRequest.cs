@@ -1,6 +1,6 @@
-﻿using MediaFinder_v2.Helpers;
+﻿using MediaFinder.Helpers;
 
-namespace MediaFinder_v2.Messages;
+namespace MediaFinder.Messages;
 
 public class FilterRequest : ReactiveBackgroundWorkerContextBase
 {

@@ -2,7 +2,7 @@
 
 using SevenZipExtractor;
 
-namespace MediaFinder_v2.Logging;
+namespace MediaFinder.Logging;
 
 public static partial class DiscoveryLoggingExtensions
 {

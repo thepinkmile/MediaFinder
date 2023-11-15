@@ -30,18 +30,18 @@
     <PackageVersion Include="MaterialDesignExtensions" Version="3.3.0" />
     <PackageVersion Include="MaterialDesignThemes" Version="4.9.0" />
     <PackageVersion Include="MetadataExtractor" Version="2.8.1" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="7.0.13">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Proxies" Version="7.0.13" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="7.0.13" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="7.0.13">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Proxies" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
-    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="7.0.1" />
+    <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="8.0.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
     <PackageVersion Include="Moq" Version="4.20.69" />
     <PackageVersion Include="Moq.AutoMock" Version="3.5.0" />
@@ -50,15 +50,15 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
     <PackageVersion Include="NReco.VideoInfo" Version="1.2.0" />
-    <PackageVersion Include="Serilog" Version="3.0.1" />
+    <PackageVersion Include="Serilog" Version="3.1.1" />
     <PackageVersion Include="Serilog.Enrichers.AssemblyName" Version="1.0.9" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="2.3.0" />
     <PackageVersion Include="Serilog.Enrichers.Process" Version="2.0.2" />
     <PackageVersion Include="Serilog.Enrichers.Thread" Version="3.1.0" />
-    <PackageVersion Include="Serilog.Extensions.Hosting" Version="7.0.0" />
-    <PackageVersion Include="Serilog.Extensions.Logging" Version="7.0.0" />
-    <PackageVersion Include="Serilog.Settings.Configuration" Version="7.0.1" />
-    <PackageVersion Include="Serilog.Sinks.Console" Version="4.1.0" />
+    <PackageVersion Include="Serilog.Extensions.Hosting" Version="8.0.0" />
+    <PackageVersion Include="Serilog.Extensions.Logging" Version="8.0.0" />
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="8.0.0" />
+    <PackageVersion Include="Serilog.Sinks.Console" Version="5.0.0" />
     <PackageVersion Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageVersion Include="SevenZipExtractor" Version="1.0.17" />
     <PackageVersion Include="SevenZipSharp.Interop" Version="19.0.2" />

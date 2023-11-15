@@ -1,6 +1,6 @@
 ﻿using NetEscapades.EnumGenerators;
 
-namespace MediaFinder_v2.Messages;
+namespace MediaFinder.Messages;
 
 [EnumExtensions]
 public enum NavigationDirection

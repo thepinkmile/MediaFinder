@@ -2,9 +2,9 @@
 using System.Windows;
 using System.Windows.Data;
 
-using MediaFinder_v2.DataAccessLayer.Models;
+using MediaFinder.DataAccessLayer.Models;
 
-namespace MediaFinder_v2.Converters;
+namespace MediaFinder.Converters;
 
 public class MultiMediaTypeToVisibilityConverter : IValueConverter
 {

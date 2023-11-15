@@ -9,11 +9,11 @@ using MaterialDesignExtensions.Controls;
 
 using MaterialDesignThemes.Wpf;
 
-using MediaFinder_v2.DataAccessLayer;
-using MediaFinder_v2.DataAccessLayer.Models;
-using MediaFinder_v2.Messages;
+using MediaFinder.DataAccessLayer;
+using MediaFinder.DataAccessLayer.Models;
+using MediaFinder.Messages;
 
-namespace MediaFinder_v2.Views.Discovery;
+namespace MediaFinder.Views.Discovery;
 
 public partial class AddSearchSettingViewModel : ObservableObject
 {

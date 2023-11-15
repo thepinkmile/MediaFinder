@@ -2,7 +2,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace MediaFinder_v2.Helpers;
+namespace MediaFinder.Helpers;
 #pragma warning disable CRRSP05
 // Copyright 2018 Steve Streeting
 // 

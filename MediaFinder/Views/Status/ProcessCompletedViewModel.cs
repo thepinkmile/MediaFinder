@@ -2,9 +2,9 @@
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
-using MediaFinder_v2.Messages;
+using MediaFinder.Messages;
 
-namespace MediaFinder_v2.Views.Status;
+namespace MediaFinder.Views.Status;
 
 public partial class ProcessCompletedViewModel : ObservableObject
 {

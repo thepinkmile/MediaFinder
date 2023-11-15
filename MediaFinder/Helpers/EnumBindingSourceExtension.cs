@@ -1,11 +1,11 @@
 ﻿using System.Windows.Automation.Provider;
 using System.Windows.Markup;
 
-using MediaFinder_v2.DataAccessLayer.Models;
-using MediaFinder_v2.Messages;
-using MediaFinder_v2.Models;
+using MediaFinder.DataAccessLayer.Models;
+using MediaFinder.Messages;
+using MediaFinder.Models;
 
-namespace MediaFinder_v2.Helpers;
+namespace MediaFinder.Helpers;
 
 public class EnumBindingSourceExtension : MarkupExtension
 {

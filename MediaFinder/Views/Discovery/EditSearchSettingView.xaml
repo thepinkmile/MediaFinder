@@ -1,16 +1,16 @@
 ﻿<UserControl
-    x:Class="MediaFinder_v2.Views.Discovery.AddSearchSetting"
+    x:Class="MediaFinder.Views.Discovery.EditSearchSetting"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converters="clr-namespace:MediaFinder_v2.Converters"
+    xmlns:converters="clr-namespace:MediaFinder.Converters"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:MediaFinder_v2.Views.Discovery"
+    xmlns:local="clr-namespace:MediaFinder.Views.Discovery"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DataContext="{d:DesignInstance Type=local:AddSearchSettingViewModel,
+    d:DataContext="{d:DesignInstance Type=local:EditSearchSettingViewModel,
                                      IsDesignTimeCreatable=False}"
+    d:DesignHeight="450"
     d:DesignWidth="800"
-    Loaded="UserControl_Loaded"
     mc:Ignorable="d">
     <UserControl.Resources>
         <materialDesign:BooleanToVisibilityConverter
@@ -216,8 +216,8 @@
             <DockPanel VerticalAlignment="Bottom" LastChildFill="False">
                 <Button
                     Margin="5"
-                    Command="{Binding ClearFormCommand}"
-                    Content="Clear"
+                    Command="{Binding ResetFormCommand}"
+                    Content="Reset"
                     DockPanel.Dock="Left"
                     Style="{StaticResource MaterialDesignRaisedSecondaryButton}" />
                 <Button
@@ -230,7 +230,7 @@
                 <Button
                     Margin="5"
                     Command="{Binding SubmitCommand}"
-                    Content="_Add"
+                    Content="_Save"
                     DockPanel.Dock="Right"
                     IsDefault="True"
                     Style="{StaticResource MaterialDesignRaisedDarkButton}" />

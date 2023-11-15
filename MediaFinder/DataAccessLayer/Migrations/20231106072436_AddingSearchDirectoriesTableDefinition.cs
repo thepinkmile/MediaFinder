@@ -2,7 +2,7 @@
 
 #nullable disable
 
-namespace MediaFinder_v2.DataAccessLayer.Migrations
+namespace MediaFinder.DataAccessLayer.Migrations
 {
     /// <inheritdoc />
     public partial class AddingSearchDirectoriesTableDefinition : Migration

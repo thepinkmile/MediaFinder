@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net7.0-windows</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
 
     <UseWPF>true</UseWPF>
-    <StartupObject>MediaFinder_v2.App</StartupObject>
-    <RootNamespace>MediaFinder_v2</RootNamespace>
+    <StartupObject>MediaFinder.App</StartupObject>
+    <RootNamespace>MediaFinder</RootNamespace>
   </PropertyGroup>
 
   <!--
@@ -44,10 +44,16 @@
     <PackageReference Include="MaterialDesignExtensions" />
     <PackageReference Include="MaterialDesignThemes" />
     <PackageReference Include="MetadataExtractor" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
     <PackageReference Include="NetEscapades.EnumGenerators" />

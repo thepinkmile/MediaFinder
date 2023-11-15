@@ -4,7 +4,7 @@
 
 #pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
 
-namespace MediaFinder_v2.DataAccessLayer.Migrations
+namespace MediaFinder.DataAccessLayer.Migrations
 {
     /// <inheritdoc />
     public partial class InitialAppDbMigration : Migration

@@ -2,7 +2,7 @@
 using System.Globalization;
 using System.Windows.Data;
 
-namespace MediaFinder_v2.Converters;
+namespace MediaFinder.Converters;
 
 public class PercentageConverter : IValueConverter
 {

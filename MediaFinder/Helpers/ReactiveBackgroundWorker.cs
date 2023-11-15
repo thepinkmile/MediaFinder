@@ -2,13 +2,13 @@
 
 using CommunityToolkit.Mvvm.Messaging;
 
-using MediaFinder_v2.Logging;
-using MediaFinder_v2.Messages;
-using MediaFinder_v2.Services.Search;
+using MediaFinder.Logging;
+using MediaFinder.Messages;
+using MediaFinder.Services.Search;
 
 using Microsoft.Extensions.Logging;
 
-namespace MediaFinder_v2.Helpers;
+namespace MediaFinder.Helpers;
 
 public abstract class ReactiveBackgroundWorker<T> : BackgroundWorker
     where T : ReactiveBackgroundWorkerContextBase

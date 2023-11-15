@@ -3,7 +3,7 @@ using System.Windows.Data;
 
 using MaterialDesignThemes.Wpf;
 
-namespace MediaFinder_v2.Converters;
+namespace MediaFinder.Converters;
 
 public class BoolToPackIconConverter : IValueConverter
 {

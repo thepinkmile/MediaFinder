@@ -4,13 +4,13 @@ using CommunityToolkit.Mvvm.Messaging;
 
 using MaterialDesignThemes.Wpf;
 
-using MediaFinder_v2.DataAccessLayer;
-using MediaFinder_v2.DataAccessLayer.Models;
-using MediaFinder_v2.Helpers;
-using MediaFinder_v2.Logging;
-using MediaFinder_v2.Messages;
-using MediaFinder_v2.Models;
-using MediaFinder_v2.Services.Export;
+using MediaFinder.DataAccessLayer;
+using MediaFinder.DataAccessLayer.Models;
+using MediaFinder.Helpers;
+using MediaFinder.Logging;
+using MediaFinder.Messages;
+using MediaFinder.Models;
+using MediaFinder.Services.Export;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -20,7 +20,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Data;
 
-namespace MediaFinder_v2.Views.Export;
+namespace MediaFinder.Views.Export;
 
 [ObservableObject]
 public partial class ExportViewModel : ProgressableViewModel,

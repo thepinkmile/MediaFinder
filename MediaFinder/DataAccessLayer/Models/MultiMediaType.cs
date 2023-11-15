@@ -2,7 +2,7 @@
 
 using NetEscapades.EnumGenerators;
 
-namespace MediaFinder_v2.DataAccessLayer.Models;
+namespace MediaFinder.DataAccessLayer.Models;
 
 [Flags]
 [EnumExtensions]

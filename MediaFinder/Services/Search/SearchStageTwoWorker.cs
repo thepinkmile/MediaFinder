@@ -7,10 +7,10 @@ using System.Text.RegularExpressions;
 
 using CommunityToolkit.Mvvm.Messaging;
 
-using MediaFinder_v2.DataAccessLayer.Models;
-using MediaFinder_v2.Helpers;
-using MediaFinder_v2.Logging;
-using MediaFinder_v2.Messages;
+using MediaFinder.DataAccessLayer.Models;
+using MediaFinder.Helpers;
+using MediaFinder.Logging;
+using MediaFinder.Messages;
 
 using MetadataExtractor;
 
@@ -18,7 +18,7 @@ using Microsoft.Extensions.Logging;
 
 using NReco.VideoInfo;
 
-namespace MediaFinder_v2.Services.Search;
+namespace MediaFinder.Services.Search;
 
 public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequest>
 {
@@ -384,7 +384,10 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             if (KnownImageExtensions.Contains(details[EXTENSION_DETAIL]))
             {
                 _logger.ImageDetected(filepath);
-                details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
+                if (details[MEDIATYPE_DETAIL] != MultiMediaType.Video.ToStringFast())
+                {
+                    details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
+                }
             }
             else
             {
@@ -421,7 +424,10 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
+            if (details[MEDIATYPE_DETAIL] != MultiMediaType.Video.ToStringFast())
+            {
+                details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
+            }
 
             var dateProperty = result.Keys.FirstOrDefault(k => k.Contains("Date/Time", StringComparison.InvariantCultureIgnoreCase));
             if (dateProperty is not null && DateTimeOffset.TryParseExact(result[dateProperty], IsoDateFormats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var tmp))
@@ -510,13 +516,13 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             {
                 SetVideoMetadata(fileMetadata, details);
             }
-            if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.None))
-            {
-                _logger.UnknownMediaType(filepath);
-            }
             if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.Text))
             {
                 _logger.TextMediaTypeDetected(filepath);
+            }
+            if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.None))
+            {
+                _logger.UnknownMediaType(filepath);
             }
         }
         catch (OperationCanceledException)
