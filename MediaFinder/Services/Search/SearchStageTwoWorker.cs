@@ -384,7 +384,10 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             if (KnownImageExtensions.Contains(details[EXTENSION_DETAIL]))
             {
                 _logger.ImageDetected(filepath);
-                details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
+                if (details[MEDIATYPE_DETAIL] != MultiMediaType.Video.ToStringFast())
+                {
+                    details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
+                }
             }
             else
             {
@@ -421,7 +424,10 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
+            if (details[MEDIATYPE_DETAIL] != MultiMediaType.Video.ToStringFast())
+            {
+                details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
+            }
 
             var dateProperty = result.Keys.FirstOrDefault(k => k.Contains("Date/Time", StringComparison.InvariantCultureIgnoreCase));
             if (dateProperty is not null && DateTimeOffset.TryParseExact(result[dateProperty], IsoDateFormats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var tmp))
