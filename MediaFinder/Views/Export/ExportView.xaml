@@ -39,10 +39,6 @@
         <converters:MultiMediaTypeToStringConverter x:Key="MultiMediaTypeToStringConverter" />
         <converters:ExportTypeToStringConverter x:Key="ExportTypeToStringConverter" />
         <converters:TriStateBooleanToStringConverter x:Key="TriStateBooleanToStringConverter" />
-        <converters:BoolToPackIconConverter
-            x:Key="BoolToPackIconConverter"
-            FalseValue="CheckboxBlankCircleOutline"
-            TrueValue="CheckboxMarkedCircleOutline" />
         <materialDesign:BooleanToVisibilityConverter
             x:Key="InverseBooleanToVisibilityConverter"
             FalseValue="Visible"
@@ -113,86 +109,86 @@
                             Stretch="Uniform"
                             Visibility="{Binding SelectedExportFile.MultiMediaType, Converter={StaticResource IsImageVisibleConverter}}" />
 
-                        <MediaElement
-                            x:Name="fileVideoViewer"
-                            MaxWidth="400"
-                            Loaded="FileVideoViewer_Loaded"
-                            LoadedBehavior="Manual"
-                            MediaEnded="FileVideoViewer_MediaEnded"
-                            ScrubbingEnabled="True"
-                            Source="{Binding SelectedExportFile.FilePath}"
-                            Stretch="Uniform"
-                            UnloadedBehavior="Stop"
-                            Visibility="{Binding SelectedExportFile.MultiMediaType, Converter={StaticResource IsVideoVisibleConverter}}" />
-                        <StackPanel
-                            Margin="0,0,0,8"
-                            HorizontalAlignment="Center"
-                            Orientation="Horizontal"
-                            Visibility="{Binding SelectedExportFile.MultiMediaType, Converter={StaticResource IsVideoVisibleConverter}}">
-
-                            <!--  Play button.  -->
-                            <Button
-                                Margin="5"
+                        <StackPanel Visibility="{Binding SelectedExportFile.MultiMediaType, Converter={StaticResource IsVideoVisibleConverter}}">
+                            <MediaElement
+                                x:Name="fileVideoViewer"
+                                MaxWidth="400"
+                                Loaded="FileVideoViewer_Loaded"
+                                LoadedBehavior="Manual"
+                                MediaEnded="FileVideoViewer_MediaEnded"
+                                ScrubbingEnabled="True"
+                                Source="{Binding SelectedExportFile.FilePath}"
+                                Stretch="Uniform"
+                                UnloadedBehavior="Stop" />
+                            <StackPanel
+                                Margin="0,0,0,8"
                                 HorizontalAlignment="Center"
-                                Click="PlayButton_Click"
-                                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                                ToolTip="Play">
+                                Orientation="Horizontal">
+
+                                <!--  Play button.  -->
+                                <Button
+                                    Margin="5"
+                                    HorizontalAlignment="Center"
+                                    Click="PlayButton_Click"
+                                    Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                    ToolTip="Play">
+                                    <materialDesign:PackIcon
+                                        Width="{StaticResource IconSize}"
+                                        Height="{StaticResource IconSize}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Kind="PlayCircle" />
+                                </Button>
+
+                                <!--  Pause button.  -->
+                                <Button
+                                    Margin="5"
+                                    HorizontalAlignment="Center"
+                                    Click="PauseButton_Click"
+                                    Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                    ToolTip="Pause">
+                                    <materialDesign:PackIcon
+                                        Width="{StaticResource IconSize}"
+                                        Height="{StaticResource IconSize}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Kind="PauseCircle" />
+                                </Button>
+
+                                <!--  Stop button.  -->
+                                <Button
+                                    Margin="5"
+                                    HorizontalAlignment="Center"
+                                    Click="StopButton_Click"
+                                    Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                    ToolTip="Stop">
+                                    <materialDesign:PackIcon
+                                        Width="{StaticResource IconSize}"
+                                        Height="{StaticResource IconSize}"
+                                        HorizontalAlignment="Center"
+                                        VerticalAlignment="Center"
+                                        Kind="StopCircle" />
+                                </Button>
+
+                                <!--  speed slider. This slider allows you to change the speed of the media playback.  -->
                                 <materialDesign:PackIcon
                                     Width="{StaticResource IconSize}"
                                     Height="{StaticResource IconSize}"
-                                    HorizontalAlignment="Center"
+                                    Margin="5"
                                     VerticalAlignment="Center"
-                                    Kind="PlayCircle" />
-                            </Button>
-
-                            <!--  Pause button.  -->
-                            <Button
-                                Margin="5"
-                                HorizontalAlignment="Center"
-                                Click="PauseButton_Click"
-                                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                                ToolTip="Pause">
-                                <materialDesign:PackIcon
-                                    Width="{StaticResource IconSize}"
-                                    Height="{StaticResource IconSize}"
-                                    HorizontalAlignment="Center"
+                                    Kind="PlaySpeed" />
+                                <Slider
+                                    Name="speedRatioSlider"
+                                    MinWidth="180"
+                                    HorizontalAlignment="Stretch"
                                     VerticalAlignment="Center"
-                                    Kind="PauseCircle" />
-                            </Button>
-
-                            <!--  Stop button.  -->
-                            <Button
-                                Margin="5"
-                                HorizontalAlignment="Center"
-                                Click="StopButton_Click"
-                                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                                ToolTip="Stop">
-                                <materialDesign:PackIcon
-                                    Width="{StaticResource IconSize}"
-                                    Height="{StaticResource IconSize}"
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Kind="StopCircle" />
-                            </Button>
-
-                            <!--  speed slider. This slider allows you to change the speed of the media playback.  -->
-                            <materialDesign:PackIcon
-                                Width="{StaticResource IconSize}"
-                                Height="{StaticResource IconSize}"
-                                Margin="5"
-                                VerticalAlignment="Center"
-                                Kind="PlaySpeed" />
-                            <Slider
-                                Name="speedRatioSlider"
-                                MinWidth="180"
-                                HorizontalAlignment="Stretch"
-                                VerticalAlignment="Center"
-                                IsSnapToTickEnabled="True"
-                                Maximum="4"
-                                Minimum="0.5"
-                                TickFrequency="0.5"
-                                TickPlacement="BottomRight"
-                                Value="{Binding SpeedRatio, ElementName=fileVideoViewer, Mode=TwoWay}" />
+                                    IsSnapToTickEnabled="True"
+                                    Maximum="4"
+                                    Minimum="0.5"
+                                    TickFrequency="0.5"
+                                    TickPlacement="BottomRight"
+                                    Value="{Binding SpeedRatio, ElementName=fileVideoViewer, Mode=TwoWay}" />
+                            </StackPanel>
                         </StackPanel>
 
                         <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
@@ -239,6 +235,7 @@
                                 Text="{Binding SelectedExportFile.Md5Hash}"
                                 TextWrapping="Wrap" />
                         </StackPanel>
+
                         <Button
                             Margin="4"
                             HorizontalAlignment="Center"
@@ -413,13 +410,14 @@
                                 HeaderStyle="{StaticResource DataHeaderStyle}">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate DataType="{x:Type models:MediaFile}">
-                                        <Button
-                                            Margin="-10"
+                                        <ToggleButton
+                                            materialDesign:ToggleButtonAssist.OnContent="{materialDesign:PackIcon Kind=Tick}"
                                             Command="{Binding DataContext.ToggleExportFlagCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}"
                                             CommandParameter="{Binding .}"
-                                            Style="{StaticResource MaterialDesignIconForegroundButton}">
-                                            <materialDesign:PackIcon Kind="{Binding ShouldExport, Converter={StaticResource BoolToPackIconConverter}}" />
-                                        </Button>
+                                            Content="{materialDesign:PackIcon Kind=Close}"
+                                            IsChecked="{Binding ShouldExport, Mode=OneWay}"
+                                            Style="{StaticResource MaterialDesignActionToggleButton}"
+                                            ToolTip="Should this media file be exported?" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                                 <DataGridTemplateColumn.Header>

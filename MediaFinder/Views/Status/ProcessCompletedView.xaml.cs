@@ -5,9 +5,9 @@ namespace MediaFinder.Views.Status
     /// <summary>
     /// Interaction logic for ProcessComplete.xaml
     /// </summary>
-    public partial class ProcessComplete : UserControl
+    public partial class ProcessCompletedView : UserControl
     {
-        public ProcessComplete()
+        public ProcessCompletedView()
         {
             InitializeComponent();
         }

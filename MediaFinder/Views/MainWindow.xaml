@@ -35,7 +35,7 @@
             <materialDesign:Transitioner AutoApplyTransitionOrigins="True" SelectedIndex="0">
                 <discovery:DiscoveryView x:Name="Discovery" DataContext="{Binding DiscoveryViewModel}" />
                 <export:ExportView x:Name="Export" DataContext="{Binding ExportViewModel}" />
-                <status:ProcessComplete x:Name="Complete" DataContext="{Binding StatusViewModel}" />
+                <status:ProcessCompletedView x:Name="Complete" DataContext="{Binding StatusViewModel}" />
             </materialDesign:Transitioner>
         </materialDesign:Card>
 

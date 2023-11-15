@@ -510,13 +510,13 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             {
                 SetVideoMetadata(fileMetadata, details);
             }
-            if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.None))
-            {
-                _logger.UnknownMediaType(filepath);
-            }
             if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.Text))
             {
                 _logger.TextMediaTypeDetected(filepath);
+            }
+            if (fileMetadata.Properties.MediaTypes.HasFlag(TagLib.MediaTypes.None))
+            {
+                _logger.UnknownMediaType(filepath);
             }
         }
         catch (OperationCanceledException)
