@@ -1,30 +1,22 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
 
-using MaterialDesignThemes.Wpf;
-
+using MediaFinder.Controls.Wpf;
 using MediaFinder.DataAccessLayer;
-using MediaFinder.Services.Export;
-using MediaFinder.Services.Search;
+using MediaFinder.DiscoveryServices;
+using MediaFinder.ExportServices;
+using MediaFinder.Helpers;
+using MediaFinder.Logging;
 
 using MediaFinder.Views;
 
-using MediaFinder.Views.Discovery;
-using MediaFinder.Views.Export;
-using MediaFinder.Views.Status;
-
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
-using NReco.VideoInfo;
-
 using Serilog;
-using Serilog.Events;
 
 using System.Windows;
-using System.Windows.Threading;
 
 namespace MediaFinder;
 
@@ -33,50 +25,35 @@ namespace MediaFinder;
 /// </summary>
 public partial class App : Application
 {
-
     [STAThread]
-    public static void Main(string[] args)
+    private static void Main(string[] args)
     {
-        Log.Logger = new LoggerConfiguration()
-            .MinimumLevel.Debug()
-            .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
-            .Enrich.FromLogContext()
-            .WriteTo.Console()
-            .WriteTo.File(
-                path: "logs/mediaFinder-.log",
-                rollingInterval: RollingInterval.Day,
-                retainedFileCountLimit: 15,
-#pragma warning disable CRRSP06
-                outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}|{Level:u3}|{SourceContext}|{Message:lj}{NewLine}{Exception}")
-#pragma warning restore CRRSP06
-            .CreateLogger();
+        MainAsync(args).GetAwaiter().GetResult();
+    }
+
+    private static async Task MainAsync(string[] args)
+    {
+        // ensure we get some logs for start-up in case CreatHostBuilder fails
+        Log.Logger = ServiceCollectionExtensions.StartupLogger();
 
         try
         {
             using IHost host = CreateHostBuilder(args).Build();
-            host.Start();
+            await host.StartAsync().ConfigureAwait(true);
 
-            AppDomain.CurrentDomain.UnhandledException += (sender, args) =>
-            {
-                var logger = host.Services.GetRequiredService<ILogger<App>>();
-                logger.LogError(args.ExceptionObject as Exception, "An unexpected exception occurred.");
-            };
+            var logger = host.Services.GetRequiredService<ILogger<App>>();
+            AppDomain.CurrentDomain.UnhandledException += (sender, args) => logger.UnhandledException(args.ExceptionObject as Exception);
 
-            using var scope = host.Services.GetRequiredService<IServiceScopeFactory>().CreateScope();
-            {
-                scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.Migrate();
-            }
+            host.Services.ApplyDatabaseMigrations();
 
             App app = new();
             app.InitializeComponent();
-            app.DispatcherUnhandledException += (sender, args) =>
-            {
-                var logger = host.Services.GetRequiredService<ILogger<App>>();
-                logger.LogError(args.Exception, "An unexpected exception occurred.");
-            };
+            app.DispatcherUnhandledException += (sender, args) => logger.UnhandledException(args.Exception);
             app.MainWindow = host.Services.GetRequiredService<MainWindow>();
             app.MainWindow.Visibility = Visibility.Visible;
             app.Run();
+
+            await host.StopAsync().ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -92,39 +69,13 @@ public partial class App : Application
         Host.CreateDefaultBuilder(args)
         .ConfigureAppConfiguration((hostBuilderContext, configurationBuilder)
             => configurationBuilder.AddUserSecrets(typeof(App).Assembly))
-        .ConfigureServices((hostContext, services) =>
-        {
-            var log = new LoggerConfiguration()
-                .ReadFrom.Configuration(hostContext.Configuration)
-                .CreateLogger();
-            services.AddSerilog(log);
-
-            services.AddDbContext<AppDbContext>(ServiceLifetime.Singleton);
-
-            services.AddTransient<SearchStageOneWorker>();
-            services.AddTransient<SearchStageTwoWorker>();
-            services.AddTransient<SearchStageThreeWorker>();
-            services.AddTransient<ExportWorker>();
-
-            services.AddTransient<FFProbe>();
-
-            services.AddSingleton<MainWindow>();
-            services.AddSingleton<MainWindowViewModel>();
-            services.AddSingleton<AddSearchSettingViewModel>();
-            services.AddSingleton<EditSearchSettingViewModel>();
-            services.AddSingleton<DiscoveryViewModel>();
-            services.AddSingleton<ExportViewModel>();
-            services.AddSingleton<ProcessCompletedViewModel>();
-
-            services.AddScoped<WeakReferenceMessenger>();
-            services.AddScoped<IMessenger, WeakReferenceMessenger>(provider => provider.GetRequiredService<WeakReferenceMessenger>());
-
-            services.AddScoped(_ => Current.Dispatcher);
-
-            services.AddTransient<ISnackbarMessageQueue>(provider =>
-            {
-                Dispatcher dispatcher = provider.GetRequiredService<Dispatcher>();
-                return new SnackbarMessageQueue(TimeSpan.FromSeconds(3.0), dispatcher);
-            });
-        });
+        .ConfigureServices((hostContext, services)
+            => services
+                .AddApplicationLogging(hostContext)
+                .AddMediaFinderDatabase()
+                .AddDiscoveryServices()
+                .AddExportServices()
+                .AddApplicationViews()
+                .AddMessenger<WeakReferenceMessenger>()
+                .AddSnackBarMessaging(Current));
 }

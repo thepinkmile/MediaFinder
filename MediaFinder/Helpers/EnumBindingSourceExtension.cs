@@ -9,7 +9,7 @@ namespace MediaFinder.Helpers;
 
 public class EnumBindingSourceExtension : MarkupExtension
 {
-    public Type EnumType {  get; private set; }
+    public Type EnumType { get; private set; }
 
     public EnumBindingSourceExtension(Type enumType)
     {

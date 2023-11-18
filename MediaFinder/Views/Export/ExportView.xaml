@@ -2,16 +2,16 @@
     x:Class="MediaFinder.Views.Export.ExportView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converters="clr-namespace:MediaFinder.Converters"
+    xmlns:converters="clr-namespace:MediaFinder.Controls.Wpf.Converters;assembly=MediaFinder.Controls.Wpf"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:dbmodels="clr-namespace:MediaFinder.DataAccessLayer.Models"
-    xmlns:exports="clr-namespace:MediaFinder.Services.Export"
-    xmlns:helpers="clr-namespace:MediaFinder.Helpers"
+    xmlns:dbmodels="clr-namespace:MediaFinder.DataAccessLayer.Models;assembly=MediaFinder.DataAccessLayer"
+    xmlns:helpers="clr-namespace:MediaFinder.Helpers;assembly=MediaFinder.Helpers"
     xmlns:local="clr-namespace:MediaFinder.Views.Export"
+    xmlns:localHelpers="clr-namespace:MediaFinder.Helpers"
     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:mde="clr-namespace:MaterialDesignExtensions.Controls;assembly=MaterialDesignExtensions"
-    xmlns:models="clr-namespace:MediaFinder.Models"
+    xmlns:models="clr-namespace:MediaFinder.Models;assembly=MediaFinder.Models"
     xmlns:system="clr-namespace:System;assembly=mscorlib"
     d:DataContext="{d:DesignInstance Type=local:ExportViewModel,
                                      IsDesignTimeCreatable=False}"
@@ -275,7 +275,7 @@
                             MinWidth="150"
                             HorizontalAlignment="Center"
                             VerticalAlignment="Center"
-                            ItemsSource="{Binding Source={helpers:EnumBindingSource {x:Type models:ExportType}}}"
+                            ItemsSource="{Binding Source={localHelpers:EnumBindingSource {x:Type models:ExportType}}}"
                             SelectedItem="{Binding ExportType}">
                             <ComboBox.ItemTemplate>
                                 <DataTemplate>
@@ -433,7 +433,7 @@
                                                 VerticalAlignment="Center"
                                                 VerticalContentAlignment="Center"
                                                 IsSynchronizedWithCurrentItem="True"
-                                                ItemsSource="{Binding Source={helpers:EnumBindingSource {x:Type helpers:TriStateBoolean}}}"
+                                                ItemsSource="{Binding Source={localHelpers:EnumBindingSource {x:Type helpers:TriStateBoolean}}}"
                                                 SelectedItem="{Binding DataContext.ExportingFilter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                                 <ComboBox.ItemTemplate>
                                                     <DataTemplate>
@@ -514,7 +514,7 @@
                                                 VerticalAlignment="Center"
                                                 VerticalContentAlignment="Center"
                                                 IsSynchronizedWithCurrentItem="True"
-                                                ItemsSource="{Binding Source={helpers:EnumBindingSource {x:Type dbmodels:MultiMediaType}}}"
+                                                ItemsSource="{Binding Source={localHelpers:EnumBindingSource {x:Type dbmodels:MultiMediaType}}}"
                                                 SelectedItem="{Binding DataContext.TypeFilter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                                                 <ComboBox.ItemTemplate>
                                                     <DataTemplate>

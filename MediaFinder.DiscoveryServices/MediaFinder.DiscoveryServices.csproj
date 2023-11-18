@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="MetadataExtractor" />
+    <PackageReference Include="NReco.VideoInfo" />
+    <PackageReference Include="SevenZipExtractor" />
+    <PackageReference Include="taglib-sharp-netstandard2.0" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <ProjectReference Include="..\MediaFinder.Helpers\MediaFinder.Helpers.csproj" />
+    <ProjectReference Include="..\MediaFinder.Models\MediaFinder.Models.csproj" />
+  </ItemGroup>
+
+</Project>

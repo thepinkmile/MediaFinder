@@ -37,7 +37,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     public DiscoveryViewModel(
         AddSearchSettingViewModel searchConfigViewModel,
         EditSearchSettingViewModel editSearchSettingViewModel,
-        AppDbContext dbContext,
+        MediaFinderDbContext dbContext,
         IMessenger messenger,
         ILogger<DiscoveryViewModel> logger,
         SearchStageOneWorker searchStageOneWorker,
@@ -445,7 +445,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
             && Directory.Exists(_createdWorkingDirectory))
         {
             Directory.Delete(_createdWorkingDirectory, true);
-            _logger.RemovedWorkingDIrectory(_createdWorkingDirectory);
+            _logger.RemovedWorkingDirectory(_createdWorkingDirectory);
             _createdWorkingDirectory = null;
             WorkingDirectorySize = 0UL;
         }

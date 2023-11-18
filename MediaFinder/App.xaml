@@ -8,14 +8,18 @@
             <ResourceDictionary.MergedDictionaries>
                 <materialDesign:BundledTheme
                     BaseTheme="Inherit"
+                    ColorAdjustment="{materialDesign:ColorAdjustment}"
                     PrimaryColor="Purple"
                     SecondaryColor="LightGreen" />
 
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+                <!--
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/Generic.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignExtensions;component/Themes/Generic.xaml" />
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignExtensions;component/Themes/MaterialDesignDarkTheme.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MediaFinder;component/Themes/Generic.xaml" />
+                -->
+                <ResourceDictionary Source="pack://application:,,,/MediaFinder.Controls.Wpf;component/Themes/Generic.xaml" />
             </ResourceDictionary.MergedDictionaries>
 
             <Style BasedOn="{StaticResource MaterialDesignCheckBox}" TargetType="CheckBox" />

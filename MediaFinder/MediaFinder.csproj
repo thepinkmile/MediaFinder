@@ -43,32 +43,51 @@
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="MaterialDesignExtensions" />
     <PackageReference Include="MaterialDesignThemes" />
-    <PackageReference Include="MetadataExtractor" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="Microsoft.Extensions.Hosting" />
-    <PackageReference Include="NetEscapades.EnumGenerators" />
-    <PackageReference Include="NReco.VideoInfo" />
     <PackageReference Include="Serilog" />
     <PackageReference Include="Serilog.Extensions.Hosting" />
     <PackageReference Include="Serilog.Extensions.Logging" />
     <PackageReference Include="Serilog.Settings.Configuration" />
     <PackageReference Include="Serilog.Sinks.Console" />
     <PackageReference Include="Serilog.Sinks.File" />
-    <PackageReference Include="SevenZipExtractor" />
-    <PackageReference Include="taglib-sharp-netstandard2.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="DataAccessLayer\Migrations\" />
+    <ProjectReference Include="..\MediaFinder.Controls.Wpf\MediaFinder.Controls.Wpf.csproj" />
+    <ProjectReference Include="..\MediaFinder.DataAccessLayer\MediaFinder.DataAccessLayer.csproj" />
+    <ProjectReference Include="..\MediaFinder.DiscoveryServices\MediaFinder.DiscoveryServices.csproj" />
+    <ProjectReference Include="..\MediaFinder.ExportServices\MediaFinder.ExportServices.csproj" />
+    <ProjectReference Include="..\MediaFinder.Helpers\MediaFinder.Helpers.csproj" />
+    <ProjectReference Include="..\MediaFinder.Models\MediaFinder.Models.csproj" />
+  </ItemGroup>
+
+  <!--
+  This enables hardware acceleration to use GPU for rendering in RDP
+  See: https://learn.microsoft.com/en-us/dotnet/desktop/wpf/advanced/optimizing-performance-taking-advantage-of-hardware?view=netframeworkdesktop-4.8
+  See: https://devblogs.microsoft.com/dotnet/announcing-dotnet-8-rc1/#wpf-hardware-acceleration-in-rdp
+  -->
+  <ItemGroup>
+    <RuntimeHostConfigurationOption Include="Switch.System.Windows.Media.EnableHardwareAccelerationInRdp" Value="true" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="**\*ViewModel.cs">
+      <DependentUpon>$([System.String]::Copy(%(Filename)).Replace('ViewModel', 'View.xaml'))</DependentUpon>
+    </Compile>
+    <Compile Update="**\MainWindowViewModel.cs">
+      <DependentUpon>$([System.String]::Copy(%(Filename)).Replace('ViewModel', '.xaml'))</DependentUpon>
+    </Compile>
+    <None Update="appsettings.*.json">
+      <DependentUpon>appsettings.json</DependentUpon>
+    </None>
   </ItemGroup>
 </Project>

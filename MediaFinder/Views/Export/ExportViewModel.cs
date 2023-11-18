@@ -33,7 +33,7 @@ public partial class ExportViewModel : ProgressableViewModel,
     public ExportViewModel(
         IMessenger messenger,
         ILogger<ExportViewModel> logger,
-        AppDbContext dbContext,
+        MediaFinderDbContext dbContext,
         ExportWorker exportWorker)
         : base(messenger, logger, dbContext)
     {

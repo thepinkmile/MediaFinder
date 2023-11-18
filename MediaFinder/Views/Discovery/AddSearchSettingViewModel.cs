@@ -17,7 +17,7 @@ namespace MediaFinder.Views.Discovery;
 
 public partial class AddSearchSettingViewModel : ObservableObject
 {
-    private readonly AppDbContext _dbContext;
+    private readonly MediaFinderDbContext _dbContext;
     private readonly IMessenger _messenger;
 
     [ObservableProperty]
@@ -70,7 +70,7 @@ public partial class AddSearchSettingViewModel : ObservableObject
     [NotifyCanExecuteChangedFor(nameof(RemoveSearchDirectoryCommand))]
     private string? _selectedDirectory;
 
-    public AddSearchSettingViewModel(AppDbContext appDbContext, IMessenger messenger)
+    public AddSearchSettingViewModel(MediaFinderDbContext appDbContext, IMessenger messenger)
     {
         _dbContext = appDbContext;
         _messenger = messenger;
