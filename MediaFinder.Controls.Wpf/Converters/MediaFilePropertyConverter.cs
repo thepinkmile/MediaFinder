@@ -12,8 +12,8 @@ public class MediaFilePropertyConverter : IValueConverter
     public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         => value is not MediaFile mf
             ? Binding.DoNothing
-            : mf.Properties.ContainsKey(PropertyName)
-                ? mf.Properties[PropertyName]
+            : mf.Properties.TryGetValue(PropertyName, out var propValue)
+                ? propValue
                 : string.Empty;
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

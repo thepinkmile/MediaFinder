@@ -32,6 +32,10 @@ public partial class MediaFile : ObservableObject
     [ObservableProperty]
     private MultiMediaType _multiMediaType;
 
+    public int? Width => Properties.TryGetValue("Width", out var propValue) && int.TryParse(propValue, out var width) ? width : null;
+
+    public int? Height => Properties.TryGetValue("Height", out var propValue) && int.TryParse(propValue, out var width) ? width : null;
+
     [ObservableProperty]
     private Dictionary<string, string> _properties;
 
