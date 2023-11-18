@@ -22,6 +22,7 @@ namespace MediaFinder.Views.Export
             // resume media if it is paused. This has no effect if the media is
             // already running.
             fileVideoViewer.Play();
+            mediaPlayButton.IsEnabled = false;
         }
 
         // Pause the media.
@@ -30,6 +31,7 @@ namespace MediaFinder.Views.Export
             // The Pause method pauses the media if it is currently running.
             // The Play method can be used to resume.
             fileVideoViewer.Pause();
+            mediaPlayButton.IsEnabled = true;
         }
 
         // Stop the media.
@@ -38,6 +40,7 @@ namespace MediaFinder.Views.Export
             // The Stop method stops and resets the media to be played from
             // the beginning.
             fileVideoViewer.Stop();
+            mediaPlayButton.IsEnabled = true;
         }
 
         // When loaded start and pause playback
@@ -45,6 +48,7 @@ namespace MediaFinder.Views.Export
         {
             fileVideoViewer.Play();
             fileVideoViewer.Pause();
+            mediaPlayButton.IsEnabled = true;
         }
 
         // When the media playback is finished. reset the media to the start.
@@ -58,12 +62,17 @@ namespace MediaFinder.Views.Export
             if (fileVideoViewer.IsLoaded)
             {
                 fileVideoViewer.Play();
+                mediaPlayButton.IsEnabled = false;
             }
         }
 
         private void DrawerHost_DrawerClosing(object sender, MaterialDesignThemes.Wpf.DrawerClosingEventArgs e)
         {
-            fileVideoViewer.Pause();
+            if (fileVideoViewer.IsLoaded)
+            {
+                fileVideoViewer.Pause();
+                mediaPlayButton.IsEnabled = true;
+            }
         }
 
         #endregion

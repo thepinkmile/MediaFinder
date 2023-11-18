@@ -10,10 +10,10 @@ namespace MediaFinder.Controls.Wpf
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddSnackBarMessaging(this IServiceCollection services, Application application, TimeSpan? messageDuration = null)
+        public static IServiceCollection AddSnackBarMessaging(this IServiceCollection services, TimeSpan? messageDuration = null)
         {
             messageDuration ??= TimeSpan.FromSeconds(3.0);
-            services.TryAddScoped(_ => application.Dispatcher);
+            services.TryAddScoped(_ => Application.Current.Dispatcher);
             services.TryAddTransient<ISnackbarMessageQueue>(provider =>
             {
                 Dispatcher dispatcher = provider.GetRequiredService<Dispatcher>();

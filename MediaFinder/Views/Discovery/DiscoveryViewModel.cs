@@ -144,7 +144,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     #region Discovery Process
 
     [ObservableProperty]
-    private ObservableCollection<SearchConfiguration> _configurations = new();
+    private ObservableCollection<SearchConfiguration> _configurations = [];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]

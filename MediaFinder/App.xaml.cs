@@ -77,5 +77,5 @@ public partial class App : Application
                 .AddExportServices()
                 .AddApplicationViews()
                 .AddMessenger<WeakReferenceMessenger>()
-                .AddSnackBarMessaging(Current));
+                .AddSnackBarMessaging());
 }

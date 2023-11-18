@@ -13,14 +13,10 @@ using SevenZipExtractor;
 
 namespace MediaFinder.Services.Search;
 
-public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
+public class SearchStageOneWorker(ILogger<SearchStageOneWorker> logger, IMessenger messenger)
+    : ReactiveBackgroundWorker<SearchRequest>(logger, messenger)
 {
-    private readonly IMessenger _messenger;
-    public SearchStageOneWorker(ILogger<SearchStageOneWorker> logger, IMessenger messenger)
-        : base(logger, messenger)
-    {
-        _messenger = messenger;
-    }
+    private readonly IMessenger _messenger = messenger;
 
     protected override void Execute(SearchRequest inputs, DoWorkEventArgs e)
     {
@@ -56,6 +52,7 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
     {
         switch (e.UserState)
         {
+            case WorkingDirectoryCreated workingDirectoryCreatedMessage: _messenger.Send(workingDirectoryCreatedMessage); break;
             case FileExtracted extractedMessage: _messenger.Send(extractedMessage); break;
         }
         base.UpdateProgress(sender, e);

@@ -383,7 +383,8 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             if (KnownImageExtensions.Contains(details[EXTENSION_DETAIL]))
             {
                 _logger.ImageDetected(filepath);
-                if (details[MEDIATYPE_DETAIL] != MultiMediaType.Video.ToStringFast())
+                if (details[MEDIATYPE_DETAIL] != MultiMediaType.Video.ToStringFast()
+                    && details[MEDIATYPE_DETAIL] != MultiMediaType.Audio.ToStringFast())
                 {
                     details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
                 }
@@ -423,7 +424,8 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (details[MEDIATYPE_DETAIL] != MultiMediaType.Video.ToStringFast())
+            if (details[MEDIATYPE_DETAIL] != MultiMediaType.Video.ToStringFast()
+                && details[MEDIATYPE_DETAIL] != MultiMediaType.Audio.ToStringFast())
             {
                 details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
             }
@@ -437,9 +439,9 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             ParseDimensionProperty(result, "Image Width", details, WIDTH_DETAIL);
             ParseDimensionProperty(result, "Image Height", details, HEIGHT_DETAIL);
 
-            if (result.ContainsKey("File Type_Expected File Name Extension"))
+            if (result.TryGetValue("File Type_Expected File Name Extension", out var value))
             {
-                details.AddOrUpdate(EXPECTED_EXTENSION_DETAIL, $".{result["File Type_Expected File Name Extension"]}");
+                details.AddOrUpdate(EXPECTED_EXTENSION_DETAIL, $".{value}");
             }
         }
         catch (OperationCanceledException)

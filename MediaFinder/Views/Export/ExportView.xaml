@@ -29,7 +29,6 @@
         <converters:PercentageConverter x:Key="FileDetailsDrawerWidthConverter" Percentage="50" />
         <converters:MultiMediaTypeToVisibilityConverter x:Key="IsImageVisibleConverter" RequiredType="Image" />
         <converters:MultiMediaTypeToVisibilityConverter x:Key="IsVideoVisibleConverter" RequiredType="PlayableMedia" />
-        <converters:MultiMediaTypeToVisibilityConverter x:Key="IsAudioVisibleConverter" RequiredType="Audio" />
         <converters:MediaFileToIconConverter
             x:Key="MediaFileToIconConverter"
             ImageIcon="FileImageOutline"
@@ -127,6 +126,7 @@
 
                                 <!--  Play button.  -->
                                 <Button
+                                    x:Name="mediaPlayButton"
                                     Margin="5"
                                     HorizontalAlignment="Center"
                                     Click="PlayButton_Click"
@@ -142,9 +142,11 @@
 
                                 <!--  Pause button.  -->
                                 <Button
+                                    x:Name="mediaPauseButton"
                                     Margin="5"
                                     HorizontalAlignment="Center"
                                     Click="PauseButton_Click"
+                                    IsEnabled="{Binding IsEnabled, ElementName=mediaPlayButton, Converter={StaticResource InvertBooleanConverter}}"
                                     Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
                                     ToolTip="Pause">
                                     <materialDesign:PackIcon
@@ -160,6 +162,7 @@
                                     Margin="5"
                                     HorizontalAlignment="Center"
                                     Click="StopButton_Click"
+                                    IsEnabled="{Binding IsEnabled, ElementName=mediaPlayButton, Converter={StaticResource InvertBooleanConverter}}"
                                     Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
                                     ToolTip="Stop">
                                     <materialDesign:PackIcon
