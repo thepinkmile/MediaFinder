@@ -5,70 +5,12 @@
 
 version: 2
 updates:
-  - package-ecosystem: "github-actions" 
-    directory: "/"
+  - package-ecosystem: "nuget" # See documentation for possible values
+    directory: "/" # Location of package manifests
     schedule:
       interval: "weekly"
 
-  - package-ecosystem: "nuget"
-    directory: "/MediaFinder.Models"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "github-actions"
-    directory: "/MediaFinder.Models"
-    schedule:
-      interval: "weekly"
-
-  - package-ecosystem: "nuget" 
-    directory: "/MediaFinder.DataAccessLayer"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "github-actions" 
-    directory: "/MediaFinder.DataAccessLayer"
+  - package-ecosystem: "github-actions" # See documentation for possible values
+    directory: "/" # Location of package manifests
     schedule:
       interval: "weekly" 
-
-  - package-ecosystem: "nuget" 
-    directory: "/MediaFinder.Helpers"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "github-actions" 
-    directory: "/MediaFinder.Helpers"
-    schedule:
-      interval: "weekly"
-
-  - package-ecosystem: "nuget"
-    directory: "/MediaFinder.Controls.Wpf"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "github-actions"
-    directory: "/MediaFinder.Controls.Wpf"
-    schedule:
-      interval: "weekly"
-
-  - package-ecosystem: "nuget"
-    directory: "/MediaFinder.DiscoveryServices"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "github-actions"
-    directory: "/MediaFinder.DiscoveryServices"
-    schedule:
-      interval: "weekly"
-
-  - package-ecosystem: "nuget"
-    directory: "/MediaFinder.ExportServices"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "github-actions"
-    directory: "/MediaFinder.ExportServices"
-    schedule:
-      interval: "weekly"
-
-  - package-ecosystem: "nuget"
-    directory: "/MediaFinder"
-    schedule:
-      interval: "weekly"
-  - package-ecosystem: "github-actions"
-    directory: "/MediaFinder"
-    schedule:
-      interval: "weekly"

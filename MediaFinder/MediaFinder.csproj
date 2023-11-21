@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -6,7 +6,7 @@
 
     <UseWPF>true</UseWPF>
     <StartupObject>MediaFinder.App</StartupObject>
-    <RootNamespace>MediaFinder</RootNamespace>
+    <ApplicationIcon>Resources\AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <!--
@@ -26,13 +26,12 @@
     <SelfContained>true</SelfContained>
     <PublishDir>bin\Publish\$(Configuration)\$(TargetFramework)</PublishDir>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
-    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <ApplicationDefinition Remove="App.xaml" />
+    <Content Include="Resources\AppIcon.ico" />
     <None Remove="appsettings.json" />
-    <Content Include="app.ico" />
     <Content Include="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
