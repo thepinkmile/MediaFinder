@@ -1,0 +1,74 @@
+# To get started with Dependabot version updates, you'll need to specify which
+# package ecosystems to update and where the package manifests are located.
+# Please see the documentation for all configuration options:
+# https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+
+version: 2
+updates:
+  - package-ecosystem: "github-actions" 
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "nuget"
+    directory: "/MediaFinder.Models"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/MediaFinder.Models"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "nuget" 
+    directory: "/MediaFinder.DataAccessLayer"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions" 
+    directory: "/MediaFinder.DataAccessLayer"
+    schedule:
+      interval: "weekly" 
+
+  - package-ecosystem: "nuget" 
+    directory: "/MediaFinder.Helpers"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions" 
+    directory: "/MediaFinder.Helpers"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "nuget"
+    directory: "/MediaFinder.Controls.Wpf"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/MediaFinder.Controls.Wpf"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "nuget"
+    directory: "/MediaFinder.DiscoveryServices"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/MediaFinder.DiscoveryServices"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "nuget"
+    directory: "/MediaFinder.ExportServices"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/MediaFinder.ExportServices"
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "nuget"
+    directory: "/MediaFinder"
+    schedule:
+      interval: "weekly"
+  - package-ecosystem: "github-actions"
+    directory: "/MediaFinder"
+    schedule:
+      interval: "weekly"

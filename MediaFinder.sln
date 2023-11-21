@@ -21,11 +21,21 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediaFinder.DiscoveryServic
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediaFinder.Helpers", "MediaFinder.Helpers\MediaFinder.Helpers.csproj", "{B6A8B190-FFD2-4AC6-B44D-1E0816D1BFCB}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaFinder.Models", "MediaFinder.Models\MediaFinder.Models.csproj", "{02C51423-6124-47A3-9964-D0259791D895}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediaFinder.Models", "MediaFinder.Models\MediaFinder.Models.csproj", "{02C51423-6124-47A3-9964-D0259791D895}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaFinder.ExportServices", "MediaFinder.ExportServices\MediaFinder.ExportServices.csproj", "{BE2480FC-8529-4293-BC3D-E2CADBE876F5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediaFinder.ExportServices", "MediaFinder.ExportServices\MediaFinder.ExportServices.csproj", "{BE2480FC-8529-4293-BC3D-E2CADBE876F5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MediaFinder.Controls.Wpf", "MediaFinder.Controls.Wpf\MediaFinder.Controls.Wpf.csproj", "{97B550F0-17E5-4B78-BC6B-D7F63BB77112}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MediaFinder.Controls.Wpf", "MediaFinder.Controls.Wpf\MediaFinder.Controls.Wpf.csproj", "{97B550F0-17E5-4B78-BC6B-D7F63BB77112}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{678BE08F-842C-4AF3-BFB0-7CDE8E87CB4E}"
+	ProjectSection(SolutionItems) = preProject
+		.github\dependabot.yml = .github\dependabot.yml
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{4FD6154D-1C3F-4C8C-88B8-1D6578FB635E}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\build.yml = .github\workflows\build.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -64,6 +74,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{678BE08F-842C-4AF3-BFB0-7CDE8E87CB4E} = {50AAD861-2EF1-4EAB-80EB-20FECB15232C}
+		{4FD6154D-1C3F-4C8C-88B8-1D6578FB635E} = {678BE08F-842C-4AF3-BFB0-7CDE8E87CB4E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {490F259C-CD1B-446C-A893-CD94D4954AE9}
