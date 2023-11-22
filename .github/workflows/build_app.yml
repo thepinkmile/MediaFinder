@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - main
+      - develop
   pull_request:
     branches:
       - main
+      - develop
   workflow_dispatch:
 
 defaults:
@@ -14,7 +16,7 @@ defaults:
     shell: pwsh
     
 env:
-  version: "1.0.${{ github.run_number }}"
+  version: "0.3.${{ github.run_number }}"
   
 jobs:
   build:
@@ -42,10 +44,10 @@ jobs:
       #    reporttypes: Html;MarkdownSummaryGithub
       #    title: 'Code Coverage'
 
-      #- name: Write PR Number
-      #  if: ${{ github.event_name == 'pull_request' }}
-      #  run: |
-      #    New-Item -Type File -Value "${{ github.event.number }}" -Force -Path "${{github.workspace}}/.build/coveragereport/PullRequestNumber"
+      - name: Write PR Number
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          New-Item -Type File -Value "${{ github.event.number }}" -Force -Path "${{github.workspace}}/.build/coveragereport/PullRequestNumber"
 
       #- name: Upload Code Coverage Report
       #  uses: actions/upload-artifact@v3
