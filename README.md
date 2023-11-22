@@ -22,7 +22,7 @@ dotnet new keboo.wpf
 # Versions
 - v0.1 [PRIVATE BUILD] - commit: [d639e5802c2cb1473e6d51bbbcebc7a9d5e31945](https://github.com/thepinkmile/MediaFinder/commit/d639e5802c2cb1473e6d51bbbcebc7a9d5e31945)
 - v0.2 [PRIVATE BUILD] - commit: [2b146dd3bb9b84966ea82f5f286c72354b2caef8](https://github.com/thepinkmile/MediaFinder/commit/2b146dd3bb9b84966ea82f5f286c72354b2caef8)
-- v0.3 [TBD]
+- v0.3 [TBD] - #4
 
 # ToDos
 - v0.3
