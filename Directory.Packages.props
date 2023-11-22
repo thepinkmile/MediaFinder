@@ -26,7 +26,7 @@
     <PackageVersion Include="FFME.Windows" Version="4.4.350" />
     <PackageVersion Include="FFmpeg.Shared" Version="4.0.2" />
     <PackageVersion Include="FluentAssertions" Version="6.12.0" />
-    <PackageVersion Include="JetBrains.Annotations" Version="2023.2.0" />
+    <PackageVersion Include="JetBrains.Annotations" Version="2023.3.0" />
     <PackageVersion Include="MaterialDesignExtensions" Version="3.3.0" />
     <PackageVersion Include="MaterialDesignThemes" Version="4.9.0" />
     <PackageVersion Include="MetadataExtractor" Version="2.8.1" />
