@@ -19,25 +19,37 @@ This project was created using Kevin Bost's DotnetTemplates tool [Keboo DotnetTe
 dotnet new keboo.wpf
 ```
 
+# Versions
+- v0.1 [PRIVATE BUILD] - commit: 
+- v0.2 [PRIVATE BUILD] - commit:
+- v0.3 [TBD]
+
 # ToDos
-- Separate DAL model types from use in UI/App code
-- Add Model type mappers
-- Check ProgressOverlay functionality
-- Add Tests
-- Fix bug where navigation sometimes doesn't automatically move to next page
-- Check issues with DataGrid virtualization in Drawer content with scroll bars
-- Simplify logic for discovery services so type is created at start and just updated
-  - Fix issue where MediaType is not discovered correctly (Video trumps Image)
-  - Enables use of actual type instead of converting to and from strings (current Dictionary implementation)
-- Fix namespaces (due to moving code into separate assemblies)
-- Reintroduce details of archives located and extracted
-- Add parent mapping of files that came from an archive to the archive file
-- Add Discovery state tracking
-- Add Discovery state persistence
-- Add Discovery state loading
-  - Load saved state
-  - Verify discovered files still exist
-  - Verify hashes of file as the same
-  - If different, allow re-discovery of changed items
-  - Allow discovery of new items
-- Add feature to compare discovery runs (diff style)
+- v0.3
+  - Separate DAL model types from use in UI/App code
+  - Add Model type mappers
+  - Check ProgressOverlay functionality
+  - Add Tests
+  - Fix bug where navigation sometimes doesn't automatically move to next page
+  - Check issues with DataGrid virtualization in Drawer content with scroll bars
+- v0.4
+  - Simplify logic for discovery services so type is created at start and just updated
+    - Fix issue where MediaType is not discovered correctly (Video trumps Image)
+    - Enables use of actual type instead of converting to and from strings (current Dictionary implementation)
+  - Fix namespaces (due to moving code into separate assemblies)
+  - Reintroduce details of archives located and extracted
+  - Add parent mapping of files that came from an archive to the archive file
+- v1.0
+  - Create proper App Icon
+  - Generate Documentation
+  - Create App installer (possibly wix v4???)
+- v2.0
+  - Add Discovery state persistence
+  - Add Discovery state loading
+    - Load saved state
+    - Verify discovered files still exist
+    - Verify hashes of file as the same
+    - If different, allow re-discovery of changed items
+    - Allow discovery of new items
+  - Add feature to compare discovery runs (diff style)
+  - Add feature to filter by diff of previous run
