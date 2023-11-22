@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Data.Common;
 using System.IO;
+using System.Windows.Controls;
 using System.Windows.Data;
 
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -18,6 +19,7 @@ using MediaFinder.Models;
 using MediaFinder.Services.Search;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace MediaFinder.Views.Discovery;
@@ -29,14 +31,14 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     IRecipient<FinishedMessage>,
     IRecipient<FileExtracted>
 {
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<DiscoveryViewModel> _logger;
     private readonly SearchStageOneWorker _searchStageOneWorker;
     private readonly SearchStageTwoWorker _searchStagaeTwoWorker;
     private readonly SearchStageThreeWorker _searchStagaeThreeWorker;
 
     public DiscoveryViewModel(
-        AddSearchSettingViewModel searchConfigViewModel,
-        EditSearchSettingViewModel editSearchSettingViewModel,
+        IServiceProvider serviceProvider,
         MediaFinderDbContext dbContext,
         IMessenger messenger,
         ILogger<DiscoveryViewModel> logger,
@@ -45,6 +47,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         SearchStageThreeWorker searchStageThreeWorker)
         : base(messenger, logger, dbContext)
     {
+        _serviceProvider = serviceProvider;
         _logger = logger;
         _searchStageOneWorker = searchStageOneWorker;
         _searchStagaeTwoWorker = searchStageTwoWorker;
@@ -58,8 +61,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         _searchStagaeTwoWorker.RunWorkerCompleted += SearchStageTwoCompleted;
         _searchStagaeThreeWorker.RunWorkerCompleted += SearchStageThreeCompleted;
 
-        SearchConfigViewModel = searchConfigViewModel;
-        EditSearchConfigViewModel = editSearchSettingViewModel;
+        // TODO: Should this default to temp directory???
         WorkingDirectory = Path.Combine(
             Directory.GetCurrentDirectory(),
             "TEMP");
@@ -68,16 +70,12 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     #region Settings Configurations
 
     [ObservableProperty]
-    private bool _drawEntityIsNew;
-
-    public AddSearchSettingViewModel SearchConfigViewModel { get; set; }
-
-    public EditSearchSettingViewModel EditSearchConfigViewModel { get; set; }
+    private UserControl? _drawContent;
 
     [RelayCommand]
     private void OnAddSearchSetting(DrawerHost drawerHost)
     {
-        DrawEntityIsNew = true;
+        DrawContent = _serviceProvider.GetRequiredService<AddSearchSettingView>();
         drawerHost!.IsRightDrawerOpen = true;
     }
 
@@ -88,10 +86,11 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 #pragma warning restore CRR0035
 #pragma warning restore CRR0034
     {
-        DrawEntityIsNew = false;
+        var view = _serviceProvider.GetRequiredService<EditSearchSettingView>();
 #pragma warning disable CRR0039
-        await EditSearchConfigViewModel.InitializeAsync(SelectedConfig!.Id).ConfigureAwait(true);
+        await view.InitializeDataContextAsync(SelectedConfig!.Id).ConfigureAwait(true);
 #pragma warning restore CRR0039
+        DrawContent = view;
         drawerHost!.IsRightDrawerOpen = true;
     }
 

@@ -27,7 +27,9 @@ namespace MediaFinder
             return services
                 .AddSingleton<MainWindow>()
                 .AddSingleton<MainWindowViewModel>()
-                .AddSingleton<AddSearchSettingViewModel>()
+                .AddTransient<AddSearchSettingView>()
+                .AddTransient<AddSearchSettingViewModel>()
+                .AddTransient<EditSearchSettingView>()
                 .AddSingleton<EditSearchSettingViewModel>()
                 .AddSingleton<DiscoveryViewModel>()
                 .AddSingleton<ExportViewModel>()
