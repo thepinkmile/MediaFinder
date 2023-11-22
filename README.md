@@ -23,6 +23,7 @@ dotnet new keboo.wpf
 - Separate DAL model types from use in UI/App code
 - Add Model type mappers
 - Check ProgressOverlay functionality
+- Add Tests
 - Fix bug where navigation sometimes doesn't automatically move to next page
 - Check issues with DataGrid virtualization in Drawer content with scroll bars
 - Simplify logic for discovery services so type is created at start and just updated
