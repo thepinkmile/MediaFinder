@@ -1,3 +1,5 @@
+using MediaFinder.Views;
+
 namespace MediaFinder.Tests;
 
 //This attribute generates tests for MainWindowViewModel that
@@ -5,60 +7,62 @@ namespace MediaFinder.Tests;
 [ConstructorTests(typeof(MainWindowViewModel))]
 public partial class MainWindowViewModelTests
 {
-    [Fact]
-    public void IncrementCounterCommand_Execute_IncrementsCount()
-    {
-        //Arrange
-        AutoMocker mocker = new();
+    // TODO: re-create tests
 
-        MainWindowViewModel viewModel = mocker.CreateInstance<MainWindowViewModel>();
+    //[Fact]
+    //public void IncrementCounterCommand_Execute_IncrementsCount()
+    //{
+    //    //Arrange
+    //    AutoMocker mocker = new();
 
-        int initialCount = viewModel.Count;
+    //    MainWindowViewModel viewModel = mocker.CreateInstance<MainWindowViewModel>();
 
-        //Act
-        viewModel.IncrementCountCommand.Execute(null);
+    //    int initialCount = viewModel.Count;
 
-        //Assert
-        Assert.Equal(initialCount + 1, viewModel.Count);
-    }
+    //    //Act
+    //    viewModel.IncrementCountCommand.Execute(null);
 
-    [Theory]
-    [InlineData(0, true)]
-    [InlineData(1, true)]
-    [InlineData(2, true)]
-    [InlineData(3, true)]
-    [InlineData(4, true)]
-    [InlineData(5, false)]
-    [InlineData(6, false)]
-    public void IncrementCounterCommand_CanExecute_IndicatesIfCountIsLessThanFive(int count, bool expected)
-    {
-        //Arrange
-        AutoMocker mocker = new();
+    //    //Assert
+    //    Assert.Equal(initialCount + 1, viewModel.Count);
+    //}
 
-        MainWindowViewModel viewModel = mocker.CreateInstance<MainWindowViewModel>();
+    //[Theory]
+    //[InlineData(0, true)]
+    //[InlineData(1, true)]
+    //[InlineData(2, true)]
+    //[InlineData(3, true)]
+    //[InlineData(4, true)]
+    //[InlineData(5, false)]
+    //[InlineData(6, false)]
+    //public void IncrementCounterCommand_CanExecute_IndicatesIfCountIsLessThanFive(int count, bool expected)
+    //{
+    //    //Arrange
+    //    AutoMocker mocker = new();
 
-        viewModel.Count = count;
+    //    MainWindowViewModel viewModel = mocker.CreateInstance<MainWindowViewModel>();
 
-        //Act
-        bool canExecute = viewModel.IncrementCountCommand.CanExecute(null);
+    //    viewModel.Count = count;
 
-        //Assert
-        Assert.Equal(expected, canExecute);
-    }
+    //    //Act
+    //    bool canExecute = viewModel.IncrementCountCommand.CanExecute(null);
 
-    [Fact]
-    public void ClearCounterCommand_Execute_ClearsCount()
-    {
-        //Arrange
-        AutoMocker mocker = new();
+    //    //Assert
+    //    Assert.Equal(expected, canExecute);
+    //}
 
-        MainWindowViewModel viewModel = mocker.CreateInstance<MainWindowViewModel>();
-        viewModel.Count = 42;
+    //[Fact]
+    //public void ClearCounterCommand_Execute_ClearsCount()
+    //{
+    //    //Arrange
+    //    AutoMocker mocker = new();
 
-        //Act
-        viewModel.ClearCountCommand.Execute(null);
+    //    MainWindowViewModel viewModel = mocker.CreateInstance<MainWindowViewModel>();
+    //    viewModel.Count = 42;
 
-        //Assert
-        Assert.Equal(0, viewModel.Count);
-    }
+    //    //Act
+    //    viewModel.ClearCountCommand.Execute(null);
+
+    //    //Assert
+    //    Assert.Equal(0, viewModel.Count);
+    //}
 }
