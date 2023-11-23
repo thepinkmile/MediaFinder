@@ -4,25 +4,22 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 
-using CommunityToolkit.Mvvm.ComponentModel;
-
 namespace MediaFinder.Controls.Wpf.Controls;
 
 /// <summary>
 /// A control for displaying some kind of progress indication over the complete user interface while a long running operation is in progress.
 /// </summary>
-[ObservableObject]
 public partial class ProgressOverlay : ContentControl
 {
     public static readonly DependencyProperty OverlayBackgroundProperty = DependencyProperty.Register(
         nameof(OverlayBackground), typeof(Brush), typeof(ProgressOverlay), new FrameworkPropertyMetadata(Panel.BackgroundProperty.DefaultMetadata.DefaultValue));
 
     [Bindable(true), Category("Appearance")]
-    public Brush OverlayBackground
+    public Brush? OverlayBackground
     {
         get
         {
-            return (Brush)GetValue(OverlayBackgroundProperty);
+            return (Brush?)GetValue(OverlayBackgroundProperty);
         }
 
         set

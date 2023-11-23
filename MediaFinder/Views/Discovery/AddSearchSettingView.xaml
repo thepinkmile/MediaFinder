@@ -68,7 +68,7 @@
             <TextBlock VerticalAlignment="Center"
                        DockPanel.Dock="Left"
                        Text="Extraction Depth" />
-            <TextBox Width="40"
+            <TextBox MinWidth="40"
                      VerticalAlignment="Center"
                      DockPanel.Dock="Right"
                      Style="{StaticResource MaterialDesignFloatingHintTextBox}"
@@ -76,7 +76,7 @@
                      TextAlignment="Right"
                      TextWrapping="NoWrap" />
             <Slider x:Name="ExtractDepth"
-                    Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=StackPanel}}"
+                    MinWidth="225"
                     Margin="8,0,8,0"
                     VerticalAlignment="Center"
                     IsEnabled="{Binding SettingExtractArchives}"
@@ -170,25 +170,26 @@
           <Border HorizontalAlignment="Stretch"
                   BorderBrush="{DynamicResource PrimaryHueMidBrush}"
                   BorderThickness="1"
-                  ClipToBounds="True">
+                  ClipToBounds="True"
+                  CornerRadius="8,8,0,0">
             <Grid>
               <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
               </Grid.RowDefinitions>
-              <materialDesign:ColorZone Effect="{DynamicResource MaterialDesignShadowDepth5}" Mode="PrimaryMid">
+              <materialDesign:ColorZone materialDesign:ElevationAssist.Elevation="Dp12"
+                                        CornerRadius="8,8,0,0"
+                                        Mode="PrimaryMid">
                 <TextBlock Margin="16" Text="Directories" />
               </materialDesign:ColorZone>
-              <Button Grid.Row="0"
-                      Margin="0,0,80,0"
+              <Button Margin="0,0,80,0"
                       HorizontalAlignment="Right"
                       VerticalAlignment="Center"
                       Command="{Binding AddSearchDirectoryCommand}"
                       Content="{materialDesign:PackIcon Kind=Plus,
                                                         Size=22}"
                       Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}" />
-              <Button Grid.Row="0"
-                      Margin="0,0,20,0"
+              <Button Margin="0,0,20,0"
                       HorizontalAlignment="Right"
                       VerticalAlignment="Center"
                       Command="{Binding RemoveSearchDirectoryCommand}"

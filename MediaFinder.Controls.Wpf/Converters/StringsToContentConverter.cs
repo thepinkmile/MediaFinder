@@ -12,7 +12,7 @@ public class StringsToContentConverter : IValueConverter
             ? Binding.DoNothing
             : list != null && list.Any()
                 ? string.Join(
-                    parameter != null && parameter is string paramStr && !string.IsNullOrWhiteSpace(paramStr)
+                    parameter is string paramStr && !string.IsNullOrWhiteSpace(paramStr)
                         ? paramStr
                         : Delimeter
                     , list)

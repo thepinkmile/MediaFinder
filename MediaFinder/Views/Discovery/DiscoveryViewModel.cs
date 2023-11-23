@@ -57,6 +57,15 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
         BindingOperations.EnableCollectionSynchronization(Configurations, new());
 
+        /*
+        IProgress<string> currentDiscoveryProgress = new Progress<string>();
+
+        Task.Run(() => {
+            // do background stuff
+            currentDiscoveryProgress.Report("My file status");
+        });
+        */
+
         _searchStageOneWorker.RunWorkerCompleted += SearchStepOneCompleted;
         _searchStagaeTwoWorker.RunWorkerCompleted += SearchStageTwoCompleted;
         _searchStagaeThreeWorker.RunWorkerCompleted += SearchStageThreeCompleted;

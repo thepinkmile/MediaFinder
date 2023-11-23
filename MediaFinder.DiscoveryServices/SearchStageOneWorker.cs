@@ -141,18 +141,18 @@ public class SearchStageOneWorker(ILogger<SearchStageOneWorker> logger, IMesseng
         return files.ToList();
     }
 
-    private DirectoryInfo GetExtractionPath(string rottDirectory, string archiveName)
+    private DirectoryInfo GetExtractionPath(string rootDirectory, string archiveName)
     {
         var nameWithoutExtension = Path.GetFileNameWithoutExtension(archiveName);
         var extractionPath = new DirectoryInfo(
-            Path.Combine(rottDirectory, $"Extracted_{nameWithoutExtension}")
+            Path.Combine(rootDirectory, $"Extracted_{nameWithoutExtension}")
             );
         var index = 0;
         while (extractionPath.Exists)
         {
             _logger.ExtractionPathExists(extractionPath.FullName);
             extractionPath = new DirectoryInfo(
-                Path.Combine(rottDirectory, $"Extracted_{nameWithoutExtension}({++index})")
+                Path.Combine(rootDirectory, $"Extracted_{nameWithoutExtension}({++index})")
                 );
         }
 

@@ -118,8 +118,8 @@
             <RowDefinition Height="*" />
           </Grid.RowDefinitions>
           <materialDesign:ColorZone Grid.Row="0"
+                                    materialDesign:ElevationAssist.Elevation="Dp24"
                                     CornerRadius="8,8,0,0"
-                                    Effect="{DynamicResource MaterialDesignShadowDepth5}"
                                     Mode="PrimaryMid">
             <TextBlock Margin="16" Text="Configurations" />
           </materialDesign:ColorZone>

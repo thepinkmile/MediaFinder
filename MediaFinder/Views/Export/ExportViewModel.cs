@@ -49,6 +49,8 @@ public partial class ExportViewModel : ProgressableViewModel,
         Binding myBind = new() { Source = DiscoveredFiles };
         BindingOperations.SetBinding(_mediaFilesViewSource, CollectionViewSource.SourceProperty, myBind);
         MediaFilesView = _mediaFilesViewSource.View;
+        // TODO: this would break the existing filtering methods
+        //MediaFilesView = CollectionViewSource.GetDefaultView(DiscoveredFiles);
 
         // default filters
         TypeFilter = MultiMediaType.All;
