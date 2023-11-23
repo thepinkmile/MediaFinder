@@ -45,10 +45,9 @@ public partial class ExportViewModel : ProgressableViewModel,
         BindingOperations.EnableCollectionSynchronization(DiscoveredFiles, new());
 
         // Bind CollectionViewSource.Source to MyCollection
-        _mediaFilesViewSource = new CollectionViewSource();
-        Binding myBind = new() { Source = DiscoveredFiles };
-        BindingOperations.SetBinding(_mediaFilesViewSource, CollectionViewSource.SourceProperty, myBind);
-        MediaFilesView = _mediaFilesViewSource.View;
+        _mediaFilesViewSource = CollectionViewSource.GetDefaultView(DiscoveredFiles);
+
+        MediaFilesView = _mediaFilesViewSource;
 
         // default filters
         TypeFilter = MultiMediaType.All;
@@ -57,10 +56,11 @@ public partial class ExportViewModel : ProgressableViewModel,
         CreatedBeforeFilter = null;
 
         // attach filter delegates
-        _mediaFilesViewSource.Filter += ApplyExportingFilter;
-        _mediaFilesViewSource.Filter += ApplyMediaTypeFilter;
-        _mediaFilesViewSource.Filter += ApplyCreatedAfterFilter;
-        _mediaFilesViewSource.Filter += ApplyCreatedBeforeilter;
+        //_mediaFilesViewSource.Filter = ApplyFiler;
+        //_mediaFilesViewSource.Filter += ApplyExportingFilter;
+        //_mediaFilesViewSource.Filter += ApplyMediaTypeFilter;
+        //_mediaFilesViewSource.Filter += ApplyCreatedAfterFilter;
+        //_mediaFilesViewSource.Filter += ApplyCreatedBeforeilter;
 
         _exportWorker.RunWorkerCompleted += ExportCompleted;
 
@@ -115,6 +115,12 @@ public partial class ExportViewModel : ProgressableViewModel,
     {
         MediaFilesView.Refresh();
     }
+
+    //private bool ApplyFiler(object item)
+    //{
+    //    return ApplyExportingFilter(item) &&
+    //        ApplyMediaTypeFilter(item) && ..
+    //}
 
     private void ApplyExportingFilter(object sender, FilterEventArgs e)
     {
@@ -219,7 +225,7 @@ public partial class ExportViewModel : ProgressableViewModel,
         }
     }
 
-    private readonly CollectionViewSource _mediaFilesViewSource;
+    private readonly ICollectionView _mediaFilesViewSource;
 
     [ObservableProperty]
     private ICollectionView _mediaFilesView;

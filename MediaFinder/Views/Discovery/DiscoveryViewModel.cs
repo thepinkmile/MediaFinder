@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Data.Common;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -56,6 +57,15 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         messenger.RegisterAll(this);
 
         BindingOperations.EnableCollectionSynchronization(Configurations, new());
+
+        Progress<string> currentFileProgress = new Progress<string>();
+
+        Task.Run(() =>
+        {
+
+            //do background stuff
+            //currentFileProgress.Report("my file");
+        });
 
         _searchStageOneWorker.RunWorkerCompleted += SearchStepOneCompleted;
         _searchStagaeTwoWorker.RunWorkerCompleted += SearchStageTwoCompleted;
@@ -303,6 +313,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
     private void SearchStepOneCompleted(object? sender, RunWorkerCompletedEventArgs e)
     {
+
         if (e.Cancelled)
         {
             _messenger.Send(SnackBarMessage.Create("Search cancelled"));
@@ -357,7 +368,6 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
             SearchCleanup();
             return;
         }
-
         try
         {
             _dbContext.FileDetails.AddRange(result.Files);

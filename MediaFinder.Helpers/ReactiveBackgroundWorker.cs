@@ -16,7 +16,7 @@ public abstract class ReactiveBackgroundWorker<T> : BackgroundWorker
 
     private readonly IMessenger _messenger;
 
-    private object _progressToken = null!;
+    private object? _progressToken;
 
     protected ReactiveBackgroundWorker(ILogger logger, IMessenger messenger)
     {
@@ -51,7 +51,7 @@ public abstract class ReactiveBackgroundWorker<T> : BackgroundWorker
 
     protected void SetProgress(string message, LogLevel logLevel = LogLevel.Debug)
     {
-        ReportProgress(UpdateProgressMessage.Create(_progressToken, message));
+        ReportProgress(UpdateProgressMessage.Create(_progressToken!, message));
         _logger.Message(message, logLevel);
     }
 
