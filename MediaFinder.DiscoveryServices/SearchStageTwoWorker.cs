@@ -383,8 +383,8 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             if (KnownImageExtensions.Contains(details[EXTENSION_DETAIL]))
             {
                 _logger.ImageDetected(filepath);
-                if (details[MEDIATYPE_DETAIL] != MultiMediaType.Video.ToStringFast()
-                    && details[MEDIATYPE_DETAIL] != MultiMediaType.Audio.ToStringFast())
+                if (string.Compare(details[MEDIATYPE_DETAIL], MultiMediaType.Video.ToStringFast(), StringComparison.InvariantCultureIgnoreCase) != 0
+                    && string.Compare(details[MEDIATYPE_DETAIL], MultiMediaType.Audio.ToStringFast(), StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
                 }
@@ -424,8 +424,8 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (details[MEDIATYPE_DETAIL] != MultiMediaType.Video.ToStringFast()
-                && details[MEDIATYPE_DETAIL] != MultiMediaType.Audio.ToStringFast())
+            if (string.Compare(details[MEDIATYPE_DETAIL], MultiMediaType.Video.ToStringFast(), StringComparison.InvariantCultureIgnoreCase) != 0
+                && string.Compare(details[MEDIATYPE_DETAIL], MultiMediaType.Audio.ToStringFast(), StringComparison.InvariantCultureIgnoreCase) != 0)
             {
                 details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
             }

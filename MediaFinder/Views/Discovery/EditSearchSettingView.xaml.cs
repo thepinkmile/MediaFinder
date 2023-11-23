@@ -24,14 +24,14 @@ public partial class EditSearchSettingView : UserControl
     }
 
 
-    public async Task InitializeDataContextAsync(int settingId)
+    public async Task InitializeDataContextAsync(int settingId, CancellationToken cancellationToken = default)
     {
         if (DataContext is not EditSearchSettingViewModel viewModel)
         {
             return;
         }
 
-        await viewModel.InitializeAsync(settingId).ConfigureAwait(true);
+        await viewModel.InitializeAsync(settingId, cancellationToken).ConfigureAwait(true);
     }
 
     private void TextBox_PreviewTextInput_NumericOnly(object sender, System.Windows.Input.TextCompositionEventArgs e)
