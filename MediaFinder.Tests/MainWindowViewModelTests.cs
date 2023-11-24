@@ -1,4 +1,8 @@
+using FluentAssertions;
+
+using MediaFinder.Messages;
 using MediaFinder.Views;
+using MediaFinder.Views.Discovery;
 
 namespace MediaFinder.Tests;
 
@@ -9,60 +13,26 @@ public partial class MainWindowViewModelTests
 {
     // TODO: re-create tests
 
-    //[Fact]
-    //public void IncrementCounterCommand_Execute_IncrementsCount()
-    //{
-    //    //Arrange
-    //    AutoMocker mocker = new();
+    [Fact]
+    public void Receive_ShowProgressMessage_Populates_Progress_Template_Variables()
+    {
+        // Arrange
+        AutoMocker mocker = new();
+        MainWindowViewModel viewModel = mocker.CreateInstance<MainWindowViewModel>(true);
+        viewModel.ProgressVisible.Should().BeFalse();
 
-    //    MainWindowViewModel viewModel = mocker.CreateInstance<MainWindowViewModel>();
+        var testMessage = new ShowProgressMessage(
+            "TestToken",
+            50,
+            "Test Message"
+            );
 
-    //    int initialCount = viewModel.Count;
+        // Act
+        viewModel.Receive(testMessage);
 
-    //    //Act
-    //    viewModel.IncrementCountCommand.Execute(null);
-
-    //    //Assert
-    //    Assert.Equal(initialCount + 1, viewModel.Count);
-    //}
-
-    //[Theory]
-    //[InlineData(0, true)]
-    //[InlineData(1, true)]
-    //[InlineData(2, true)]
-    //[InlineData(3, true)]
-    //[InlineData(4, true)]
-    //[InlineData(5, false)]
-    //[InlineData(6, false)]
-    //public void IncrementCounterCommand_CanExecute_IndicatesIfCountIsLessThanFive(int count, bool expected)
-    //{
-    //    //Arrange
-    //    AutoMocker mocker = new();
-
-    //    MainWindowViewModel viewModel = mocker.CreateInstance<MainWindowViewModel>();
-
-    //    viewModel.Count = count;
-
-    //    //Act
-    //    bool canExecute = viewModel.IncrementCountCommand.CanExecute(null);
-
-    //    //Assert
-    //    Assert.Equal(expected, canExecute);
-    //}
-
-    //[Fact]
-    //public void ClearCounterCommand_Execute_ClearsCount()
-    //{
-    //    //Arrange
-    //    AutoMocker mocker = new();
-
-    //    MainWindowViewModel viewModel = mocker.CreateInstance<MainWindowViewModel>();
-    //    viewModel.Count = 42;
-
-    //    //Act
-    //    viewModel.ClearCountCommand.Execute(null);
-
-    //    //Assert
-    //    Assert.Equal(0, viewModel.Count);
-    //}
+        // Assert
+        viewModel.ProgressVisible.Should().BeTrue();
+        viewModel.ProgressValue.Should().Be(50);
+        viewModel.ProgressMessage.Should().Be("Test Message");
+    }
 }
