@@ -66,6 +66,8 @@
     <PackageVersion Include="Serilog.Sinks.File" Version="5.0.0" />
     <PackageVersion Include="SevenZipExtractor" Version="1.0.17" />
     <PackageVersion Include="SevenZipSharp.Interop" Version="19.0.2" />
+    <PackageVersion Include="System.Net.Http" Version="4.3.4" />
+    <PackageVersion Include="System.Text.RegularExpressions" Version="4.3.1" />
     <PackageVersion Include="taglib-sharp-netstandard2.0" Version="2.1.0" />
     <PackageVersion Include="Xamarin.CommunityToolkit" Version="2.0.6" />
     <PackageVersion Include="xunit" Version="2.6.2" />
