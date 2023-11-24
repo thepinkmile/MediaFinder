@@ -32,12 +32,12 @@ public partial class MainWindowViewModel : ObservableObject,
         IMessenger messenger,
         ISnackbarMessageQueue snackbarMessageQueue)
     {
-        _serviceProvider = serviceProvider;
-        _messenger = messenger;
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
         
         _messenger.RegisterAll(this);
 
-        MessageQueue = snackbarMessageQueue;
+        MessageQueue = snackbarMessageQueue ?? throw new ArgumentNullException(nameof(snackbarMessageQueue));
     }
 
     public DiscoveryViewModel DiscoveryViewModel => _serviceProvider.GetRequiredService<DiscoveryViewModel>();
