@@ -86,7 +86,7 @@ jobs:
           dotnet-version: '8.x'
 
       - name: dotnet build
-        run: dotnet build --configuration Release -p:AssemblyVersion="${{ steps.gitversion.outputs.assemblySemVer }}" -p:FileVersion="${{ steps.gitversion.outputs.assemblySemFileVer }}" -p:InformationalVersion="${{ steps.gitversion.outputs.informationalVersion }}" -p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}"
+        run: dotnet build --configuration Release -p:AssemblyVersion="${{ needs.git_version.outputs.assemblySemVer }}" -p:FileVersion="${{ needs.git_version.outputs.assemblySemFileVer }}" -p:InformationalVersion="${{ needs.git_version.outputs.informationalVersion }}" -p:Version="${{ needs.git_version.outputs.majorMinorPatch }}"
 
       - name: dotnet test
         run: dotnet test --configuration Release --no-build --collect:"XPlat Code Coverage" --results-directory ${{github.workspace}}/.build/coverage
@@ -113,7 +113,7 @@ jobs:
         
       - name: dotnet publish
         if: ${{ github.event_name != 'pull_request' }}
-        run: dotnet publish --configuration Release --no-build -p:AssemblyVersion="${{ steps.gitversion.outputs.assemblySemVer }}" -p:FileVersion="${{ steps.gitversion.outputs.assemblySemFileVer }}" -p:InformationalVersion="${{ steps.gitversion.outputs.informationalVersion }}" -p:Version="${{ steps.gitversion.outputs.majorMinorPatch }}" -p:PublishDir=${{github.workspace}}/.build/publish
+        run: dotnet publish --configuration Release --no-build -p:AssemblyVersion="${{ needs.git_version.outputs.assemblySemVer }}" -p:FileVersion="${{ needs.git_version.outputs.assemblySemFileVer }}" -p:InformationalVersion="${{ needs.git_version.outputs.informationalVersion }}" -p:Version="${{ needs.git_version.outputs.majorMinorPatch }}" -p:PublishDir=${{github.workspace}}/.build/publish
 
       - name: Upload artifact for deployment job
         if: ${{ github.event_name != 'pull_request' }}
