@@ -19,6 +19,12 @@ jobs:
   git_version:
     name: Git Version
     runs-on: ubuntu-latest
+
+    outputs:
+      assemblySemVer: ${{ steps.gitversion.outputs.assemblySemVer }}
+      assemblySemFileVer: ${{ steps.gitversion.outputs.assemblySemFileVer }}
+      informationalVersion: ${{ steps.gitversion.outputs.informationalVersion }}
+      majorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}
     
     steps:
       - name: Checkout
