@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -31,10 +31,6 @@
   <ItemGroup>
     <ApplicationDefinition Remove="App.xaml" />
     <Content Include="Resources\AppIcon.ico" />
-    <None Remove="appsettings.json" />
-    <Content Include="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Page Include="App.xaml" />
   </ItemGroup>
 
@@ -85,6 +81,13 @@
     <Compile Update="**\MainWindowViewModel.cs">
       <DependentUpon>$([System.String]::Copy(%(Filename)).Replace('ViewModel', '.xaml'))</DependentUpon>
     </Compile>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Remove="appsettings.json" />
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Update="appsettings.*.json">
       <DependentUpon>appsettings.json</DependentUpon>
     </None>
