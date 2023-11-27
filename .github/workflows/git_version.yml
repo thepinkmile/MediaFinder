@@ -3,13 +3,17 @@ name: Get Git Version Information
 on:
   workflow_call:
     outputs:
-      assemblySemVer: ${{ jobs.getgitversion.outputs.assemblySemVer }}
-      assemblySemFileVer: ${{ jobs.getgitversion.outputs.assemblySemFileVer }}
-      informationalVersion: ${{ jobs.getgitversion.outputs.informationalVersion }}
-      majorMinorPatch: ${{ jobs.getgitversion.outputs.majorMinorPatch }}
+      assemblySemVer:
+        value: ${{ jobs.get_git_version.outputs.assemblySemVer }}
+      assemblySemFileVer:
+        value: ${{ jobs.get_git_version.outputs.assemblySemFileVer }}
+      informationalVersion:
+        value: ${{ jobs.get_git_version.outputs.informationalVersion }}
+      majorMinorPatch:
+        value: ${{ jobs.get_git_version.outputs.majorMinorPatch }}
 
 jobs:
-  getgitversion:
+  get_git_version:
     name: Git Version
     runs-on: ubuntu-latest
     
