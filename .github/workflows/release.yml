@@ -19,7 +19,7 @@ defaults:
 jobs:
   git_version:
     name: Get Git Version
-    uses: ./.github/workflows/git-version.yml
+    uses: ./.github/workflows/git_version.yml
 
   version_number_check:
     needs: [git_version]
