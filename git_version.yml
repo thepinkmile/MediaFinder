@@ -4,17 +4,16 @@ on:
   workflow_call:
     outputs:
       assemblySemVer:
-        value: ${{ jobs.getgitversion.outputs.assemblySemVer }}
+        value: ${{ jobs.git_version.outputs.assemblySemVer }}
       assemblySemFileVer:
-        value: ${{ jobs.getgitversion.outputs.assemblySemFileVer }}
+        value: ${{ jobs.git_version.outputs.assemblySemFileVer }}
       informationalVersion:
-        value: ${{ jobs.getgitversion.outputs.informationalVersion }}
+        value: ${{ jobs.git_version.outputs.informationalVersion }}
       majorMinorPatch:
-        value: ${{ jobs.getgitversion.outputs.majorMinorPatch }}
+        value: ${{ jobs.git_version.outputs.majorMinorPatch }}
 
 jobs:
   git_version:
-    id: getgitversion
     name: Git Version
     runs-on: ubuntu-latest
     
