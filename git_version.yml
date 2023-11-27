@@ -1,6 +1,7 @@
 name: Get Git Version Information
 
 on:
+  workflow_dispatch:
   workflow_call:
 
 jobs:
