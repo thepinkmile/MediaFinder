@@ -3,10 +3,14 @@ name: Get Git Version Information
 on:
   workflow_call:
     outputs:
-      assemblySemVer: ${{ jobs.getgitversion.outputs.assemblySemVer }}
-      assemblySemFileVer: ${{ jobs.getgitversion.outputs.assemblySemFileVer }}
-      informationalVersion: ${{ jobs.getgitversion.outputs.informationalVersion }}
-      majorMinorPatch: ${{ jobs.getgitversion.outputs.majorMinorPatch }}
+      assemblySemVer:
+        value: ${{ jobs.getgitversion.outputs.assemblySemVer }}
+      assemblySemFileVer:
+        value: ${{ jobs.getgitversion.outputs.assemblySemFileVer }}
+      informationalVersion:
+        value: ${{ jobs.getgitversion.outputs.informationalVersion }}
+      majorMinorPatch:
+        value: ${{ jobs.getgitversion.outputs.majorMinorPatch }}
 
 jobs:
   git_version:
