@@ -1,20 +1,24 @@
 name: Get Git Version Information
 
 on:
-  workflow_dispatch:
   workflow_call:
+    outputs:
+      assemblySemVer: ${{ jobs.git_version.outputs.assemblySemVer }}
+      assemblySemFileVer: ${{ jobs.git_version.outputs.assemblySemFileVer }}
+      informationalVersion: ${{ jobs.git_version.outputs.informationalVersion }}
+      majorMinorPatch: ${{ jobs.git_version.outputs.majorMinorPatch }}
 
 jobs:
   git_version:
     name: Git Version
     runs-on: ubuntu-latest
-
+    
     outputs:
       assemblySemVer: ${{ steps.gitversion.outputs.assemblySemVer }}
       assemblySemFileVer: ${{ steps.gitversion.outputs.assemblySemFileVer }}
       informationalVersion: ${{ steps.gitversion.outputs.informationalVersion }}
       majorMinorPatch: ${{ steps.gitversion.outputs.majorMinorPatch }}
-    
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
