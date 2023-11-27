@@ -18,7 +18,7 @@ defaults:
 jobs:
   git_version:
     name: Get Git Version
-    uses: ./.github/workflows/git_version.yml@develop
+    uses: ./.github/workflows/git_version.yml
 
   build:
     name: Build
