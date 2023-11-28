@@ -5,7 +5,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using MaterialDesignThemes.Wpf;
 
 using MediaFinder.DataAccessLayer;
-using MediaFinder.DataAccessLayer.Models;
 using MediaFinder.Helpers;
 using MediaFinder.Logging;
 using MediaFinder.Messages;
