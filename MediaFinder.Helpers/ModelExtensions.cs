@@ -27,6 +27,7 @@ public static class ModelExtensions
         {
             Id = file.Id,
             ParentPath = file.ParentPath,
+            RelativePath = file.RelativePath,
             FileName = file.FileName,
             FilePath = Path.Combine(file.ParentPath, file.FileName),
             FileSize = file.FileSize,
@@ -44,6 +45,7 @@ public static class ModelExtensions
         {
             Id = file.Id,
             ParentPath = file.ParentPath!,
+            RelativePath = file.RelativePath!,
             FileName = file.FileName!,
             FileSize = file.FileSize,
             Created = file.DateCreated,
