@@ -1,6 +1,5 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Data.Common;
 using System.IO;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -372,7 +371,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
             _dbContext.FileDetails.AddRange(result.Files.Select(x => x.ToFileDetails()));
             _dbContext.SaveChanges();
         }
-        catch (DbException ex)
+        catch (DbUpdateException ex)
         {
             _messenger.Send(SnackBarMessage.Create("Failed to save search results"));
             _logger.DatabaseError(ex, "saving initial search results");
