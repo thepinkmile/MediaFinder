@@ -3,7 +3,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 
 using MediaFinder.DataAccessLayer;
-using MediaFinder.DataAccessLayer.Models;
+using MediaFinder.Models;
 using MediaFinder.Helpers;
 using MediaFinder.Logging;
 using MediaFinder.Messages;

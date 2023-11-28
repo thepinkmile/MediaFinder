@@ -20,9 +20,9 @@ public class MediaFileToIconConverter : IValueConverter
             ? PackIconKind.None
             : mf.MultiMediaType switch
             {
-                DataAccessLayer.Models.MultiMediaType.Image => ImageIcon,
-                DataAccessLayer.Models.MultiMediaType.Video => VideoIcon,
-                DataAccessLayer.Models.MultiMediaType.Audio => AudioIcon,
+                MultiMediaType.Image => ImageIcon,
+                MultiMediaType.Video => VideoIcon,
+                MultiMediaType.Audio => AudioIcon,
                 _ => (object)PackIconKind.None
             };
 

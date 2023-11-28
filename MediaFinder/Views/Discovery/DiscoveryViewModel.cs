@@ -152,7 +152,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     #region Discovery Process
 
     [ObservableProperty]
-    private ObservableCollection<SearchConfiguration> _configurations = [];
+    private ObservableCollection<DiscoveryOptions> _configurations = [];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
@@ -166,7 +166,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
     [NotifyCanExecuteChangedFor(nameof(RemoveSearchSettingCommand))]
-    private SearchConfiguration? _selectedConfig;
+    private DiscoveryOptions? _selectedConfig;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
@@ -181,7 +181,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         SearchComplete = false;
     }
 
-    partial void OnSelectedConfigChanged(SearchConfiguration? value)
+    partial void OnSelectedConfigChanged(DiscoveryOptions? value)
     {
         CleanupWorkingDirectory();
         SearchComplete = false;
@@ -233,7 +233,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
             .Include(ss => ss.Directories)
             .AsAsyncEnumerable())
         {
-            Configurations.Add(SearchConfiguration.Create(config));
+            Configurations.Add(config.ToDiscoveryOptions());
         }
 
         HideProgressIndicator();
@@ -369,7 +369,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
         try
         {
-            _dbContext.FileDetails.AddRange(result.Files);
+            _dbContext.FileDetails.AddRange(result.Files.Select(x => x.ToFileDetails()));
             _dbContext.SaveChanges();
         }
         catch (DbException ex)

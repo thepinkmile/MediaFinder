@@ -164,7 +164,7 @@
                                       MinWidth="100"
                                       CanUserResize="False">
                 <DataGridTemplateColumn.CellTemplate>
-                  <DataTemplate DataType="{x:Type models:SearchConfiguration}">
+                  <DataTemplate DataType="{x:Type models:DiscoveryOptions}">
                     <Button Command="{Binding DataContext.EditSearchSettingCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}"
                             CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type materialDesign:DrawerHost}}}"
                             Content="{materialDesign:PackIcon Kind=PencilOutline}"

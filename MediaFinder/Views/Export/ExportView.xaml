@@ -3,7 +3,6 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:converters="clr-namespace:MediaFinder.Controls.Wpf.Converters;assembly=MediaFinder.Controls.Wpf"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:dbmodels="clr-namespace:MediaFinder.DataAccessLayer.Models;assembly=MediaFinder.DataAccessLayer"
              xmlns:helpers="clr-namespace:MediaFinder.Helpers;assembly=MediaFinder.Helpers"
              xmlns:local="clr-namespace:MediaFinder.Views.Export"
              xmlns:localHelpers="clr-namespace:MediaFinder.Helpers"
@@ -452,7 +451,7 @@
                                 VerticalAlignment="Center"
                                 VerticalContentAlignment="Center"
                                 IsSynchronizedWithCurrentItem="True"
-                                ItemsSource="{Binding Source={localHelpers:EnumBindingSource {x:Type dbmodels:MultiMediaType}}}"
+                                ItemsSource="{Binding Source={localHelpers:EnumBindingSource {x:Type models:MultiMediaType}}}"
                                 SelectedItem="{Binding DataContext.TypeFilter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
                         <ComboBox.ItemTemplate>
                           <DataTemplate>

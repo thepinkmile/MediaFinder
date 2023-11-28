@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 using CommunityToolkit.Mvvm.Messaging;
 
-using MediaFinder.DataAccessLayer.Models;
+using MediaFinder.Models;
 using MediaFinder.Helpers;
 using MediaFinder.Logging;
 using MediaFinder.Messages;
@@ -106,7 +106,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
     protected override void Execute(AnalyseRequest inputs, DoWorkEventArgs e)
     {
-        var files = new List<FileDetails>();
+        var files = new List<MediaFile>();
         var index = 0;
         foreach(var filepath in inputs.Files)
         {
@@ -131,7 +131,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             else
             {
                 var originalSearchDir = inputs.OriginalPaths.FirstOrDefault(op => filepath.StartsWith(op));
-                if (originalSearchDir is not null)
+                if (originalSearchDir is { })
                 {
                     details.AddOrUpdate(WAS_EXTRACTED_DETAIL, "false");
                     details.AddOrUpdate(RELATIVE_PATH_DETAIL, GetRelativePath(originalSearchDir, filepath));
@@ -200,27 +200,32 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
         return filepath[sourceDirectory.Length..];
     }
 
-    private bool TryDescribeFile(ConcurrentDictionary<string, string> details, out FileDetails? fileDetails)
+    private bool TryDescribeFile(ConcurrentDictionary<string, string> details, out MediaFile? fileDetails)
     {
         _logger.CompilingResults(details[FULLPATH_DETAIL]);
 
         try
         {
+            var fromArchive = details.GetValueOrDefault(WAS_EXTRACTED_DETAIL, "false").Equals("true", StringComparison.InvariantCultureIgnoreCase);
+
             fileDetails = new()
             {
                 FileName = details[FILENAME_DETAIL],
                 ParentPath = details[PARENTPATH_DETAIL],
-                Created = DateTimeOffset.TryParseExact(details[CREATEDDATE_DETAIL], IsoDateFormats, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var createdDate)
+                DateCreated = DateTimeOffset.TryParseExact(details[CREATEDDATE_DETAIL], IsoDateFormats, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var createdDate)
                         ? createdDate
                         : DateTimeOffset.UnixEpoch,
                 FileSize = long.Parse(details[FILESIZE_DETAIL]),
                 ShouldExport = true,
-                FileType = MultiMediaTypeExtensions.TryParse(details[MEDIATYPE_DETAIL], out var value, true, true) ? value : MultiMediaType.Unknown,
-                FileProperties = details.Select(x => new FileProperty() { Name = x.Key, Value = x.Value }).ToList(),
-                MD5_Hash = details.GetValueOrDefault(MD5_DETAIL),
-                SHA256_Hash = details.GetValueOrDefault(SHA256_DETAIL),
-                SHA512_Hash = details.GetValueOrDefault(SHA512_DETAIL),
-                Extracted = details.GetValueOrDefault(WAS_EXTRACTED_DETAIL, "false").Equals("true", StringComparison.InvariantCultureIgnoreCase),
+                MultiMediaType = MultiMediaTypeExtensions.TryParse(details[MEDIATYPE_DETAIL], out var value, true, true) ? value : MultiMediaType.Unknown,
+                Properties = details.ToDictionary(),
+                Md5Hash = details.GetValueOrDefault(MD5_DETAIL),
+                Sha256Hash = details.GetValueOrDefault(SHA256_DETAIL),
+                Sha512Hash = details.GetValueOrDefault(SHA512_DETAIL),
+                FromArchive = fromArchive,
+                //ParentArchive = fromArchive
+                //    ? ""
+                //    : null,
                 RelativePath = details.TryGetValue(RELATIVE_PATH_DETAIL, out var path)
                     ? path
                     : details[PARENTNAME_DETAIL]

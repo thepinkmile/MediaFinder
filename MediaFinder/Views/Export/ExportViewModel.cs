@@ -27,6 +27,11 @@ public partial class ExportViewModel : ProgressableViewModel,
     IRecipient<SearchCompletedMessage>,
     IRecipient<FinishedMessage>
 {
+    private static readonly string SystemDrive = Path.GetPathRoot(Environment.SystemDirectory)!;
+    private static IEnumerable<string> LogicalDrives => Environment
+        .GetLogicalDrives()
+        .Where(x => !string.Equals(x, SystemDrive, StringComparison.InvariantCultureIgnoreCase));
+
     private readonly ILogger<ExportViewModel> _logger;
     private readonly ExportWorker _exportWorker;
 
@@ -66,8 +71,8 @@ public partial class ExportViewModel : ProgressableViewModel,
 
         _exportWorker.RunWorkerCompleted += ExportCompleted;
 
-        ExportDirectory = Environment.GetLogicalDrives().Any()
-            ? Environment.GetLogicalDrives().Skip(1).First()
+        ExportDirectory = LogicalDrives.Any()
+            ? LogicalDrives.First()
             : Path.GetTempPath();
     }
 
@@ -265,7 +270,7 @@ public partial class ExportViewModel : ProgressableViewModel,
         DiscoveredFiles.Clear();
         await foreach (var file in _dbContext.FileDetails.AsAsyncEnumerable())
         {
-            var mediaFile = MediaFile.Create(file);
+            var mediaFile = file.ToMediaFile();
             DiscoveredFiles.Add(mediaFile);
         }
         MediaFilesTotalCount = DiscoveredFiles.Count;

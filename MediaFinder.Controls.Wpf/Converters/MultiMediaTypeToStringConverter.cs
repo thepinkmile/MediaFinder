@@ -1,7 +1,7 @@
 ﻿using System.Globalization;
 using System.Windows.Data;
 
-using MediaFinder.DataAccessLayer.Models;
+using MediaFinder.Models;
 
 namespace MediaFinder.Controls.Wpf.Converters;
 
