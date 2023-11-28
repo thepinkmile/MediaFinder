@@ -36,6 +36,7 @@
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="MaterialDesignExtensions" />
     <PackageReference Include="MaterialDesignThemes" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
