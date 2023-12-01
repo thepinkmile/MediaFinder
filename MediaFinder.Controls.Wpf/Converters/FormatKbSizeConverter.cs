@@ -4,6 +4,8 @@ using System.Text;
 using System.Windows.Data;
 using System.Windows;
 
+using Windows.Win32;
+
 namespace MediaFinder.Controls.Wpf.Converters;
 
 public class FormatKbSizeConverter : IValueConverter
@@ -12,12 +14,17 @@ public class FormatKbSizeConverter : IValueConverter
     private static extern long StrFormatByteSizeW(long qdw, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszBuf,
         int cchBuf);
 
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Windows only application")]
+    public unsafe object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
+        var buffer = new char[32];
         var number = System.Convert.ToInt64(value);
-        var sb = new StringBuilder(32);
-        StrFormatByteSizeW(number, sb, sb.Capacity);
-        return sb.ToString();
+        fixed (char* pBuff = buffer)
+        {
+            _ = PInvoke.StrFormatByteSize(number, pBuff, 32);
+        }
+
+        return new string(buffer);
     }
 
     public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
