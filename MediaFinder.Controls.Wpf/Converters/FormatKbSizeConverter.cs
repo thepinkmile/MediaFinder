@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Diagnostics;
+using System.Globalization;
 using System.Windows.Data;
 using System.Windows;
 
@@ -8,13 +9,13 @@ namespace MediaFinder.Controls.Wpf.Converters;
 
 public class FormatKbSizeConverter : IValueConverter
 {
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("Interoperability", "CA1416:Validate platform compatibility", Justification = "Windows only application")]
     public unsafe object Convert(object value, Type targetType, object parameter, CultureInfo culture)
     {
         var buffer = new char[32];
         var number = System.Convert.ToInt64(value);
         fixed (char* pBuff = buffer)
         {
+            Debug.Assert(OperatingSystem.IsWindowsVersionAtLeast(5));
             _ = PInvoke.StrFormatByteSize(number, pBuff, 32);
         }
 
