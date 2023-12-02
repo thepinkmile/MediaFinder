@@ -107,11 +107,11 @@ public partial class ProgressOverlay : ContentControl
     /// The status message to be displayed instead of percentage value.
     /// </summary>
     [Bindable(true), Category("Status")]
-    public string StatusMessage
+    public string? StatusMessage
     {
         get
         {
-            return (string)GetValue(StatusMessageProperty);
+            return (string?)GetValue(StatusMessageProperty);
         }
 
         set
