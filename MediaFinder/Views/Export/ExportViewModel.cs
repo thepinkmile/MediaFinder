@@ -19,8 +19,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Windows.Data;
 
-using TagLib.Ape;
-
 namespace MediaFinder.Views.Export;
 
 public partial class ExportViewModel : ProgressableViewModel,
@@ -189,8 +187,6 @@ public partial class ExportViewModel : ProgressableViewModel,
             _logger.LogError(ex, "Failed to handle Search Completed message.");
         }
     }
-
-    private readonly CollectionViewSource _mediaFilesViewSource;
 
     [ObservableProperty]
     private ICollectionView _mediaFilesView;
