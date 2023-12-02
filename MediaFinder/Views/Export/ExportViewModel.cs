@@ -1,4 +1,4 @@
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
@@ -18,6 +18,8 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Data;
+
+using TagLib.Ape;
 
 namespace MediaFinder.Views.Export;
 
@@ -47,25 +49,14 @@ public partial class ExportViewModel : ProgressableViewModel,
 
         BindingOperations.EnableCollectionSynchronization(DiscoveredFiles, new());
 
-        // Bind CollectionViewSource.Source to MyCollection
-        _mediaFilesViewSource = new CollectionViewSource();
-        Binding myBind = new() { Source = DiscoveredFiles };
-        BindingOperations.SetBinding(_mediaFilesViewSource, CollectionViewSource.SourceProperty, myBind);
-        MediaFilesView = _mediaFilesViewSource.View;
-        // TODO: this would break the existing filtering methods
-        //MediaFilesView = CollectionViewSource.GetDefaultView(DiscoveredFiles);
+        MediaFilesView = CollectionViewSource.GetDefaultView(DiscoveredFiles);
+        MediaFilesView.Filter = MatchesFilterConstraints;
 
         // default filters
         TypeFilter = MultiMediaType.All;
         ExportingFilter = TriStateBoolean.True;
         CreatedAfterFilter = null;
         CreatedBeforeFilter = null;
-
-        // attach filter delegates
-        _mediaFilesViewSource.Filter += ApplyExportingFilter;
-        _mediaFilesViewSource.Filter += ApplyMediaTypeFilter;
-        _mediaFilesViewSource.Filter += ApplyCreatedAfterFilter;
-        _mediaFilesViewSource.Filter += ApplyCreatedBeforeilter;
 
         _exportWorker.RunWorkerCompleted += ExportCompleted;
 
@@ -75,6 +66,12 @@ public partial class ExportViewModel : ProgressableViewModel,
     }
 
     #region Filtering
+
+    private bool MatchesFilterConstraints(object item)
+        => item is MediaFile mf
+            && IsSelectedMediaType(mf)
+            && IsInSelectedExportFilter(mf)
+            && IsAfterSelectedDates(mf);
 
     #region Media Type Filter
 
@@ -86,28 +83,10 @@ public partial class ExportViewModel : ProgressableViewModel,
         MediaFilesView.Refresh();
     }
 
-    private void ApplyMediaTypeFilter(object sender, FilterEventArgs e)
-    {
-        if (!e.Accepted || e.Item is not MediaFile item)
-        {
-            e.Accepted = false;
-            return;
-        }
-
-        if (TypeFilter == MultiMediaType.All)
-        {
-            e.Accepted &= true;
-            return;
-        }
-
-        if (TypeFilter == MultiMediaType.None)
-        {
-            e.Accepted &= false;
-            return;
-        }
-
-        e.Accepted &= TypeFilter.HasFlagFast(item.MultiMediaType);
-    }
+    private bool IsSelectedMediaType(MediaFile item)
+        => TypeFilter == MultiMediaType.All ? true
+           : TypeFilter == MultiMediaType.None ? false
+           : TypeFilter.HasFlagFast(item.MultiMediaType);
 
     #endregion
 
@@ -121,29 +100,12 @@ public partial class ExportViewModel : ProgressableViewModel,
         MediaFilesView.Refresh();
     }
 
-    private void ApplyExportingFilter(object sender, FilterEventArgs e)
-    {
-        if (!e.Accepted || e.Item is not MediaFile item)
-        {
-            e.Accepted = false;
-            return;
-        }
-
-        if (ExportingFilter == TriStateBoolean.All)
-        {
-            e.Accepted &= true;
-            return;
-        }
-
-        if (ExportingFilter == TriStateBoolean.None)
-        {
-            e.Accepted &= false;
-            return;
-        }
-        
-        var itemExportFlag = item.ShouldExport ? TriStateBoolean.True : TriStateBoolean.False;
-        e.Accepted &= ExportingFilter.HasFlagFast(itemExportFlag);
-    }
+    private bool IsInSelectedExportFilter(MediaFile item)
+        => ExportingFilter == TriStateBoolean.All
+            || (
+                ExportingFilter != TriStateBoolean.None
+                && ExportingFilter.HasFlagFast(item.ShouldExport ? TriStateBoolean.True : TriStateBoolean.False)
+            );
 
     #endregion
 
@@ -157,22 +119,26 @@ public partial class ExportViewModel : ProgressableViewModel,
         MediaFilesView.Refresh();
     }
 
-    private void ApplyCreatedAfterFilter(object sender, FilterEventArgs e)
-    {
-        if (!e.Accepted || e.Item is not MediaFile item)
-        {
-            e.Accepted = false;
-            return;
-        }
+    //private void ApplyCreatedAfterFilter(object sender, FilterEventArgs e)
+    //{
+    //    if (!e.Accepted || e.Item is not MediaFile item)
+    //    {
+    //        e.Accepted = false;
+    //        return;
+    //    }
 
-        if (!CreatedAfterFilter.HasValue || CreatedAfterFilter == DateTime.MinValue)
-        {
-            e.Accepted &= true;
-            return;
-        }
+    //    if (!CreatedAfterFilter.HasValue || CreatedAfterFilter == DateTime.MinValue)
+    //    {
+    //        e.Accepted &= true;
+    //        return;
+    //    }
 
-        e.Accepted &= CreatedAfterFilter.Value.Date <= item.DateCreated.DateTime.Date;
-    }
+    //    e.Accepted &= CreatedAfterFilter.Value.Date <= item.DateCreated.DateTime.Date;
+    //}
+
+    private bool IsAfterSelectedDates(MediaFile item)
+        => !CreatedAfterFilter.HasValue || CreatedAfterFilter == DateTime.MinValue ? true
+            : CreatedAfterFilter.Value.Date <= item.DateCreated.DateTime.Date;
 
     #endregion
 
