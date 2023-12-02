@@ -1,7 +1,6 @@
 ﻿using System.Globalization;
 using System.Windows.Data;
 
-using MediaFinder.DataAccessLayer.Models;
 using MediaFinder.Models;
 
 namespace MediaFinder.Controls.Wpf.Converters;
@@ -12,17 +11,17 @@ public class ExportTypeToStringConverter : IValueConverter
         => ExportTypeExtensions.GetValues()
             .ToDictionary(x => x.ToStringFast(), x => x);
 
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        => value is not ExportType mediaType
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value is not ExportType exportType
             ? Binding.DoNothing
-            : mediaType.ToStringFast();
+            : exportType.ToStringFast();
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => value is string name
             ? ExportTypeExtensions.TryParse(name, out var newValue, true, true)
                 ? newValue
-                : DisplayNameMapper.ContainsKey(name)
-                    ? DisplayNameMapper[name]
+                : DisplayNameMapper.TryGetValue(name, out var exportType)
+                    ? exportType
                     : Binding.DoNothing
             : Binding.DoNothing;
 }
