@@ -69,7 +69,8 @@ public partial class ExportViewModel : ProgressableViewModel,
         => item is MediaFile mf
             && IsSelectedMediaType(mf)
             && IsInSelectedExportFilter(mf)
-            && IsAfterSelectedDates(mf);
+            && IsAfterSelectedDates(mf)
+            && IsBeforeSelectedDates(mf);
 
     #region Media Type Filter
 
@@ -82,9 +83,11 @@ public partial class ExportViewModel : ProgressableViewModel,
     }
 
     private bool IsSelectedMediaType(MediaFile item)
-        => TypeFilter == MultiMediaType.All ? true
-           : TypeFilter == MultiMediaType.None ? false
-           : TypeFilter.HasFlagFast(item.MultiMediaType);
+        => TypeFilter == MultiMediaType.All
+            || (
+                TypeFilter != MultiMediaType.None
+                && TypeFilter.HasFlagFast(item.MultiMediaType)
+            );
 
     #endregion
 
@@ -117,26 +120,10 @@ public partial class ExportViewModel : ProgressableViewModel,
         MediaFilesView.Refresh();
     }
 
-    //private void ApplyCreatedAfterFilter(object sender, FilterEventArgs e)
-    //{
-    //    if (!e.Accepted || e.Item is not MediaFile item)
-    //    {
-    //        e.Accepted = false;
-    //        return;
-    //    }
-
-    //    if (!CreatedAfterFilter.HasValue || CreatedAfterFilter == DateTime.MinValue)
-    //    {
-    //        e.Accepted &= true;
-    //        return;
-    //    }
-
-    //    e.Accepted &= CreatedAfterFilter.Value.Date <= item.DateCreated.DateTime.Date;
-    //}
-
     private bool IsAfterSelectedDates(MediaFile item)
-        => !CreatedAfterFilter.HasValue || CreatedAfterFilter == DateTime.MinValue ? true
-            : CreatedAfterFilter.Value.Date <= item.DateCreated.DateTime.Date;
+        => !CreatedAfterFilter.HasValue
+            || CreatedAfterFilter == DateTime.MinValue
+            || CreatedAfterFilter.Value.Date <= item.DateCreated.DateTime.Date;
 
     #endregion
 
@@ -150,22 +137,10 @@ public partial class ExportViewModel : ProgressableViewModel,
         MediaFilesView.Refresh();
     }
 
-    private void ApplyCreatedBeforeilter(object sender, FilterEventArgs e)
-    {
-        if (!e.Accepted || e.Item is not MediaFile item)
-        {
-            e.Accepted = false;
-            return;
-        }
-
-        if (!CreatedBeforeFilter.HasValue || CreatedBeforeFilter == DateTime.MaxValue)
-        {
-            e.Accepted &= true;
-            return;
-        }
-
-        e.Accepted &= CreatedBeforeFilter.Value.Date >= item.DateCreated.DateTime.Date;
-    }
+    private bool IsBeforeSelectedDates(MediaFile item)
+        => !CreatedBeforeFilter.HasValue
+            || CreatedBeforeFilter == DateTime.MaxValue
+            || CreatedBeforeFilter.Value.Date >= item.DateCreated.DateTime.Date;
 
     #endregion
 
