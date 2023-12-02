@@ -11,15 +11,11 @@ using System.Windows.Input;
 
 namespace MediaFinder.Helpers;
 
-#pragma warning disable CRRSP08
 public abstract class ProgressableViewModel
-#pragma warning restore CRRSP08
 {
     private readonly ILogger _logger;
 
-#pragma warning disable CRRSP11
     protected ProgressableViewModel(
-#pragma warning restore CRRSP11
         IMessenger messenger,
         ILogger logger,
         MediaFinderDbContext dbContext)
@@ -35,7 +31,6 @@ public abstract class ProgressableViewModel
     protected readonly object _progressToken;
 
     #region Progress Actions
-#pragma warning disable CA2254 // Template should be a static expression
 
     protected void ShowProgressIndicator(string message, ICommand? cancelCommand = null)
     {
@@ -61,7 +56,6 @@ public abstract class ProgressableViewModel
         _logger.ProgressUpdate("Process Complete.");
     }
 
-#pragma warning restore CA2254 // Template should be a static expression
     #endregion
 
     #region Completion Actions

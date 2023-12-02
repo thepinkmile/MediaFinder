@@ -238,7 +238,7 @@ public partial class ExportViewModel : ProgressableViewModel,
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExportFilesCommand))]
-    private ObservableCollection<MediaFile> _discoveredFiles = new();
+    private ObservableCollection<MediaFile> _discoveredFiles = [];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExportFilesCommand))]
@@ -259,11 +259,7 @@ public partial class ExportViewModel : ProgressableViewModel,
     private bool _exportComplete;
 
     [RelayCommand]
-#pragma warning disable CRR0034
-#pragma warning disable CRR0035
     public async Task OnLoadingResults()
-#pragma warning restore CRR0035
-#pragma warning restore CRR0034
     {
         ShowProgressIndicator("Populating Results...");
         DiscoveredFiles.Clear();
@@ -296,11 +292,7 @@ public partial class ExportViewModel : ProgressableViewModel,
     private MediaFile? _selectedExportFile;
 
     [RelayCommand]
-#pragma warning disable CRR0034
-#pragma warning disable CRR0035
     public async Task OnToggleExportFlag(MediaFile item)
-#pragma warning restore CRR0035
-#pragma warning restore CRR0034
     {
         var entity = await _dbContext.FileDetails
             .FindAsync(item.Id)
@@ -319,10 +311,7 @@ public partial class ExportViewModel : ProgressableViewModel,
             {
                 item.ShouldExport = newValue;
                 entityPropertyDescriptor.SetValue(entity, newValue);
-#pragma warning disable CRR0039
                 await _dbContext.SaveChangesAsync().ConfigureAwait(true);
-#pragma warning restore CRR0039
-
                 MediaFilesViewCount = DiscoveredFiles.Count(x => x.ShouldExport);
                 ExportFilesCommand.NotifyCanExecuteChanged();
                 MediaFilesView.Refresh();
@@ -354,9 +343,7 @@ public partial class ExportViewModel : ProgressableViewModel,
             && !_exportWorker.IsBusy;
 
     [RelayCommand(CanExecute = nameof(CanExportFiles))]
-#pragma warning disable CRR0034
     public async Task OnExportFiles(CancellationToken cancellationToken)
-#pragma warning restore CRR0034
     {
         if (ExportComplete)
         {
