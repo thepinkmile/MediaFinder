@@ -65,7 +65,7 @@ public partial class ExportViewModel : ProgressableViewModel,
 
     #region Filtering
 
-    private bool MatchesFilterConstraints(object item)
+    private bool MatchesFilterConstraints(object? item)
         => item is MediaFile mf
             && IsSelectedMediaType(mf)
             && IsInSelectedExportFilter(mf)
