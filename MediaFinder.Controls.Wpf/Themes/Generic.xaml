@@ -2,5 +2,6 @@
 
     <ResourceDictionary.MergedDictionaries>
         <ResourceDictionary Source="pack://application:,,,/MediaFinder.Controls.Wpf;component/Themes/ProgressOverlayTemplates.xaml" />
+        <ResourceDictionary Source="pack://application:,,,/MediaFinder.Controls.Wpf;component/Themes/StatusOverlayTemplates.xaml" />
     </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>
