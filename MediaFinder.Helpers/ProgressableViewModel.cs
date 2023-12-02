@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
 
 using MediaFinder.DataAccessLayer;
 using MediaFinder.Logging;
@@ -11,7 +12,7 @@ using System.Windows.Input;
 
 namespace MediaFinder.Helpers;
 
-public abstract class ProgressableViewModel
+public abstract class ProgressableViewModel : ObservableObject
 {
     private readonly ILogger _logger;
 
