@@ -13,7 +13,9 @@ using SevenZipExtractor;
 
 namespace MediaFinder.Services.Search;
 
-public class SearchStageOneWorker(ILogger<SearchStageOneWorker> logger, IMessenger messenger)
+public class SearchStageOneWorker(
+    ILogger<SearchStageOneWorker> logger,
+    IMessenger messenger)
     : ReactiveBackgroundWorker<SearchRequest>(logger, messenger)
 {
     private readonly IMessenger _messenger = messenger;
