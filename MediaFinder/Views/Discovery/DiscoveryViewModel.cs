@@ -23,7 +23,6 @@ using Microsoft.Extensions.Logging;
 
 namespace MediaFinder.Views.Discovery;
 
-[ObservableObject]
 public partial class DiscoveryViewModel : ProgressableViewModel,
     IRecipient<SearchSettingUpdated>,
     IRecipient<WorkingDirectoryCreated>,
