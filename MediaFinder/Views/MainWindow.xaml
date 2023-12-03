@@ -49,8 +49,6 @@
                             FontSize="16"
                             FontWeight="Bold"
                             IsBusy="{Binding ProgressVisible}"
-                            OverlayBackground="{DynamicResource MaterialDesignCardBackground}"
-                            OverlayType="Circular"
                             Progress="{Binding ProgressValue}">
       <TextBlock VerticalAlignment="Center"
                  Text="{Binding ProgressMessage, Mode=OneWay}"

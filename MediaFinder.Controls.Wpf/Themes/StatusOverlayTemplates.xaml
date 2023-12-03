@@ -15,6 +15,21 @@
                                   FalseValue="False"
                                   TrueValue="True" />
 
+  <converters:StatusOverlayTypeToStyleConverter x:Key="StatusOverlayTypeToStyleConverter"
+                                                CircularStyle="{StaticResource MaterialDesignCircularProgressBar}"
+                                                LinearStyle="{StaticResource MaterialDesignLinearProgressBar}" />
+
+  <converters:StatusOverlayTypeToDockConverter x:Key="StatusOverlayTypeToDockConverter"
+                                               CircularPosition="Left"
+                                               LinearPosition="Bottom" />
+
+  <converters:StatusOverlayTypeToSizeConverter x:Key="StatusOverlayTypeToWidthConverter"
+                                               CircularSize="32"
+                                               LinearSize="{x:Null}" />
+  <converters:StatusOverlayTypeToSizeConverter x:Key="StatusOverlayTypeToHeightConverter"
+                                               CircularSize="32"
+                                               LinearSize="16" />
+
   <converters:PercentageConverter x:Key="ProgressMaxSizeConverter" Percentage="60" />
 
   <Style x:Key="StatusOverlay" TargetType="{x:Type controls:StatusOverlay}">
@@ -37,32 +52,36 @@
                                  Background="{TemplateBinding Background}"
                                  Foreground="{TemplateBinding Foreground}"
                                  UniformCornerRadius="6">
-              <DockPanel Margin="0,0,0,8"
-                         HorizontalAlignment="Center"
-                         VerticalAlignment="Center">
-                <!-- TODO: Style Converter to switch circle (MaterialDesignCircularProgressBar) to linear (MaterialDesignLinearProgressBar) -->
-                <!-- TODO: DockPanel.Dock Converter to switch circle to linear layout -->
-                <ProgressBar Width="32"
-                             Height="32"
-                             Margin="0,0,8,0"
-                             VerticalAlignment="Center"
-                             DockPanel.Dock="Left"
-                             Foreground="{TemplateBinding Foreground}"
-                             IsIndeterminate="{TemplateBinding Progress, Converter={StaticResource IsZeroConverter}}"
-                             Style="{StaticResource MaterialDesignCircularProgressBar}"
-                             Value="{TemplateBinding Progress}" />
+              <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <DockPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <ProgressBar Width="{TemplateBinding OverlayType, Converter={StaticResource StatusOverlayTypeToWidthConverter}}"
+                               Height="{TemplateBinding OverlayType, Converter={StaticResource StatusOverlayTypeToHeightConverter}}"
+                               Margin="0,0,8,0"
+                               VerticalAlignment="Center"
+                               DockPanel.Dock="{TemplateBinding OverlayType, Converter={StaticResource StatusOverlayTypeToDockConverter}}"
+                               Foreground="{TemplateBinding Foreground}"
+                               IsIndeterminate="{TemplateBinding Progress, Converter={StaticResource IsZeroConverter}}"
+                               Style="{TemplateBinding OverlayType, Converter={StaticResource StatusOverlayTypeToStyleConverter}}"
+                               Value="{TemplateBinding Progress}" />
 
-                <!-- TODO: DockPanel.Dock Converter to switch circle to linear layout -->
-                <Button HorizontalAlignment="Center"
+                  <ContentPresenter Margin="0,0,0,8"
+                                    Content="{TemplateBinding Content}"
+                                    ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                    ContentTemplate="{TemplateBinding ContentTemplate}"
+                                    ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" />
+                </DockPanel>
+
+                <Button Margin="0,8,0,0"
+                        HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Command="{TemplateBinding CancelCommand}"
-                        DockPanel.Dock="Bottom"
                         Style="{StaticResource MaterialDesignRaisedButton}"
                         Visibility="{TemplateBinding CancelCommand, Converter={StaticResource NullToVisibilityConverter}}">
                   <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Width="15"
                                              Height="15"
-                                             Margin="0,2,8,0"
+                                             Margin="0,0,8,0"
+                                             VerticalAlignment="Center"
                                              Kind="Cancel" />
                     <TextBlock FontFamily="{TemplateBinding FontFamily}"
                                FontSize="{TemplateBinding FontSize}"
@@ -72,12 +91,7 @@
                                Text="Cancel" />
                   </StackPanel>
                 </Button>
-
-                <ContentPresenter Content="{TemplateBinding Content}"
-                                  ContentStringFormat="{TemplateBinding ContentStringFormat}"
-                                  ContentTemplate="{TemplateBinding ContentTemplate}"
-                                  ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}"/>
-              </DockPanel>
+              </StackPanel>
             </materialDesign:Card>
           </Grid>
           <ControlTemplate.Triggers>
