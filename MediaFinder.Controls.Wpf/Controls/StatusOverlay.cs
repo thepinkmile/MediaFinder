@@ -1,48 +1,19 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 
 namespace MediaFinder.Controls.Wpf.Controls;
 
 /// <summary>
 /// A control for displaying some kind of progress/status indication over the complete user interface while a long running operation is in progress.
 /// </summary>
-public partial class StatusOverlay : ContentControl
+public partial class StatusOverlay : OverlayControl
 {
     /// <summary>
     /// Creates a new <see cref="StatusOverlay" />.
     /// </summary>
     public StatusOverlay() : base() { }
-
-    #region OverlayBackground
-
-    /// <summary>
-    /// The <see cref="Brush"/> to use for the overlay background.
-    /// </summary>
-    public static readonly DependencyProperty OverlayBackgroundProperty = DependencyProperty.Register(
-        nameof(OverlayBackground), typeof(Brush), typeof(StatusOverlay), new FrameworkPropertyMetadata(Panel.BackgroundProperty.DefaultMetadata.DefaultValue));
-
-    /// <summary>
-    /// The <see cref="Brush"/> to use for the overlay background.
-    /// </summary>
-    [Bindable(true), Category("Appearance")]
-    public Brush? OverlayBackground
-    {
-        get
-        {
-            return (Brush?)GetValue(OverlayBackgroundProperty);
-        }
-
-        set
-        {
-            SetValue(OverlayBackgroundProperty, value);
-        }
-    }
-
-    #endregion
 
     #region CancelCommand
 
@@ -66,33 +37,6 @@ public partial class StatusOverlay : ContentControl
         set
         {
             SetValue(CancelCommandProperty, value);
-        }
-    }
-
-    #endregion
-
-    #region IsBusy
-
-    /// <summary>
-    /// True, to switch the control into busy state and make it visible in the UI's foreground.
-    /// </summary>
-    public static readonly DependencyProperty IsBusyProperty = DependencyProperty.Register(
-        nameof(IsBusy), typeof(bool), typeof(StatusOverlay), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
-
-    /// <summary>
-    /// True, to switch the control into busy state and make it visible in the UI's foreground.
-    /// </summary>
-    [Bindable(true), Category("Action")]
-    public bool IsBusy
-    {
-        get
-        {
-            return (bool)GetValue(IsBusyProperty);
-        }
-
-        set
-        {
-            SetValue(IsBusyProperty, value);
         }
     }
 
