@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -7,13 +8,26 @@ using System.Windows.Media;
 namespace MediaFinder.Controls.Wpf.Controls;
 
 /// <summary>
-/// A control for displaying some kind of progress indication over the complete user interface while a long running operation is in progress.
+/// A control for displaying some kind of progress/status indication over the complete user interface while a long running operation is in progress.
 /// </summary>
-public partial class ProgressOverlay : ContentControl
+public partial class StatusOverlay : ContentControl
 {
-    public static readonly DependencyProperty OverlayBackgroundProperty = DependencyProperty.Register(
-        nameof(OverlayBackground), typeof(Brush), typeof(ProgressOverlay), new FrameworkPropertyMetadata(Panel.BackgroundProperty.DefaultMetadata.DefaultValue));
+    /// <summary>
+    /// Creates a new <see cref="StatusOverlay" />.
+    /// </summary>
+    public StatusOverlay() : base() { }
 
+    #region OverlayBackground
+
+    /// <summary>
+    /// The <see cref="Brush"/> to use for the overlay background.
+    /// </summary>
+    public static readonly DependencyProperty OverlayBackgroundProperty = DependencyProperty.Register(
+        nameof(OverlayBackground), typeof(Brush), typeof(StatusOverlay), new FrameworkPropertyMetadata(Panel.BackgroundProperty.DefaultMetadata.DefaultValue));
+
+    /// <summary>
+    /// The <see cref="Brush"/> to use for the overlay background.
+    /// </summary>
     [Bindable(true), Category("Appearance")]
     public Brush? OverlayBackground
     {
@@ -28,11 +42,15 @@ public partial class ProgressOverlay : ContentControl
         }
     }
 
+    #endregion
+
+    #region CancelCommand
+
     /// <summary>
     /// A <see cref="ICommand"/> to enable cancellation.
     /// </summary>
     public static readonly DependencyProperty CancelCommandProperty = DependencyProperty.Register(
-        nameof(CancelCommand), typeof(ICommand), typeof(ProgressOverlay), new FrameworkPropertyMetadata(null));
+        nameof(CancelCommand), typeof(ICommand), typeof(StatusOverlay), new FrameworkPropertyMetadata(null));
 
     /// <summary>
     /// A <see cref="ICommand"/> to enable cancellation.
@@ -51,11 +69,15 @@ public partial class ProgressOverlay : ContentControl
         }
     }
 
+    #endregion
+
+    #region IsBusy
+
     /// <summary>
     /// True, to switch the control into busy state and make it visible in the UI's foreground.
     /// </summary>
     public static readonly DependencyProperty IsBusyProperty = DependencyProperty.Register(
-        nameof(IsBusy), typeof(bool), typeof(ProgressOverlay), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
+        nameof(IsBusy), typeof(bool), typeof(StatusOverlay), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
 
     /// <summary>
     /// True, to switch the control into busy state and make it visible in the UI's foreground.
@@ -74,16 +96,20 @@ public partial class ProgressOverlay : ContentControl
         }
     }
 
-    /// <summary>
-    /// The progress in percentage of the operation causing the busy state.
-    /// </summary>
-    public static readonly DependencyProperty ProgressProperty = DependencyProperty.Register(
-        nameof(Progress), typeof(int), typeof(ProgressOverlay), new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsRender));
+    #endregion
+
+    #region Progress
 
     /// <summary>
     /// The progress in percentage of the operation causing the busy state.
     /// </summary>
-    [Bindable(true), Category("Status")]
+    public static readonly DependencyProperty ProgressProperty = DependencyProperty.Register(
+        nameof(Progress), typeof(int), typeof(StatusOverlay), new FrameworkPropertyMetadata(0, FrameworkPropertyMetadataOptions.AffectsRender));
+
+    /// <summary>
+    /// The progress in percentage of the operation causing the busy state.
+    /// </summary>
+    [Bindable(true), Category("Status"), Range(-1,100, MaximumIsExclusive = false, MinimumIsExclusive = false)]
     public int Progress
     {
         get
@@ -97,31 +123,32 @@ public partial class ProgressOverlay : ContentControl
         }
     }
 
+    #endregion
+
+    #region StatusOverlayType
+
     /// <summary>
     /// The status message to be displayed instead of percentage value.
     /// </summary>
-    public static readonly DependencyProperty StatusMessageProperty = DependencyProperty.Register(
-        nameof(StatusMessage), typeof(string), typeof(ProgressOverlay), new FrameworkPropertyMetadata(string.Empty, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender));
+    public static readonly DependencyProperty OverlayTypeProperty = DependencyProperty.Register(
+        nameof(OverlayType), typeof(StatusOverlayType), typeof(StatusOverlay), new FrameworkPropertyMetadata(StatusOverlayType.Circular, FrameworkPropertyMetadataOptions.AffectsArrange | FrameworkPropertyMetadataOptions.AffectsRender));
 
     /// <summary>
     /// The status message to be displayed instead of percentage value.
     /// </summary>
     [Bindable(true), Category("Status")]
-    public string StatusMessage
+    public StatusOverlayType? OverlayType
     {
         get
         {
-            return (string)GetValue(StatusMessageProperty);
+            return (StatusOverlayType?)GetValue(OverlayTypeProperty);
         }
 
         set
         {
-            SetValue(StatusMessageProperty, value);
+            SetValue(OverlayTypeProperty, value);
         }
     }
 
-    /// <summary>
-    /// Creates a new <see cref="ProgressOverlay" />.
-    /// </summary>
-    public ProgressOverlay() : base() { }
+    #endregion
 }
