@@ -79,20 +79,23 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     [ObservableProperty]
     private UserControl? _drawContent;
 
+    [ObservableProperty]
+    private bool _editorVisible;
+
     [RelayCommand]
-    private void OnAddSearchSetting(DrawerHost drawerHost)
+    private void OnAddSearchSetting()
     {
         DrawContent = _serviceProvider.GetRequiredService<AddSearchSettingView>();
-        drawerHost!.IsRightDrawerOpen = true;
+        EditorVisible = true;
     }
 
     [RelayCommand]
-    private async Task OnEditSearchSetting(DrawerHost drawerHost)
+    private async Task OnEditSearchSetting()
     {
         var view = _serviceProvider.GetRequiredService<EditSearchSettingView>();
         await view.InitializeDataContextAsync(SelectedConfig!.Id).ConfigureAwait(true);
         DrawContent = view;
-        drawerHost!.IsRightDrawerOpen = true;
+        EditorVisible = true;
     }
 
     private bool CanRemoveSearchSetting()
