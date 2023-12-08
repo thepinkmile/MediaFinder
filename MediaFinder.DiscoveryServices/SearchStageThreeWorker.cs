@@ -17,8 +17,10 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
 {
     private readonly MediaFinderDbContext _dbContext;
 
-    public SearchStageThreeWorker(ILogger<SearchStageTwoWorker> logger,
-        IMessenger messenger, MediaFinderDbContext dbContext)
+    public SearchStageThreeWorker(
+        ILogger<SearchStageTwoWorker> logger,
+        IMessenger messenger,
+        MediaFinderDbContext dbContext)
         : base(logger, messenger)
     {
         _dbContext = dbContext;
