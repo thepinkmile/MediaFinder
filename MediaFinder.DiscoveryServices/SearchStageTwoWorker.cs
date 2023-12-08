@@ -23,7 +23,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 {
     private const string YearDateFormatString = "yyyy";
 
-    private static readonly string[] IsoDateFormats = { 
+    private static readonly string[] IsoDateFormats = [ 
         // Basic formats
         "yyyyMMddTHHmmsszzz",
         "yyyyMMddTHHmmsszz",
@@ -70,7 +70,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
         "yyyy:MM:dd HH:mm:sszz",
         "yyyy:MM:dd HH:mm:ssZ",
         "yyyy:MM:dd HH:mm:ss"
-        };
+        ];
     private static readonly Enum[] MetadataTags = Enum.GetValues(typeof(TagLib.TagTypes)).Cast<Enum>().ToArray();
 
     internal const string FILENAME_DETAIL = "filename";
@@ -239,11 +239,11 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
     #region Video Processing
 
-    private static readonly string[] KnownVideoExtensions = new[] {
+    private static readonly string[] KnownVideoExtensions = [
         "webm", "mkv", "flv", "vob", "ogv", "ogg", "rrc", "gifv", "mng", "mov",
         "avi", "qt", "wmv", "yuv", "rm", "asf", "amv", "mp4", "m4p", "m4v", "mpg",
         "mp2", "mpeg", "mpe", "mpv", "m4v", "svi", "3gp", "3g2", "mxf", "roq",
-        "nsv", "flv", "f4v", "f4p", "f4a", "f4b", "mod" };
+        "nsv", "flv", "f4v", "f4p", "f4a", "f4b", "mod" ];
 
     private Task GetVideoInfoAsync(string filepath, ConcurrentDictionary<string, string> details, bool performDeepAnalysis = false, CancellationToken cancellationToken = default)
     {
@@ -366,7 +366,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
     #region Image Processing
 
-    private static readonly string[] KnownImageExtensions = new[] { ".bmp", ".jpg", ".jpeg", ".jfif", ".png", ".tif", ".tiff", ".gif", ".svg" };
+    private static readonly string[] KnownImageExtensions = [".bmp", ".jpg", ".jpeg", ".jfif", ".png", ".tif", ".tiff", ".gif", ".svg"];
     private const string REGEX_GROUP_PIXELS = "pixels";
     [GeneratedRegex($"(?<{REGEX_GROUP_PIXELS}>(\\d+))( {REGEX_GROUP_PIXELS})?", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Singleline | RegexOptions.CultureInvariant)]
     private static partial Regex PixelsRegex();

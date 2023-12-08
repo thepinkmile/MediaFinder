@@ -55,7 +55,7 @@ public class ExportWorker : ReactiveBackgroundWorker<ExportRequest>
                 cts.Cancel();
             }
         }
-        Task.WaitAll(exportTasks.ToArray());
+        Task.WaitAll([..exportTasks]);
 
         if (CancellationPending)
         {
