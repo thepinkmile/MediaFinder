@@ -11,7 +11,7 @@ public class PathToBitmapImageConverter : IValueConverter
 
     public int? DecodePixelHeight { get; set; } = null;
 
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         if (value is not string path || path is null || !File.Exists(path))
         {
@@ -42,6 +42,6 @@ public class PathToBitmapImageConverter : IValueConverter
     }
 
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => Binding.DoNothing;
 }

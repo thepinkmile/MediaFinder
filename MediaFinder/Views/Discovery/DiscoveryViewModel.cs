@@ -23,7 +23,6 @@ using Microsoft.Extensions.Logging;
 
 namespace MediaFinder.Views.Discovery;
 
-[ObservableObject]
 public partial class DiscoveryViewModel : ProgressableViewModel,
     IRecipient<SearchSettingUpdated>,
     IRecipient<WorkingDirectoryCreated>,
@@ -80,53 +79,42 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     [ObservableProperty]
     private UserControl? _drawContent;
 
+    [ObservableProperty]
+    private bool _editorVisible;
+
     [RelayCommand]
-    private void OnAddSearchSetting(DrawerHost drawerHost)
+    private void OnAddSearchSetting()
     {
         DrawContent = _serviceProvider.GetRequiredService<AddSearchSettingView>();
-        drawerHost!.IsRightDrawerOpen = true;
+        EditorVisible = true;
     }
 
     [RelayCommand]
-#pragma warning disable CRR0034
-#pragma warning disable CRR0035
-    private async Task OnEditSearchSetting(DrawerHost drawerHost)
-#pragma warning restore CRR0035
-#pragma warning restore CRR0034
+    private async Task OnEditSearchSetting()
     {
         var view = _serviceProvider.GetRequiredService<EditSearchSettingView>();
-#pragma warning disable CRR0039
         await view.InitializeDataContextAsync(SelectedConfig!.Id).ConfigureAwait(true);
-#pragma warning restore CRR0039
         DrawContent = view;
-        drawerHost!.IsRightDrawerOpen = true;
+        EditorVisible = true;
     }
 
     private bool CanRemoveSearchSetting()
         => SelectedConfig is not null;
 
     [RelayCommand(CanExecute = nameof(CanRemoveSearchSetting))]
-#pragma warning disable CRR0034
-#pragma warning disable CRR0035
     private async Task OnRemoveSearchSetting()
-#pragma warning restore CRR0035
-#pragma warning restore CRR0034
     {
         var config = SelectedConfig!;
-#pragma warning disable CRR0039
         var entity = await _dbContext.SearchSettings
             .FirstOrDefaultAsync(x => x.Id == config.Id)
             .ConfigureAwait(true);
-#pragma warning restore CRR0039
         if (entity is null)
         {
             return;
         }
 
         _dbContext.SearchSettings.Remove(entity);
-#pragma warning disable CRR0039
         await _dbContext.SaveChangesAsync().ConfigureAwait(true);
-#pragma warning restore CRR0039
         _messenger.Send(SearchSettingUpdated.Create(config));
         _messenger.Send(SnackBarMessage.Create($"Removed configuration: {config.Name}"));
     }
@@ -219,11 +207,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     }
 
     [RelayCommand]
-#pragma warning disable CRR0034
-#pragma warning disable CRR0035
     public async Task LoadConfigurations()
-#pragma warning restore CRR0035
-#pragma warning restore CRR0034
     {
         ShowProgressIndicator("Loading...");
 
@@ -247,11 +231,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
             && !_searchStagaeThreeWorker.IsBusy;
 
     [RelayCommand(CanExecute = nameof(CanPerformSearch))]
-#pragma warning disable CRR0034
-#pragma warning disable CRR0035
     public async Task OnPerformSearch()
-#pragma warning restore CRR0035
-#pragma warning restore CRR0034
     {
         if (SelectedConfig is null)
         {
@@ -268,11 +248,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         if (!_searchStageOneWorker.IsBusy && !_searchStagaeTwoWorker.IsBusy && !_searchStagaeThreeWorker.IsBusy)
         {
             ShowProgressIndicator("Initializing search parameters", CancelSearchCommand);
-
-#pragma warning disable CRR0039
             await TruncateFileDetailStateAsync(_dbContext).ConfigureAwait(true);
-#pragma warning restore CRR0039
-
             _searchStageOneWorker.RunWorkerAsync(SearchRequest.Create(_progressToken, WorkingDirectory!, SelectedConfig!));
             CancelSearchCommand.NotifyCanExecuteChanged();
         }
@@ -474,9 +450,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     {
         try
         {
-#pragma warning disable CRR0039
             await CleanupAsync().ConfigureAwait(true);
-#pragma warning restore CRR0039
         }
         catch
         {

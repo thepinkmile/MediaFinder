@@ -19,6 +19,12 @@ See: https://learn.microsoft.com/visualstudio/msbuild/customize-your-build
     <!--<EmitCompilerGeneratedFiles>true</EmitCompilerGeneratedFiles>-->
   </PropertyGroup>
 
+
+  <!-- Treat all warnings as errors (except warning about dependencies with resources out of our control) -->
+  <PropertyGroup>
+    <TreatWarningsAsErrors>True</TreatWarningsAsErrors>
+  </PropertyGroup>
+
   <!--
   This allows all projects to share the same user secrets file. 
   If you want project to have their own, set it to a different GUID on each project.

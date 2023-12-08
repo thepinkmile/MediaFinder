@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net8.0-windows</TargetFramework>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
 
     <IsPublishable>false</IsPublishable>
     <IsPackable>false</IsPackable>

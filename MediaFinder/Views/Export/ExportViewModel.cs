@@ -1,4 +1,4 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
@@ -21,7 +21,6 @@ using System.Windows.Data;
 
 namespace MediaFinder.Views.Export;
 
-[ObservableObject]
 public partial class ExportViewModel : ProgressableViewModel,
     IRecipient<SearchCompletedMessage>,
     IRecipient<FinishedMessage>
@@ -48,25 +47,14 @@ public partial class ExportViewModel : ProgressableViewModel,
 
         BindingOperations.EnableCollectionSynchronization(DiscoveredFiles, new());
 
-        // Bind CollectionViewSource.Source to MyCollection
-        _mediaFilesViewSource = new CollectionViewSource();
-        Binding myBind = new() { Source = DiscoveredFiles };
-        BindingOperations.SetBinding(_mediaFilesViewSource, CollectionViewSource.SourceProperty, myBind);
-        MediaFilesView = _mediaFilesViewSource.View;
-        // TODO: this would break the existing filtering methods
-        //MediaFilesView = CollectionViewSource.GetDefaultView(DiscoveredFiles);
+        MediaFilesView = CollectionViewSource.GetDefaultView(DiscoveredFiles);
+        MediaFilesView.Filter = MatchesFilterConstraints;
 
         // default filters
         TypeFilter = MultiMediaType.All;
         ExportingFilter = TriStateBoolean.True;
         CreatedAfterFilter = null;
         CreatedBeforeFilter = null;
-
-        // attach filter delegates
-        _mediaFilesViewSource.Filter += ApplyExportingFilter;
-        _mediaFilesViewSource.Filter += ApplyMediaTypeFilter;
-        _mediaFilesViewSource.Filter += ApplyCreatedAfterFilter;
-        _mediaFilesViewSource.Filter += ApplyCreatedBeforeilter;
 
         _exportWorker.RunWorkerCompleted += ExportCompleted;
 
@@ -76,6 +64,13 @@ public partial class ExportViewModel : ProgressableViewModel,
     }
 
     #region Filtering
+
+    private bool MatchesFilterConstraints(object? item)
+        => item is MediaFile mf
+            && IsSelectedMediaType(mf)
+            && IsInSelectedExportFilter(mf)
+            && IsAfterSelectedDates(mf)
+            && IsBeforeSelectedDates(mf);
 
     #region Media Type Filter
 
@@ -87,28 +82,12 @@ public partial class ExportViewModel : ProgressableViewModel,
         MediaFilesView.Refresh();
     }
 
-    private void ApplyMediaTypeFilter(object sender, FilterEventArgs e)
-    {
-        if (!e.Accepted || e.Item is not MediaFile item)
-        {
-            e.Accepted = false;
-            return;
-        }
-
-        if (TypeFilter == MultiMediaType.All)
-        {
-            e.Accepted &= true;
-            return;
-        }
-
-        if (TypeFilter == MultiMediaType.None)
-        {
-            e.Accepted &= false;
-            return;
-        }
-
-        e.Accepted &= TypeFilter.HasFlagFast(item.MultiMediaType);
-    }
+    private bool IsSelectedMediaType(MediaFile item)
+        => TypeFilter == MultiMediaType.All
+            || (
+                TypeFilter != MultiMediaType.None
+                && TypeFilter.HasFlagFast(item.MultiMediaType)
+            );
 
     #endregion
 
@@ -122,29 +101,12 @@ public partial class ExportViewModel : ProgressableViewModel,
         MediaFilesView.Refresh();
     }
 
-    private void ApplyExportingFilter(object sender, FilterEventArgs e)
-    {
-        if (!e.Accepted || e.Item is not MediaFile item)
-        {
-            e.Accepted = false;
-            return;
-        }
-
-        if (ExportingFilter == TriStateBoolean.All)
-        {
-            e.Accepted &= true;
-            return;
-        }
-
-        if (ExportingFilter == TriStateBoolean.None)
-        {
-            e.Accepted &= false;
-            return;
-        }
-        
-        var itemExportFlag = item.ShouldExport ? TriStateBoolean.True : TriStateBoolean.False;
-        e.Accepted &= ExportingFilter.HasFlagFast(itemExportFlag);
-    }
+    private bool IsInSelectedExportFilter(MediaFile item)
+        => ExportingFilter == TriStateBoolean.All
+            || (
+                ExportingFilter != TriStateBoolean.None
+                && ExportingFilter.HasFlagFast(item.ShouldExport ? TriStateBoolean.True : TriStateBoolean.False)
+            );
 
     #endregion
 
@@ -158,22 +120,10 @@ public partial class ExportViewModel : ProgressableViewModel,
         MediaFilesView.Refresh();
     }
 
-    private void ApplyCreatedAfterFilter(object sender, FilterEventArgs e)
-    {
-        if (!e.Accepted || e.Item is not MediaFile item)
-        {
-            e.Accepted = false;
-            return;
-        }
-
-        if (!CreatedAfterFilter.HasValue || CreatedAfterFilter == DateTime.MinValue)
-        {
-            e.Accepted &= true;
-            return;
-        }
-
-        e.Accepted &= CreatedAfterFilter.Value.Date <= item.DateCreated.DateTime.Date;
-    }
+    private bool IsAfterSelectedDates(MediaFile item)
+        => !CreatedAfterFilter.HasValue
+            || CreatedAfterFilter == DateTime.MinValue
+            || CreatedAfterFilter.Value.Date <= item.DateCreated.DateTime.Date;
 
     #endregion
 
@@ -187,22 +137,10 @@ public partial class ExportViewModel : ProgressableViewModel,
         MediaFilesView.Refresh();
     }
 
-    private void ApplyCreatedBeforeilter(object sender, FilterEventArgs e)
-    {
-        if (!e.Accepted || e.Item is not MediaFile item)
-        {
-            e.Accepted = false;
-            return;
-        }
-
-        if (!CreatedBeforeFilter.HasValue || CreatedBeforeFilter == DateTime.MaxValue)
-        {
-            e.Accepted &= true;
-            return;
-        }
-
-        e.Accepted &= CreatedBeforeFilter.Value.Date >= item.DateCreated.DateTime.Date;
-    }
+    private bool IsBeforeSelectedDates(MediaFile item)
+        => !CreatedBeforeFilter.HasValue
+            || CreatedBeforeFilter == DateTime.MaxValue
+            || CreatedBeforeFilter.Value.Date >= item.DateCreated.DateTime.Date;
 
     #endregion
 
@@ -225,8 +163,6 @@ public partial class ExportViewModel : ProgressableViewModel,
         }
     }
 
-    private readonly CollectionViewSource _mediaFilesViewSource;
-
     [ObservableProperty]
     private ICollectionView _mediaFilesView;
 
@@ -238,7 +174,7 @@ public partial class ExportViewModel : ProgressableViewModel,
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExportFilesCommand))]
-    private ObservableCollection<MediaFile> _discoveredFiles = new();
+    private ObservableCollection<MediaFile> _discoveredFiles = [];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(ExportFilesCommand))]
@@ -259,11 +195,7 @@ public partial class ExportViewModel : ProgressableViewModel,
     private bool _exportComplete;
 
     [RelayCommand]
-#pragma warning disable CRR0034
-#pragma warning disable CRR0035
     public async Task OnLoadingResults()
-#pragma warning restore CRR0035
-#pragma warning restore CRR0034
     {
         ShowProgressIndicator("Populating Results...");
         DiscoveredFiles.Clear();
@@ -296,11 +228,7 @@ public partial class ExportViewModel : ProgressableViewModel,
     private MediaFile? _selectedExportFile;
 
     [RelayCommand]
-#pragma warning disable CRR0034
-#pragma warning disable CRR0035
     public async Task OnToggleExportFlag(MediaFile item)
-#pragma warning restore CRR0035
-#pragma warning restore CRR0034
     {
         var entity = await _dbContext.FileDetails
             .FindAsync(item.Id)
@@ -319,10 +247,7 @@ public partial class ExportViewModel : ProgressableViewModel,
             {
                 item.ShouldExport = newValue;
                 entityPropertyDescriptor.SetValue(entity, newValue);
-#pragma warning disable CRR0039
                 await _dbContext.SaveChangesAsync().ConfigureAwait(true);
-#pragma warning restore CRR0039
-
                 MediaFilesViewCount = DiscoveredFiles.Count(x => x.ShouldExport);
                 ExportFilesCommand.NotifyCanExecuteChanged();
                 MediaFilesView.Refresh();
@@ -354,9 +279,7 @@ public partial class ExportViewModel : ProgressableViewModel,
             && !_exportWorker.IsBusy;
 
     [RelayCommand(CanExecute = nameof(CanExportFiles))]
-#pragma warning disable CRR0034
     public async Task OnExportFiles(CancellationToken cancellationToken)
-#pragma warning restore CRR0034
     {
         if (ExportComplete)
         {
