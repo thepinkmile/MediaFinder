@@ -3,10 +3,10 @@
                     xmlns:controls="clr-namespace:MediaFinder.Controls.Wpf.Controls"
                     xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
   <ResourceDictionary.MergedDictionaries>
-    <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ProgressBar.xaml" />
+    <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Card.xaml" />
   </ResourceDictionary.MergedDictionaries>
 
-  <Style x:Key="OverlayControl" TargetType="{x:Type controls:OverlayControl}">
+  <Style x:Key="MediaFinderOverlayControl" TargetType="{x:Type controls:OverlayControl}">
     <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
     <Setter Property="Foreground" Value="{DynamicResource PrimaryHueForegroundBrush}" />
     <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -105,5 +105,5 @@
     </Style.Triggers>
   </Style>
 
-  <Style TargetType="{x:Type controls:OverlayControl}" BasedOn="{StaticResource OverlayControl}" />
+  <Style TargetType="{x:Type controls:OverlayControl}" BasedOn="{StaticResource MediaFinderOverlayControl}" />
 </ResourceDictionary>
