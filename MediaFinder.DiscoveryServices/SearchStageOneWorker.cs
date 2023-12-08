@@ -138,7 +138,7 @@ public class SearchStageOneWorker(
             files.Add(file);
         }
 
-        return files.ToList();
+        return [..files];
     }
 
     private DirectoryInfo GetExtractionPath(string rootDirectory, string archiveName)
@@ -159,7 +159,7 @@ public class SearchStageOneWorker(
         return extractionPath;
     }
 
-    private static readonly string[] KnownNonArchiveExtensions = new[] { ".ipa", ".ibooks", ".epub" };
+    private static readonly string[] KnownNonArchiveExtensions = [".ipa", ".ibooks", ".epub"];
 
     private bool ExtractArchive(FileInfo filepath, DirectoryInfo destinationPath)
     {
