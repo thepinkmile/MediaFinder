@@ -20,7 +20,7 @@ using System.Windows.Data;
 namespace MediaFinder.Views.Export;
 
 public partial class ExportViewModel : ProgressableViewModel,
-    IRecipient<SearchCompletedMessage>,
+    IRecipient<DiscoveryCompletedMessage>,
     IRecipient<FinishedMessage>
 {
     private static readonly string SystemDrive = Path.GetPathRoot(Environment.SystemDirectory)!;
@@ -58,7 +58,7 @@ public partial class ExportViewModel : ProgressableViewModel,
 
         ExportDirectory = LogicalDrives.Any()
             ? LogicalDrives.First()
-            : Path.GetTempPath();
+            : null;
     }
 
     #region Filtering
@@ -146,7 +146,7 @@ public partial class ExportViewModel : ProgressableViewModel,
 
     #region Step2 - View Results
 
-    public async void Receive(SearchCompletedMessage message)
+    public async void Receive(DiscoveryCompletedMessage message)
     {
         try
         {
