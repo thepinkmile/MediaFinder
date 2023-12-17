@@ -61,6 +61,7 @@
   <materialDesign:DrawerHost x:Name="DrawerHost"
                              DrawerClosing="DrawerHost_DrawerClosing"
                              DrawerOpened="DrawerHost_DrawerOpened"
+                             IsRightDrawerOpen="{Binding FileDetailsDrawerIsOpen}"
                              OpenMode="Modal"
                              OverlayBackground="{DynamicResource PrimaryHueMidBrush}">
     <materialDesign:DrawerHost.RightDrawerContent>
@@ -72,23 +73,26 @@
                 Header="{Binding SelectedExportFile}"
                 Style="{StaticResource MaterialDesignCardGroupBox}">
         <GroupBox.HeaderTemplate>
-          <DataTemplate>
-            <StackPanel Orientation="Horizontal">
+          <DataTemplate DataType="{x:Type models:MediaFile}">
+            <DockPanel>
               <materialDesign:PackIcon Width="{StaticResource HeaderIconSize}"
                                        Height="{StaticResource HeaderIconSize}"
+                                       Margin="0,0,8,0"
                                        VerticalAlignment="Center"
-                                       Kind="{Binding Path=., Converter={StaticResource MediaFileToIconConverter}}" />
-              <TextBlock Margin="8,0,0,0"
-                         VerticalAlignment="Center"
+                                       DockPanel.Dock="Left"
+                                       Kind="{Binding Path=., Mode=OneWay, Converter={StaticResource MediaFileToIconConverter}}" />
+              <TextBlock VerticalAlignment="Center"
                          Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                         Text="{Binding FileName}" />
-            </StackPanel>
+                         Text="{Binding FileName, Mode=OneWay}" />
+            </DockPanel>
           </DataTemplate>
         </GroupBox.HeaderTemplate>
         <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
           <StackPanel Margin="8" DataContext="{Binding SelectedExportFile}">
-            <local:ImageViewerView DataContext="{Binding .}" Visibility="{Binding MultiMediaType, Converter={StaticResource IsImageVisibleConverter}}"/>
-            <local:MediaPlayerView x:Name="mediaPlayer" DataContext="{Binding .}" Visibility="{Binding MultiMediaType, Converter={StaticResource IsVideoVisibleConverter}}" />
+            <local:ImageViewerView DataContext="{Binding .}" Visibility="{Binding MultiMediaType, Converter={StaticResource IsImageVisibleConverter}}" />
+            <local:MediaPlayerView x:Name="mediaPlayer"
+                                   DataContext="{Binding .}"
+                                   Visibility="{Binding MultiMediaType, Converter={StaticResource IsVideoVisibleConverter}}" />
 
             <local:FileDetails DataContext="{Binding .}" />
 
@@ -198,7 +202,7 @@
                 <TextBlock Margin="0,0,8,0"
                            Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"
                            Text="Total" />
-                <TextBlock Foreground="{DynamicResource PrimaryHueLightForegroundBrush}" Text="{Binding MediaFilesTotalCount}" />
+                <TextBlock Foreground="{DynamicResource PrimaryHueLightForegroundBrush}" Text="{Binding MediaFilesTotalCount, Mode=OneTime}" />
               </StackPanel>
             </Border>
           </StackPanel>
@@ -230,9 +234,7 @@
                                       HeaderStyle="{StaticResource DataHeaderStyle}">
                 <DataGridTemplateColumn.CellTemplate>
                   <DataTemplate DataType="{x:Type models:MediaFile}">
-                    <Button Command="{Binding DataContext.ShowFileDetailsCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}"
-                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type materialDesign:DrawerHost}}}"
-                            Style="{StaticResource MaterialDesignRaisedButton}">
+                    <Button Command="{Binding DataContext.ShowFileDetailsCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}" Style="{StaticResource MaterialDesignRaisedButton}">
                       <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="EyeArrowRightOutline" />
                         <TextBlock Margin="8,0,0,0" Text="Details" />
