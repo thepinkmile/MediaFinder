@@ -2,8 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
-using MaterialDesignThemes.Wpf;
-
 using MediaFinder.DataAccessLayer;
 using MediaFinder.Helpers;
 using MediaFinder.Logging;
@@ -22,7 +20,7 @@ using System.Windows.Data;
 namespace MediaFinder.Views.Export;
 
 public partial class ExportViewModel : ProgressableViewModel,
-    IRecipient<SearchCompletedMessage>,
+    IRecipient<DiscoveryCompletedMessage>,
     IRecipient<FinishedMessage>
 {
     private static readonly string SystemDrive = Path.GetPathRoot(Environment.SystemDirectory)!;
@@ -60,7 +58,7 @@ public partial class ExportViewModel : ProgressableViewModel,
 
         ExportDirectory = LogicalDrives.Any()
             ? LogicalDrives.First()
-            : Path.GetTempPath();
+            : null;
     }
 
     #region Filtering
@@ -148,7 +146,7 @@ public partial class ExportViewModel : ProgressableViewModel,
 
     #region Step2 - View Results
 
-    public async void Receive(SearchCompletedMessage message)
+    public async void Receive(DiscoveryCompletedMessage message)
     {
         try
         {
@@ -255,13 +253,16 @@ public partial class ExportViewModel : ProgressableViewModel,
         }
     }
 
+    [ObservableProperty]
+    private bool _fileDetailsDrawerIsOpen;
+
     [RelayCommand]
-    public void OnShowFileDetails(DrawerHost drawerHost)
+    public void OnShowFileDetails()
     {
         if (SelectedExportFile is null)
             return;
 
-        drawerHost!.IsRightDrawerOpen = true;
+        FileDetailsDrawerIsOpen = true;
     }
 
     public bool CanNavigateBack()

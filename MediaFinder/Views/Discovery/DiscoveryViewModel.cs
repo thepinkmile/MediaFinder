@@ -178,7 +178,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     {
         if (newValue is true && newValue != oldValue)
         {
-            _messenger.Send(SearchCompletedMessage.Create());
+            _messenger.Send(DiscoveryCompletedMessage.Create());
             _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));
         }
     }
