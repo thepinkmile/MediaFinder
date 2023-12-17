@@ -59,9 +59,9 @@
     </Style>
   </UserControl.Resources>
   <materialDesign:DrawerHost x:Name="DrawerHost"
-                             IsRightDrawerOpen="{Binding FileDetailsDrawerIsOpen}"
                              DrawerClosing="DrawerHost_DrawerClosing"
                              DrawerOpened="DrawerHost_DrawerOpened"
+                             IsRightDrawerOpen="{Binding FileDetailsDrawerIsOpen}"
                              OpenMode="Modal"
                              OverlayBackground="{DynamicResource PrimaryHueMidBrush}">
     <materialDesign:DrawerHost.RightDrawerContent>
@@ -73,17 +73,18 @@
                 Header="{Binding SelectedExportFile}"
                 Style="{StaticResource MaterialDesignCardGroupBox}">
         <GroupBox.HeaderTemplate>
-          <DataTemplate>
-            <StackPanel Orientation="Horizontal">
+          <DataTemplate DataType="{x:Type models:MediaFile}">
+            <DockPanel>
               <materialDesign:PackIcon Width="{StaticResource HeaderIconSize}"
                                        Height="{StaticResource HeaderIconSize}"
+                                       Margin="0,0,8,0"
                                        VerticalAlignment="Center"
-                                       Kind="{Binding Path=., Converter={StaticResource MediaFileToIconConverter}}" />
-              <TextBlock Margin="8,0,0,0"
-                         VerticalAlignment="Center"
+                                       DockPanel.Dock="Left"
+                                       Kind="{Binding Path=., Mode=OneWay, Converter={StaticResource MediaFileToIconConverter}}" />
+              <TextBlock VerticalAlignment="Center"
                          Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                         Text="{Binding FileName}" />
-            </StackPanel>
+                         Text="{Binding FileName, Mode=OneWay}" />
+            </DockPanel>
           </DataTemplate>
         </GroupBox.HeaderTemplate>
         <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
@@ -233,8 +234,7 @@
                                       HeaderStyle="{StaticResource DataHeaderStyle}">
                 <DataGridTemplateColumn.CellTemplate>
                   <DataTemplate DataType="{x:Type models:MediaFile}">
-                    <Button Command="{Binding DataContext.ShowFileDetailsCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}"
-                            Style="{StaticResource MaterialDesignRaisedButton}">
+                    <Button Command="{Binding DataContext.ShowFileDetailsCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}" Style="{StaticResource MaterialDesignRaisedButton}">
                       <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="EyeArrowRightOutline" />
                         <TextBlock Margin="8,0,0,0" Text="Details" />
