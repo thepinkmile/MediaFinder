@@ -2,8 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
-using MaterialDesignThemes.Wpf;
-
 using MediaFinder.DataAccessLayer;
 using MediaFinder.Helpers;
 using MediaFinder.Logging;
@@ -255,13 +253,16 @@ public partial class ExportViewModel : ProgressableViewModel,
         }
     }
 
+    [ObservableProperty]
+    private bool _fileDetailsDrawerIsOpen;
+
     [RelayCommand]
-    public void OnShowFileDetails(DrawerHost drawerHost)
+    public void OnShowFileDetails()
     {
         if (SelectedExportFile is null)
             return;
 
-        drawerHost!.IsRightDrawerOpen = true;
+        FileDetailsDrawerIsOpen = true;
     }
 
     public bool CanNavigateBack()
