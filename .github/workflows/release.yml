@@ -62,7 +62,7 @@ jobs:
           cat "ReleaseNotes.md"
 
       - name: Upload Release Notes
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: ReleaseNotes
           path: "ReleaseNotes.md"
@@ -84,7 +84,7 @@ jobs:
 
     steps:
       - name: Download App Artifacts
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: MediaFinderApp
           path: app
@@ -93,7 +93,7 @@ jobs:
         run: zip -r MediaFinder.zip app/*
 
       - name: Download Release Notes
-        uses: actions/download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
           name: ReleaseNotes
 
