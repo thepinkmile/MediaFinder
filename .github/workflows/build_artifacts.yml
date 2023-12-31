@@ -49,7 +49,7 @@ jobs:
 
       - name: Upload application artifact for deployment job
         if: ${{ github.event_name != 'pull_request' }}
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: MediaFinderApp
           path: ${{github.workspace}}/.build/publish
