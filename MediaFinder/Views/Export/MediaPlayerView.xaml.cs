@@ -1,8 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 
-using JetBrains.Annotations;
-
 namespace MediaFinder.Views.Export;
 
 /// <summary>
