@@ -8,19 +8,23 @@ using Microsoft.Extensions.Logging;
 
 using SevenZipExtractor;
 using Microsoft.Extensions.Options;
+using MediaFinder.DataAccessLayer;
 
 namespace MediaFinder.DiscoveryServices;
 
 public class DirectoryIteratorService
 {
     private readonly ILogger<DirectoryIteratorService> _logger;
+    private readonly MediaFinderDbContext _dbContext;
     private readonly KnownFalseArchiveExtensions _knownNonArchiveExtensions;
 
     public DirectoryIteratorService(
         ILogger<DirectoryIteratorService> logger,
+        MediaFinderDbContext dbContext,
         IOptionsMonitor<KnownFalseArchiveExtensions> knownFalseArchiveExtensionsConfigMonitor)
     {
         _logger = logger;
+        _dbContext = dbContext;
         _knownNonArchiveExtensions = knownFalseArchiveExtensionsConfigMonitor.CurrentValue;
     }
 
