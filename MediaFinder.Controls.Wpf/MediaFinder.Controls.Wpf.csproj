@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="MaterialDesignThemes" />
+    <PackageReference Include="Microsoft.Windows.CsWin32" />
   </ItemGroup>
 
   <ItemGroup>
