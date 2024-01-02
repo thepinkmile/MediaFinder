@@ -21,13 +21,6 @@
         TextElement.FontWeight="Medium"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         mc:Ignorable="d">
-  <Window.Resources>
-    <Style x:Key="CircularProgressBar"
-           TargetType="{x:Type ProgressBar}"
-           BasedOn="{StaticResource MaterialDesignCircularProgressBar}">
-      <Setter Property="Foreground" Value="{DynamicResource PrimaryHueDarkForegroundBrush}" />
-    </Style>
-  </Window.Resources>
   <Grid>
     <materialDesign:Card Margin="15" Padding="4">
       <materialDesign:Transitioner AutoApplyTransitionOrigins="True" SelectedIndex="0">
