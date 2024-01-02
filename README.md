@@ -29,8 +29,6 @@ dotnet new keboo.wpf
   - Separate DAL model types from use in UI/App code
   - Add Model type mappers
   - Check ProgressOverlay functionality
-  - Add Tests
-  - Fix bug where navigation sometimes doesn't automatically move to next page
   - Check issues with DataGrid virtualization in Drawer content with scroll bars
 - v0.4
   - Simplify logic for discovery services so type is created at start and just updated
@@ -39,7 +37,9 @@ dotnet new keboo.wpf
   - Fix namespaces (due to moving code into separate assemblies)
   - Reintroduce details of archives located and extracted
   - Add parent mapping of files that came from an archive to the archive file
+  - Add Tests
 - v1.0
+  - Fix bug where navigation sometimes doesn't automatically move to next page
   - Create proper App Icon
   - Generate Documentation
   - Create App installer (possibly wix v4???)
