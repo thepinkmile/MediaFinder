@@ -10,6 +10,7 @@ namespace MediaFinder.DataAccessLayer
         public DbSet<SearchDirectory> SearchDirectories => Set<SearchDirectory>();
         public DbSet<FileDetails> FileDetails => Set<FileDetails>();
         public DbSet<FileProperty> FileProperties => Set<FileProperty>();
+        public DbSet<DiscoveryExecution> Runs => Set<DiscoveryExecution>();
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
