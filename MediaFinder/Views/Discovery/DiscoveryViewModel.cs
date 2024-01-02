@@ -53,6 +53,11 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
         BindingOperations.EnableCollectionSynchronization(Configurations, new());
 
+        Progress<object> tmpProgressReporter = new();
+        IProgress<object> progressReporter = tmpProgressReporter;
+
+        tmpProgressReporter.ProgressChanged += TmpProgressReporter_ProgressChanged;
+
         /*
         IProgress<string> currentDiscoveryProgress = new Progress<string>();
 
@@ -62,9 +67,11 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         });
         */
 
+#pragma warning disable CS0618 // Type or member is obsolete
         _searchStageOneWorker.RunWorkerCompleted += SearchStepOneCompleted;
         _searchStagaeTwoWorker.RunWorkerCompleted += SearchStageTwoCompleted;
         _searchStagaeThreeWorker.RunWorkerCompleted += SearchStageThreeCompleted;
+#pragma warning restore CS0618 // Type or member is obsolete
 
         // TODO: Should this default to temp directory???
         WorkingDirectory = Path.Combine(
@@ -160,6 +167,16 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     [NotifyCanExecuteChangedFor(nameof(FinishSearchCommand))]
     private bool _searchComplete;
 
+    private void TmpProgressReporter_ProgressChanged(object? sender, object e)
+    {
+        switch(e)
+        {
+            case WorkingDirectoryCreated wdcMessage: _createdWorkingDirectory = wdcMessage.Directory; ; break;
+            case FileExtracted feMessage: _messenger.Send(feMessage); break;
+            case string statusMessage: _messenger.Send(UpdateProgressMessage.Create(_progressToken!, statusMessage)); break;
+        }
+    }
+
     partial void OnWorkingDirectoryChanged(string? value)
     {
         CleanupWorkingDirectory();
@@ -172,20 +189,23 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         SearchComplete = false;
     }
 
+    [Obsolete("Will be replaced by Task.Run variant.")]
     partial void OnSearchCompleteChanged(bool oldValue, bool newValue)
     {
         if (newValue is true && newValue != oldValue)
         {
             _messenger.Send(DiscoveryCompletedMessage.Create());
-            _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));
+            MoveToReviewCommand.Execute(null);
         }
     }
 
+    [Obsolete("Will be replaced by Task.Run variant.")]
     public void Receive(WorkingDirectoryCreated message)
     {
         _createdWorkingDirectory = message.Directory;
     }
 
+    [Obsolete("Will be replaced by Task.Run variant.")]
     public void Receive(FileExtracted message)
     {
         if (WorkingDirectory is null)
@@ -243,6 +263,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
             return;
         }
 
+        // TODO: replace with Task.Run variant of process
         if (!_searchStageOneWorker.IsBusy && !_searchStagaeTwoWorker.IsBusy && !_searchStagaeThreeWorker.IsBusy)
         {
             ShowProgressIndicator("Initializing search parameters", CancelSearchCommand);
@@ -260,6 +281,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     [RelayCommand(CanExecute = nameof(CanCancelSearch))]
     private void OnCancelSearch()
     {
+        // TODO: update Task.Run variant of process
         if (!_searchStageOneWorker.IsBusy
             && !_searchStagaeTwoWorker.IsBusy
             && !_searchStagaeThreeWorker.IsBusy)
@@ -283,6 +305,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         CancelSearchCommand.NotifyCanExecuteChanged();
     }
 
+    [Obsolete("Will be replaced by Task.Run variant.")]
     private void SearchStepOneCompleted(object? sender, RunWorkerCompletedEventArgs e)
     {
         if (e.Cancelled)
@@ -316,6 +339,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
                 SelectedConfig.PerformDeepAnalysis));
     }
 
+    [Obsolete("Will be replaced by Task.Run variant.")]
     private void SearchStageTwoCompleted(object? sender, RunWorkerCompletedEventArgs e)
     {
         if (e.Cancelled)
@@ -362,6 +386,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
                 SelectedConfig.MinVideoHeight));
     }
 
+    [Obsolete("Will be replaced by Task.Run variant.")]
     private void SearchStageThreeCompleted(object? sender, RunWorkerCompletedEventArgs e)
     {
         if (e.Cancelled)
@@ -404,6 +429,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         SearchComplete = true;
     }
 
+    // TODO: update with Task.Run variant
     private bool CanMoveToReview()
         => SearchComplete
             && !_searchStageOneWorker.IsBusy
