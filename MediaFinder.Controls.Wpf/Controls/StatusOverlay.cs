@@ -15,6 +15,11 @@ public partial class StatusOverlay : OverlayControl
     /// </summary>
     public StatusOverlay() : base() { }
 
+    static StatusOverlay()
+    {
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(StatusOverlay), new FrameworkPropertyMetadata(typeof(StatusOverlay)));
+    }
+
     #region CancelCommand
 
     /// <summary>

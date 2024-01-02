@@ -58,8 +58,6 @@
                                    VerticalAlignment="{TemplateBinding VerticalAlignment}"
                                    Background="{TemplateBinding Background}"
                                    Foreground="{TemplateBinding Foreground}"
-                                   IsBusy="{TemplateBinding IsBusy}"
-                                   OverlayBackground="{TemplateBinding OverlayBackground}"
                                    SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
             <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
               <DockPanel HorizontalAlignment="Center" VerticalAlignment="Center">

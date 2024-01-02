@@ -12,13 +12,18 @@ public partial class OverlayControl : ContentControl
     /// </summary>
     public OverlayControl() : base() { }
 
+    static OverlayControl()
+    {
+        DefaultStyleKeyProperty.OverrideMetadata(typeof(OverlayControl), new FrameworkPropertyMetadata(typeof(OverlayControl)));
+    }
+
     #region OverlayBackground
 
     /// <summary>
     /// The <see cref="Brush"/> to use for the overlay background.
     /// </summary>
     public static readonly DependencyProperty OverlayBackgroundProperty = DependencyProperty.Register(
-        nameof(OverlayBackground), typeof(Brush), typeof(OverlayControl), new FrameworkPropertyMetadata(Panel.BackgroundProperty.DefaultMetadata.DefaultValue));
+        nameof(OverlayBackground), typeof(Brush), typeof(OverlayControl), new FrameworkPropertyMetadata(Panel.BackgroundProperty.DefaultMetadata.DefaultValue, FrameworkPropertyMetadataOptions.Inherits));
 
     /// <summary>
     /// The <see cref="Brush"/> to use for the overlay background.
@@ -45,7 +50,7 @@ public partial class OverlayControl : ContentControl
     /// True, to switch the control into busy state and make it visible in the UI's foreground.
     /// </summary>
     public static readonly DependencyProperty IsBusyProperty = DependencyProperty.Register(
-        nameof(IsBusy), typeof(bool), typeof(OverlayControl), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender));
+        nameof(IsBusy), typeof(bool), typeof(OverlayControl), new FrameworkPropertyMetadata(false, FrameworkPropertyMetadataOptions.AffectsRender | FrameworkPropertyMetadataOptions.Inherits));
 
     /// <summary>
     /// True, to switch the control into busy state and make it visible in the UI's foreground.
