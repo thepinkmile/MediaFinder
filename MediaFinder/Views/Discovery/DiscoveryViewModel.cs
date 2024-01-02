@@ -1,5 +1,4 @@
 ﻿using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.IO;
 using System.Windows.Controls;
 using System.Windows.Data;
@@ -9,11 +8,11 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 
 using MediaFinder.DataAccessLayer;
+using MediaFinder.DiscoveryServices;
 using MediaFinder.Helpers;
 using MediaFinder.Logging;
 using MediaFinder.Messages;
 using MediaFinder.Models;
-using MediaFinder.Services.Search;
 
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -29,54 +28,42 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<DiscoveryViewModel> _logger;
-    private readonly SearchStageOneWorker _searchStageOneWorker;
-    private readonly SearchStageTwoWorker _searchStagaeTwoWorker;
-    private readonly SearchStageThreeWorker _searchStagaeThreeWorker;
+    private readonly Progress<object> _progressReporter;
+
+    private Task? _discoveryTask;
+    private CancellationTokenSource? _discoveryTaskCancellationSource;
 
     public DiscoveryViewModel(
         IServiceProvider serviceProvider,
         MediaFinderDbContext dbContext,
         IMessenger messenger,
-        ILogger<DiscoveryViewModel> logger,
-        SearchStageOneWorker searchStageOneWorker,
-        SearchStageTwoWorker searchStageTwoWorker,
-        SearchStageThreeWorker searchStageThreeWorker)
+        ILogger<DiscoveryViewModel> logger)
         : base(messenger, logger, dbContext)
     {
         _serviceProvider = serviceProvider;
         _logger = logger;
-        _searchStageOneWorker = searchStageOneWorker;
-        _searchStagaeTwoWorker = searchStageTwoWorker;
-        _searchStagaeThreeWorker = searchStageThreeWorker;
 
         messenger.RegisterAll(this);
 
         BindingOperations.EnableCollectionSynchronization(Configurations, new());
 
-        Progress<object> tmpProgressReporter = new();
-        IProgress<object> progressReporter = tmpProgressReporter;
-
-        tmpProgressReporter.ProgressChanged += TmpProgressReporter_ProgressChanged;
-
-        /*
-        IProgress<string> currentDiscoveryProgress = new Progress<string>();
-
-        Task.Run(() => {
-            // do background stuff
-            currentDiscoveryProgress.Report("My file status");
-        });
-        */
-
-#pragma warning disable CS0618 // Type or member is obsolete
-        _searchStageOneWorker.RunWorkerCompleted += SearchStepOneCompleted;
-        _searchStagaeTwoWorker.RunWorkerCompleted += SearchStageTwoCompleted;
-        _searchStagaeThreeWorker.RunWorkerCompleted += SearchStageThreeCompleted;
-#pragma warning restore CS0618 // Type or member is obsolete
+        _progressReporter = new();
+        _progressReporter.ProgressChanged += TmpProgressReporter_ProgressChanged;
 
         // TODO: Should this default to temp directory???
         WorkingDirectory = Path.Combine(
             Directory.GetCurrentDirectory(),
             "TEMP");
+    }
+
+    private void TmpProgressReporter_ProgressChanged(object? sender, object e)
+    {
+        switch (e)
+        {
+            case WorkingDirectoryCreated wdcMessage: _messenger.Send(wdcMessage); break;
+            case FileExtracted feMessage: _messenger.Send(feMessage); break;
+            case string statusMessage: _messenger.Send(UpdateProgressMessage.Create(_progressToken!, statusMessage)); break;
+        }
     }
 
     #region Settings Configurations
@@ -167,16 +154,6 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     [NotifyCanExecuteChangedFor(nameof(FinishSearchCommand))]
     private bool _searchComplete;
 
-    private void TmpProgressReporter_ProgressChanged(object? sender, object e)
-    {
-        switch(e)
-        {
-            case WorkingDirectoryCreated wdcMessage: _createdWorkingDirectory = wdcMessage.Directory; ; break;
-            case FileExtracted feMessage: _messenger.Send(feMessage); break;
-            case string statusMessage: _messenger.Send(UpdateProgressMessage.Create(_progressToken!, statusMessage)); break;
-        }
-    }
-
     partial void OnWorkingDirectoryChanged(string? value)
     {
         CleanupWorkingDirectory();
@@ -187,16 +164,6 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     {
         CleanupWorkingDirectory();
         SearchComplete = false;
-    }
-
-    [Obsolete("Will be replaced by Task.Run variant.")]
-    partial void OnSearchCompleteChanged(bool oldValue, bool newValue)
-    {
-        if (newValue is true && newValue != oldValue)
-        {
-            _messenger.Send(DiscoveryCompletedMessage.Create());
-            MoveToReviewCommand.Execute(null);
-        }
     }
 
     [Obsolete("Will be replaced by Task.Run variant.")]
@@ -244,12 +211,11 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         => !string.IsNullOrEmpty(WorkingDirectory)
             && SelectedConfig is not null
             && !SearchComplete
-            && !_searchStageOneWorker.IsBusy
-            && !_searchStagaeTwoWorker.IsBusy
-            && !_searchStagaeThreeWorker.IsBusy;
+            && (_discoveryTask is null || _discoveryTask.IsCompleted)
+            && (_discoveryTaskCancellationSource is null);
 
     [RelayCommand(CanExecute = nameof(CanPerformSearch))]
-    public async Task OnPerformSearch()
+    public void OnPerformSearch()
     {
         if (SelectedConfig is null)
         {
@@ -263,178 +229,67 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
             return;
         }
 
-        // TODO: replace with Task.Run variant of process
-        if (!_searchStageOneWorker.IsBusy && !_searchStagaeTwoWorker.IsBusy && !_searchStagaeThreeWorker.IsBusy)
+        if (_discoveryTask is null || _discoveryTask.IsCompleted)
         {
             ShowProgressIndicator("Initializing search parameters", CancelSearchCommand);
-            await TruncateFileDetailStateAsync(_dbContext).ConfigureAwait(true);
-            _searchStageOneWorker.RunWorkerAsync(SearchRequest.Create(_progressToken, WorkingDirectory!, SelectedConfig!));
+            _discoveryTaskCancellationSource = new();
+            _discoveryTask = Task.Run(async () =>
+            {
+                // TODO: update DiscoveryRunnerService to create new Db Tennant for run.
+                await TruncateFileDetailStateAsync(_dbContext).ConfigureAwait(true);
+                var contextId = await _serviceProvider.GetRequiredService<DiscoveryRunnerService>().CreateRunContext(WorkingDirectory!, SelectedConfig!, _progressReporter, _discoveryTaskCancellationSource.Token);
+
+                // TODO: Add next steps
+
+
+                // ON Cancelled: SearchCleanup();
+
+                //_messenger.Send(SnackBarMessage.Create("Discovery process completed"));
+                //SearchFinished();
+            });
             CancelSearchCommand.NotifyCanExecuteChanged();
         }
     }
 
     private bool CanCancelSearch()
-        => ((_searchStageOneWorker.IsBusy && !_searchStageOneWorker.CancellationPending)
-            || (_searchStagaeTwoWorker.IsBusy && !_searchStagaeTwoWorker.CancellationPending)
-            || (_searchStagaeThreeWorker.IsBusy && !_searchStagaeThreeWorker.CancellationPending));
+        => _discoveryTask is not null && !_discoveryTask.IsCompleted
+            && _discoveryTaskCancellationSource is not null && !_discoveryTaskCancellationSource.IsCancellationRequested;
 
     [RelayCommand(CanExecute = nameof(CanCancelSearch))]
     private void OnCancelSearch()
     {
-        // TODO: update Task.Run variant of process
-        if (!_searchStageOneWorker.IsBusy
-            && !_searchStagaeTwoWorker.IsBusy
-            && !_searchStagaeThreeWorker.IsBusy)
-        {
-            return;
-        }
-
         CancelProgressIndicator("Cancelling...");
-        if (_searchStageOneWorker.IsBusy)
-        {
-            _searchStageOneWorker.CancelAsync();
-        }
-        if (_searchStagaeTwoWorker.IsBusy)
-        {
-            _searchStagaeTwoWorker.CancelAsync();
-        }
-        if (_searchStagaeThreeWorker.IsBusy)
-        {
-            _searchStagaeThreeWorker.CancelAsync();
-        }
+        _discoveryTaskCancellationSource!.Cancel();
         CancelSearchCommand.NotifyCanExecuteChanged();
-    }
-
-    [Obsolete("Will be replaced by Task.Run variant.")]
-    private void SearchStepOneCompleted(object? sender, RunWorkerCompletedEventArgs e)
-    {
-        if (e.Cancelled)
-        {
-            _messenger.Send(SnackBarMessage.Create("Search cancelled"));
-            _logger.UserCanceledOperation("Media Discovery");
-            SearchCleanup();
-            return;
-        }
-        if (e.Error is not null)
-        {
-            _messenger.Send(SnackBarMessage.Create($"Search failed: {e.Error.Message}"));
-            _logger.ProcessFailed(e.Error);
-            SearchCleanup();
-            return;
-        }
-        if (e.Result is not SearchResponse result)
-        {
-            _messenger.Send(SnackBarMessage.Create("Search returned invalid result"));
-            _logger.InvalidResult("SearchWorker1", e.Result!.GetType());
-            SearchCleanup();
-            return;
-        }
-
-        _searchStagaeTwoWorker.RunWorkerAsync(
-            AnalyseRequest.Create(
-                _progressToken,
-                result.Files,
-                SelectedConfig!.Directories,
-                WorkingDirectory!,
-                SelectedConfig.PerformDeepAnalysis));
-    }
-
-    [Obsolete("Will be replaced by Task.Run variant.")]
-    private void SearchStageTwoCompleted(object? sender, RunWorkerCompletedEventArgs e)
-    {
-        if (e.Cancelled)
-        {
-            _messenger.Send(SnackBarMessage.Create("Search cancelled"));
-            _logger.UserCanceledOperation("File Analysis");
-            SearchCleanup();
-            return;
-        }
-        if (e.Error is not null)
-        {
-            _messenger.Send(SnackBarMessage.Create($"Search failed"));
-            _logger.ProcessFailed(e.Error);
-            SearchCleanup();
-            return;
-        }
-        if (e.Result is not AnalysisResponse result)
-        {
-            _messenger.Send(SnackBarMessage.Create("Search returned invalid result"));
-            _logger.InvalidResult("SearchWorker2", e.Result!.GetType());
-            SearchCleanup();
-            return;
-        }
-
-        try
-        {
-            _dbContext.FileDetails.AddRange(result.Files.Select(x => x.ToFileDetails()));
-            _dbContext.SaveChanges();
-        }
-        catch (DbUpdateException ex)
-        {
-            _messenger.Send(SnackBarMessage.Create("Failed to save search results"));
-            _logger.DatabaseError(ex, "saving initial search results");
-            SearchCleanup();
-            return;
-        }
-
-        _searchStagaeThreeWorker.RunWorkerAsync(
-            FilterRequest.Create(
-                _progressToken,
-                SelectedConfig!.MinImageWidth,
-                SelectedConfig.MinImageHeight,
-                SelectedConfig.MinVideoWidth,
-                SelectedConfig.MinVideoHeight));
-    }
-
-    [Obsolete("Will be replaced by Task.Run variant.")]
-    private void SearchStageThreeCompleted(object? sender, RunWorkerCompletedEventArgs e)
-    {
-        if (e.Cancelled)
-        {
-            _messenger.Send(SnackBarMessage.Create("Discovery process cancelled"));
-            _logger.UserCanceledOperation("Filtering");
-            SearchCleanup();
-            return;
-        }
-        if (e.Error is not null)
-        {
-            _messenger.Send(SnackBarMessage.Create("Discovery failed"));
-            _logger.ProcessFailed(e.Error);
-            SearchCleanup();
-            return;
-        }
-        if (e.Result is not bool result || !result)
-        {
-            _messenger.Send(SnackBarMessage.Create("Discovery process returned invalid analysis result"));
-            _logger.InvalidResult("SearchWorker3", e.Result!.GetType());
-            SearchCleanup();
-            return;
-        }
-
-        _messenger.Send(SnackBarMessage.Create("Discovery process completed"));
-        SearchFinished();
     }
 
     private void SearchCleanup()
     {
+        _discoveryTaskCancellationSource = null;
+        _discoveryTask = null;
+
         CleanupWorkingDirectory();
         HideProgressIndicator();
+        
         CancelSearchCommand.NotifyCanExecuteChanged();
         PerformSearchCommand.NotifyCanExecuteChanged();
     }
 
     private void SearchFinished()
     {
+        _discoveryTaskCancellationSource = null;
+        _discoveryTask = null;
+
         HideProgressIndicator();
         SearchComplete = true;
+        
+        _messenger.Send(DiscoveryCompletedMessage.Create());
+        MoveToReviewCommand.Execute(null);
     }
 
-    // TODO: update with Task.Run variant
     private bool CanMoveToReview()
         => SearchComplete
-            && !_searchStageOneWorker.IsBusy
-            && !_searchStagaeTwoWorker.IsBusy
-            && !_searchStagaeThreeWorker.IsBusy;
+            && (_discoveryTask is null || _discoveryTask.IsCompleted);
 
     [RelayCommand(CanExecute = nameof(CanMoveToReview))]
     private void OnMoveToReview()
@@ -460,9 +315,8 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
     public bool CanFinishSearch()
         => (_createdWorkingDirectory is not null || _dbContext.FileDetails.Any())
-            && !_searchStageOneWorker.IsBusy
-            && !_searchStagaeTwoWorker.IsBusy
-            && !_searchStagaeThreeWorker.IsBusy;
+            && (_discoveryTask is null || _discoveryTask.IsCompleted)
+            && _discoveryTaskCancellationSource is null;
 
     [RelayCommand(CanExecute = nameof(CanFinishSearch))]
     public void OnFinishSearch()

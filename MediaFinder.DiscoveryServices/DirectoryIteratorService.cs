@@ -30,11 +30,7 @@ public class DirectoryIteratorService
 
     public async Task RunAsync(SearchRequest inputs, IProgress<object> progressUpdate, CancellationToken cancellationToken = default)
     {
-        progressUpdate.Report("Preparing Working Directory...");
-        var workingDirectory = Path.Combine(inputs.WorkingDirectory, Guid.NewGuid().ToString());
-        Directory.CreateDirectory(workingDirectory);
-        progressUpdate.Report(WorkingDirectoryCreated.Create(workingDirectory));
-        _logger.CreatedWorkingDirectory(workingDirectory);
+        var workingDirectory = string.Empty;
 
         var files = await IterateDirectories(
             inputs.SourceDirectories.Select(x => new DirectoryInfo(x)),
