@@ -27,20 +27,23 @@ public class DiscoveryRunnerService
         CancellationToken cancellationToken = default)
     {
         progressUpdate.Report("Creating Discovery Context...");
-        var entity = _dbContext.Runs.Add(new DataAccessLayer.Models.DiscoveryExecution
+        var runDetails = new DataAccessLayer.Models.DiscoveryExecution
         {
             ConfigurationId = configuration.Id,
             WorkingDirectory = workingDirectory
-
-        });
+        };
+        _dbContext.Runs.Add(runDetails);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
         progressUpdate.Report("Preparing Working Directory...");
-        var workingRunDirectory = Path.Combine(workingDirectory, entity.Entity.Id.ToString());
+        var workingRunDirectory = Path.Combine(workingDirectory, runDetails.Id.ToString());
         Directory.CreateDirectory(workingRunDirectory);
+        runDetails.WorkingDirectory = workingRunDirectory;
+        await _dbContext.SaveChangesAsync(cancellationToken);
+
         progressUpdate.Report(WorkingDirectoryCreated.Create(workingRunDirectory));
         _logger.CreatedWorkingDirectory(workingRunDirectory);
 
-        return entity.Entity.Id;
+        return runDetails.Id;
     }
 }

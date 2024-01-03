@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.IO;
+using System.Threading;
 using System.Windows.Controls;
 using System.Windows.Data;
 
@@ -22,16 +23,13 @@ namespace MediaFinder.Views.Discovery;
 
 public partial class DiscoveryViewModel : ProgressableViewModel,
     IRecipient<SearchSettingUpdated>,
-    IRecipient<WorkingDirectoryCreated>,
     IRecipient<FinishedMessage>,
-    IRecipient<FileExtracted>
+    IRecipient<FileExtracted>,
+    IRecipient<DiscoveryCompletedMessage>
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<DiscoveryViewModel> _logger;
     private readonly Progress<object> _progressReporter;
-
-    private Task? _discoveryTask;
-    private CancellationTokenSource? _discoveryTaskCancellationSource;
 
     public DiscoveryViewModel(
         IServiceProvider serviceProvider,
@@ -60,9 +58,11 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     {
         switch (e)
         {
+            case string statusMessage: _messenger.Send(UpdateProgressMessage.Create(_progressToken!, statusMessage)); break;
             case WorkingDirectoryCreated wdcMessage: _messenger.Send(wdcMessage); break;
             case FileExtracted feMessage: _messenger.Send(feMessage); break;
-            case string statusMessage: _messenger.Send(UpdateProgressMessage.Create(_progressToken!, statusMessage)); break;
+            case SnackBarMessage sbMessage: _messenger.Send(sbMessage); break;
+            case DiscoveryCompletedMessage dcMessage: _messenger.Send(dcMessage); break;
         }
     }
 
@@ -131,6 +131,14 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     #region Discovery Process
 
     [ObservableProperty]
+    [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
+    [NotifyCanExecuteChangedFor(nameof(CancelSearchCommand))]
+    [NotifyCanExecuteChangedFor(nameof(FinishSearchCommand))]
+    private Task? _discoveryTask;
+
+    private CancellationTokenSource? _discoveryTaskCancellationSource;
+
+    [ObservableProperty]
     private ObservableCollection<DiscoveryOptions> _configurations = [];
 
     [ObservableProperty]
@@ -140,7 +148,10 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     [ObservableProperty]
     private ulong _workingDirectorySize;
 
-    private string? _createdWorkingDirectory;
+    private Guid? _currentRunIdewntifier;
+
+    private async ValueTask<DataAccessLayer.Models.DiscoveryExecution?> GetCurrentRunDetails()
+        => await _dbContext.Runs.FindAsync([_currentRunIdewntifier]);
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
@@ -156,32 +167,29 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
     partial void OnWorkingDirectoryChanged(string? value)
     {
-        CleanupWorkingDirectory();
-        SearchComplete = false;
+        _messenger.Send(FinishedMessage.Create());
     }
 
     partial void OnSelectedConfigChanged(DiscoveryOptions? value)
     {
-        CleanupWorkingDirectory();
-        SearchComplete = false;
+        _messenger.Send(FinishedMessage.Create());
     }
 
-    [Obsolete("Will be replaced by Task.Run variant.")]
-    public void Receive(WorkingDirectoryCreated message)
+    public async void Receive(FileExtracted message)
     {
-        _createdWorkingDirectory = message.Directory;
-    }
+        var runDetails = await GetCurrentRunDetails();
+        if (runDetails is not { })
+        {
+            return;
+        }
 
-    [Obsolete("Will be replaced by Task.Run variant.")]
-    public void Receive(FileExtracted message)
-    {
-        if (WorkingDirectory is null)
+        if (string.IsNullOrEmpty(runDetails.WorkingDirectory))
         {
             WorkingDirectorySize = 0UL;
             return;
         }
 
-        var workingDir = new DirectoryInfo(WorkingDirectory!);
+        var workingDir = new DirectoryInfo(runDetails.WorkingDirectory);
         if (!workingDir.Exists)
         {
             WorkingDirectorySize = 0UL;
@@ -211,8 +219,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         => !string.IsNullOrEmpty(WorkingDirectory)
             && SelectedConfig is not null
             && !SearchComplete
-            && (_discoveryTask is null || _discoveryTask.IsCompleted)
-            && (_discoveryTaskCancellationSource is null);
+            && (DiscoveryTask is null || DiscoveryTask.IsCompleted);
 
     [RelayCommand(CanExecute = nameof(CanPerformSearch))]
     public void OnPerformSearch()
@@ -229,30 +236,15 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
             return;
         }
 
-        if (_discoveryTask is null || _discoveryTask.IsCompleted)
+        if (DiscoveryTask is null || DiscoveryTask.IsCompleted)
         {
-            ShowProgressIndicator("Initializing search parameters", CancelSearchCommand);
             _discoveryTaskCancellationSource = new();
-            _discoveryTask = Task.Run(async () =>
-            {
-                // TODO: update DiscoveryRunnerService to create new Db Tennant for run.
-                await TruncateFileDetailStateAsync(_dbContext).ConfigureAwait(true);
-                var contextId = await _serviceProvider.GetRequiredService<DiscoveryRunnerService>().CreateRunContext(WorkingDirectory!, SelectedConfig!, _progressReporter, _discoveryTaskCancellationSource.Token);
-
-                // TODO: Add next steps
-
-
-                // ON Cancelled: SearchCleanup();
-
-                //_messenger.Send(SnackBarMessage.Create("Discovery process completed"));
-                //SearchFinished();
-            });
-            CancelSearchCommand.NotifyCanExecuteChanged();
+            DiscoveryTask = Task.Run(() => DoDiscovery(_discoveryTaskCancellationSource.Token));
         }
     }
 
     private bool CanCancelSearch()
-        => _discoveryTask is not null && !_discoveryTask.IsCompleted
+        => DiscoveryTask is not null && !DiscoveryTask.IsCompleted
             && _discoveryTaskCancellationSource is not null && !_discoveryTaskCancellationSource.IsCancellationRequested;
 
     [RelayCommand(CanExecute = nameof(CanCancelSearch))]
@@ -263,33 +255,60 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         CancelSearchCommand.NotifyCanExecuteChanged();
     }
 
-    private void SearchCleanup()
+    private async Task DoDiscovery(CancellationToken cancellationToken = default)
     {
-        _discoveryTaskCancellationSource = null;
-        _discoveryTask = null;
+        ShowProgressIndicator("Initializing search parameters", CancelSearchCommand);
+        IProgress<object> progressReporter = _progressReporter;
 
-        CleanupWorkingDirectory();
-        HideProgressIndicator();
-        
-        CancelSearchCommand.NotifyCanExecuteChanged();
-        PerformSearchCommand.NotifyCanExecuteChanged();
+        try
+        {
+            // TODO: update DiscoveryRunnerService to create new Db Tennant for run.
+            await TruncateFileDetailStateAsync(_dbContext, cancellationToken).ConfigureAwait(true);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            _currentRunIdewntifier = await _serviceProvider
+                .GetRequiredService<DiscoveryRunnerService>()
+                .CreateRunContext(WorkingDirectory!, SelectedConfig!, progressReporter, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // TODO: Add next steps
+            cancellationToken.ThrowIfCancellationRequested();
+
+            SearchComplete = true;
+            progressReporter.Report(SnackBarMessage.Create("Discovery process completed"));
+            progressReporter.Report(DiscoveryCompletedMessage.Create());
+        }
+        catch (TaskCanceledException ex)
+        {
+            progressReporter.Report(SnackBarMessage.Create("Search cancelled"));
+            _logger.UserCanceledOperation(ex.Source ?? "DiscoveryViewModel::DoDiscovery");
+            progressReporter.Report(FinishedMessage.Create());
+        }
+        catch(Exception ex)
+        {
+            progressReporter.Report(SnackBarMessage.Create($"Search failed: {ex.Message}"));
+            _logger.ProcessFailed(ex);
+            progressReporter.Report(FinishedMessage.Create());
+        }
+        finally
+        {
+            _discoveryTaskCancellationSource = null;
+            DiscoveryTask = null;
+            HideProgressIndicator();
+        }
     }
 
-    private void SearchFinished()
+    public void Receive(DiscoveryCompletedMessage message)
     {
-        _discoveryTaskCancellationSource = null;
-        _discoveryTask = null;
-
-        HideProgressIndicator();
-        SearchComplete = true;
-        
-        _messenger.Send(DiscoveryCompletedMessage.Create());
-        MoveToReviewCommand.Execute(null);
+        if (CanMoveToReview())
+        {
+            MoveToReviewCommand.Execute(null);
+        }
     }
 
     private bool CanMoveToReview()
         => SearchComplete
-            && (_discoveryTask is null || _discoveryTask.IsCompleted);
+            && (DiscoveryTask is null || DiscoveryTask.IsCompleted);
 
     [RelayCommand(CanExecute = nameof(CanMoveToReview))]
     private void OnMoveToReview()
@@ -301,22 +320,25 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
     #region Finish Actions
 
-    private void CleanupWorkingDirectory()
+    private async Task CleanupWorkingDirectory()
     {
-        if (!string.IsNullOrEmpty(_createdWorkingDirectory)
-            && Directory.Exists(_createdWorkingDirectory))
+        var runDetails = await GetCurrentRunDetails();
+        if (runDetails is not { })
         {
-            Directory.Delete(_createdWorkingDirectory, true);
-            _logger.RemovedWorkingDirectory(_createdWorkingDirectory);
-            _createdWorkingDirectory = null;
+            return;
+        }
+
+        if (Directory.Exists(runDetails.WorkingDirectory))
+        {
+            Directory.Delete(runDetails.WorkingDirectory, true);
+            _logger.RemovedWorkingDirectory(runDetails.WorkingDirectory);
             WorkingDirectorySize = 0UL;
         }
     }
 
     public bool CanFinishSearch()
-        => (_createdWorkingDirectory is not null || _dbContext.FileDetails.Any())
-            && (_discoveryTask is null || _discoveryTask.IsCompleted)
-            && _discoveryTaskCancellationSource is null;
+        => _currentRunIdewntifier is not null
+            && (DiscoveryTask is null || DiscoveryTask.IsCompleted);
 
     [RelayCommand(CanExecute = nameof(CanFinishSearch))]
     public void OnFinishSearch()
@@ -326,28 +348,35 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
     public async void Receive(FinishedMessage message)
     {
-        try
-        {
-            await CleanupAsync().ConfigureAwait(true);
-        }
-        catch
-        {
-            // do nothing
-        }
+        await CleanupAsync().ConfigureAwait(true);
     }
 
-    internal async Task CleanupAsync(CancellationToken cancellationToken = default)
+    internal async Task CleanupAsync()
     {
-        _logger.SessionCleanup();
-
-        await TruncateFileDetailStateAsync(_dbContext, cancellationToken).ConfigureAwait(true);
-
-        CleanupWorkingDirectory();
-
-        if (SearchComplete)
+        try
         {
-            SearchComplete = false;
-            SelectedConfig = null;
+            _logger.SessionCleanup();
+
+            await TruncateFileDetailStateAsync(_dbContext).ConfigureAwait(true);
+
+            await CleanupWorkingDirectory();
+
+            var runDetails = await GetCurrentRunDetails();
+            if (runDetails is { })
+            {
+                _dbContext.Runs.Remove(runDetails);
+                await _dbContext.SaveChangesAsync();
+            }
+
+            if (SearchComplete)
+            {
+                SearchComplete = false;
+                SelectedConfig = null;
+            }
+        }
+        catch(Exception ex)
+        {
+            _logger.LogError(ex, "Unhandled Exception Occured.");
         }
     }
 
