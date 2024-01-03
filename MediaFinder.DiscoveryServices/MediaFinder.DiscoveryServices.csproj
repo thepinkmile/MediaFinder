@@ -7,6 +7,7 @@
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
     <PackageReference Include="MetadataExtractor" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" />
     <PackageReference Include="NReco.VideoInfo" />
     <PackageReference Include="SevenZipExtractor" />
     <PackageReference Include="taglib-sharp-netstandard2.0" />
