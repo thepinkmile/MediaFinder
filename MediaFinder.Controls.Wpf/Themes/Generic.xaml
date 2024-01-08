@@ -1,6 +1,7 @@
 <ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
 
-    <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/MediaFinder.Controls.Wpf;component/Themes/ProgressOverlayTemplates.xaml" />
-    </ResourceDictionary.MergedDictionaries>
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="pack://application:,,,/MediaFinder.Controls.Wpf;component/Themes/OverlayControlTemplates.xaml" />
+    <ResourceDictionary Source="pack://application:,,,/MediaFinder.Controls.Wpf;component/Themes/StatusOverlayTemplates.xaml" />
+  </ResourceDictionary.MergedDictionaries>
 </ResourceDictionary>

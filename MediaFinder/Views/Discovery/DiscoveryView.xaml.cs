@@ -12,9 +12,7 @@ namespace MediaFinder.Views.Discovery
             InitializeComponent();
         }
 
-#pragma warning disable CRR0034
         private async void UserControl_Loaded(object sender, System.Windows.RoutedEventArgs e)
-#pragma warning restore CRR0034
         {
             try
             {

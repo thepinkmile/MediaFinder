@@ -1,60 +1,53 @@
-﻿<Window
-    x:Class="MediaFinder.Views.MainWindow"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="clr-namespace:MediaFinder.Controls.Wpf.Controls;assembly=MediaFinder.Controls.Wpf"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:discovery="clr-namespace:MediaFinder.Views.Discovery"
-    xmlns:export="clr-namespace:MediaFinder.Views.Export"
-    xmlns:local="clr-namespace:MediaFinder.Views"
-    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:status="clr-namespace:MediaFinder.Views.Status"
-    Title="Media Finder"
-    Width="800"
-    Height="600"
-    d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel,
-                                     IsDesignTimeCreatable=False}"
-    Background="{DynamicResource MaterialDesignPaper}"
-    FontFamily="{materialDesign:MaterialDesignFont}"
-    Style="{StaticResource MaterialDesignWindow}"
-    TextElement.FontSize="14"
-    TextElement.FontWeight="Medium"
-    TextElement.Foreground="{DynamicResource MaterialDesignBody}"
-    mc:Ignorable="d">
-    <Window.Resources>
-        <Style
-            x:Key="CircularProgressBar"
-            BasedOn="{StaticResource MaterialDesignCircularProgressBar}"
-            TargetType="{x:Type ProgressBar}">
-            <Setter Property="Foreground" Value="{DynamicResource PrimaryHueDarkForegroundBrush}" />
-        </Style>
-    </Window.Resources>
-    <Grid>
-        <materialDesign:Card Margin="15" Padding="4">
-            <materialDesign:Transitioner AutoApplyTransitionOrigins="True" SelectedIndex="0">
-                <discovery:DiscoveryView x:Name="Discovery" DataContext="{Binding DiscoveryViewModel}" />
-                <export:ExportView x:Name="Export" DataContext="{Binding ExportViewModel}" />
-                <status:ProcessCompletedView x:Name="Complete" DataContext="{Binding StatusViewModel}" />
-            </materialDesign:Transitioner>
-        </materialDesign:Card>
+﻿<Window x:Class="MediaFinder.Views.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:controls="clr-namespace:MediaFinder.Controls.Wpf.Controls;assembly=MediaFinder.Controls.Wpf"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:discovery="clr-namespace:MediaFinder.Views.Discovery"
+        xmlns:export="clr-namespace:MediaFinder.Views.Export"
+        xmlns:local="clr-namespace:MediaFinder.Views"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:status="clr-namespace:MediaFinder.Views.Status"
+        Title="Media Finder"
+        Width="800"
+        Height="600"
+        d:DataContext="{d:DesignInstance Type=local:MainWindowViewModel,
+                                         IsDesignTimeCreatable=False}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        FontFamily="{materialDesign:MaterialDesignFont}"
+        Style="{StaticResource MaterialDesignWindow}"
+        TextElement.FontSize="14"
+        TextElement.FontWeight="Medium"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        mc:Ignorable="d">
+  <Grid>
+    <materialDesign:Card Margin="15" Padding="4">
+      <materialDesign:Transitioner AutoApplyTransitionOrigins="True" SelectedIndex="0">
+        <discovery:DiscoveryView x:Name="Discovery" DataContext="{Binding DiscoveryViewModel}" />
+        <export:ExportView x:Name="Export" DataContext="{Binding ExportViewModel}" />
+        <status:ProcessCompletedView x:Name="Complete" DataContext="{Binding StatusViewModel}" />
+      </materialDesign:Transitioner>
+    </materialDesign:Card>
 
-        <materialDesign:DialogHost
-            x:Name="m_dialogHost"
-            DialogTheme="Inherit"
-            Identifier="DialogHost" />
-        <materialDesign:Snackbar
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Top"
-            Background="{DynamicResource PrimaryHueDarkBrush}"
-            Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
-            MessageQueue="{Binding MessageQueue}" />
-        <controls:ProgressOverlay
-            CancelCommand="{Binding ProgressCancelCommand}"
-            FontSize="16"
-            FontWeight="Bold"
-            IsBusy="{Binding ProgressVisible}"
-            Progress="{Binding ProgressValue}"
-            StatusMessage="{Binding ProgressMessage}" />
-    </Grid>
+    <materialDesign:DialogHost x:Name="m_dialogHost"
+                               DialogTheme="Inherit"
+                               Identifier="DialogHost" />
+    <materialDesign:Snackbar HorizontalAlignment="Stretch"
+                             VerticalAlignment="Top"
+                             Background="{DynamicResource PrimaryHueDarkBrush}"
+                             Foreground="{DynamicResource PrimaryHueDarkForegroundBrush}"
+                             MessageQueue="{Binding MessageQueue}" />
+    <controls:StatusOverlay CancelCommand="{Binding ProgressCancelCommand}"
+                            FontSize="16"
+                            FontWeight="Bold"
+                            IsBusy="{Binding ProgressVisible}"
+                            Progress="{Binding ProgressValue}">
+      <TextBlock VerticalAlignment="Center"
+                 Text="{Binding ProgressMessage, Mode=OneWay}"
+                 TextTrimming="WordEllipsis"
+                 TextWrapping="WrapWithOverflow"
+                 Visibility="{Binding ProgressMessage, Converter={StaticResource StringIsEmptyVisibilityConverter}}" />
+    </controls:StatusOverlay>
+  </Grid>
 </Window>

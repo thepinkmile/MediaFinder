@@ -1,14 +1,12 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Data.Common;
 using System.IO;
+using System.Windows.Controls;
 using System.Windows.Data;
 
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-
-using MaterialDesignThemes.Wpf;
 
 using MediaFinder.DataAccessLayer;
 using MediaFinder.Helpers;
@@ -18,25 +16,25 @@ using MediaFinder.Models;
 using MediaFinder.Services.Search;
 
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace MediaFinder.Views.Discovery;
 
-[ObservableObject]
 public partial class DiscoveryViewModel : ProgressableViewModel,
     IRecipient<SearchSettingUpdated>,
     IRecipient<WorkingDirectoryCreated>,
     IRecipient<FinishedMessage>,
     IRecipient<FileExtracted>
 {
+    private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<DiscoveryViewModel> _logger;
     private readonly SearchStageOneWorker _searchStageOneWorker;
     private readonly SearchStageTwoWorker _searchStagaeTwoWorker;
     private readonly SearchStageThreeWorker _searchStagaeThreeWorker;
 
     public DiscoveryViewModel(
-        AddSearchSettingViewModel searchConfigViewModel,
-        EditSearchSettingViewModel editSearchSettingViewModel,
+        IServiceProvider serviceProvider,
         MediaFinderDbContext dbContext,
         IMessenger messenger,
         ILogger<DiscoveryViewModel> logger,
@@ -45,6 +43,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         SearchStageThreeWorker searchStageThreeWorker)
         : base(messenger, logger, dbContext)
     {
+        _serviceProvider = serviceProvider;
         _logger = logger;
         _searchStageOneWorker = searchStageOneWorker;
         _searchStagaeTwoWorker = searchStageTwoWorker;
@@ -54,12 +53,20 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
         BindingOperations.EnableCollectionSynchronization(Configurations, new());
 
+        /*
+        IProgress<string> currentDiscoveryProgress = new Progress<string>();
+
+        Task.Run(() => {
+            // do background stuff
+            currentDiscoveryProgress.Report("My file status");
+        });
+        */
+
         _searchStageOneWorker.RunWorkerCompleted += SearchStepOneCompleted;
         _searchStagaeTwoWorker.RunWorkerCompleted += SearchStageTwoCompleted;
         _searchStagaeThreeWorker.RunWorkerCompleted += SearchStageThreeCompleted;
 
-        SearchConfigViewModel = searchConfigViewModel;
-        EditSearchConfigViewModel = editSearchSettingViewModel;
+        // TODO: Should this default to temp directory???
         WorkingDirectory = Path.Combine(
             Directory.GetCurrentDirectory(),
             "TEMP");
@@ -68,58 +75,44 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     #region Settings Configurations
 
     [ObservableProperty]
-    private bool _drawEntityIsNew;
+    private UserControl? _drawContent;
 
-    public AddSearchSettingViewModel SearchConfigViewModel { get; set; }
-
-    public EditSearchSettingViewModel EditSearchConfigViewModel { get; set; }
+    [ObservableProperty]
+    private bool _editorVisible;
 
     [RelayCommand]
-    private void OnAddSearchSetting(DrawerHost drawerHost)
+    private void OnAddSearchSetting()
     {
-        DrawEntityIsNew = true;
-        drawerHost!.IsRightDrawerOpen = true;
+        DrawContent = _serviceProvider.GetRequiredService<AddSearchSettingView>();
+        EditorVisible = true;
     }
 
     [RelayCommand]
-#pragma warning disable CRR0034
-#pragma warning disable CRR0035
-    private async Task OnEditSearchSetting(DrawerHost drawerHost)
-#pragma warning restore CRR0035
-#pragma warning restore CRR0034
+    private async Task OnEditSearchSetting()
     {
-        DrawEntityIsNew = false;
-#pragma warning disable CRR0039
-        await EditSearchConfigViewModel.InitializeAsync(SelectedConfig!.Id).ConfigureAwait(true);
-#pragma warning restore CRR0039
-        drawerHost!.IsRightDrawerOpen = true;
+        var view = _serviceProvider.GetRequiredService<EditSearchSettingView>();
+        await view.InitializeDataContextAsync(SelectedConfig!.Id).ConfigureAwait(true);
+        DrawContent = view;
+        EditorVisible = true;
     }
 
     private bool CanRemoveSearchSetting()
         => SelectedConfig is not null;
 
     [RelayCommand(CanExecute = nameof(CanRemoveSearchSetting))]
-#pragma warning disable CRR0034
-#pragma warning disable CRR0035
     private async Task OnRemoveSearchSetting()
-#pragma warning restore CRR0035
-#pragma warning restore CRR0034
     {
         var config = SelectedConfig!;
-#pragma warning disable CRR0039
         var entity = await _dbContext.SearchSettings
             .FirstOrDefaultAsync(x => x.Id == config.Id)
             .ConfigureAwait(true);
-#pragma warning restore CRR0039
         if (entity is null)
         {
             return;
         }
 
         _dbContext.SearchSettings.Remove(entity);
-#pragma warning disable CRR0039
         await _dbContext.SaveChangesAsync().ConfigureAwait(true);
-#pragma warning restore CRR0039
         _messenger.Send(SearchSettingUpdated.Create(config));
         _messenger.Send(SnackBarMessage.Create($"Removed configuration: {config.Name}"));
     }
@@ -144,7 +137,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     #region Discovery Process
 
     [ObservableProperty]
-    private ObservableCollection<SearchConfiguration> _configurations = new();
+    private ObservableCollection<DiscoveryOptions> _configurations = [];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
@@ -158,7 +151,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
     [NotifyCanExecuteChangedFor(nameof(RemoveSearchSettingCommand))]
-    private SearchConfiguration? _selectedConfig;
+    private DiscoveryOptions? _selectedConfig;
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(PerformSearchCommand))]
@@ -173,7 +166,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         SearchComplete = false;
     }
 
-    partial void OnSelectedConfigChanged(SearchConfiguration? value)
+    partial void OnSelectedConfigChanged(DiscoveryOptions? value)
     {
         CleanupWorkingDirectory();
         SearchComplete = false;
@@ -183,7 +176,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     {
         if (newValue is true && newValue != oldValue)
         {
-            _messenger.Send(SearchCompletedMessage.Create());
+            _messenger.Send(DiscoveryCompletedMessage.Create());
             _messenger.Send(WizardNavigationMessage.Create(NavigationDirection.Next));
         }
     }
@@ -212,11 +205,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     }
 
     [RelayCommand]
-#pragma warning disable CRR0034
-#pragma warning disable CRR0035
     public async Task LoadConfigurations()
-#pragma warning restore CRR0035
-#pragma warning restore CRR0034
     {
         ShowProgressIndicator("Loading...");
 
@@ -225,7 +214,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
             .Include(ss => ss.Directories)
             .AsAsyncEnumerable())
         {
-            Configurations.Add(SearchConfiguration.Create(config));
+            Configurations.Add(config.ToDiscoveryOptions());
         }
 
         HideProgressIndicator();
@@ -240,11 +229,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
             && !_searchStagaeThreeWorker.IsBusy;
 
     [RelayCommand(CanExecute = nameof(CanPerformSearch))]
-#pragma warning disable CRR0034
-#pragma warning disable CRR0035
     public async Task OnPerformSearch()
-#pragma warning restore CRR0035
-#pragma warning restore CRR0034
     {
         if (SelectedConfig is null)
         {
@@ -261,11 +246,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         if (!_searchStageOneWorker.IsBusy && !_searchStagaeTwoWorker.IsBusy && !_searchStagaeThreeWorker.IsBusy)
         {
             ShowProgressIndicator("Initializing search parameters", CancelSearchCommand);
-
-#pragma warning disable CRR0039
             await TruncateFileDetailStateAsync(_dbContext).ConfigureAwait(true);
-#pragma warning restore CRR0039
-
             _searchStageOneWorker.RunWorkerAsync(SearchRequest.Create(_progressToken, WorkingDirectory!, SelectedConfig!));
             CancelSearchCommand.NotifyCanExecuteChanged();
         }
@@ -361,10 +342,10 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
         try
         {
-            _dbContext.FileDetails.AddRange(result.Files);
+            _dbContext.FileDetails.AddRange(result.Files.Select(x => x.ToFileDetails()));
             _dbContext.SaveChanges();
         }
-        catch (DbException ex)
+        catch (DbUpdateException ex)
         {
             _messenger.Send(SnackBarMessage.Create("Failed to save search results"));
             _logger.DatabaseError(ex, "saving initial search results");
@@ -467,9 +448,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
     {
         try
         {
-#pragma warning disable CRR0039
             await CleanupAsync().ConfigureAwait(true);
-#pragma warning restore CRR0039
         }
         catch
         {

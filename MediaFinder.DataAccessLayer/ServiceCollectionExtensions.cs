@@ -7,10 +7,7 @@ namespace MediaFinder.DataAccessLayer
         public static IServiceCollection AddMediaFinderDatabase(this IServiceCollection services, string databaseName = "mediaFinder")
         {
             return services.AddDbContext<MediaFinderDbContext>(
-                optionsBuilder => optionsBuilder.ConfigureMediaFinderDatabase(databaseName) //,
-                //ServiceLifetime.Singleton,
-                //ServiceLifetime.Singleton
-                );
+                optionsBuilder => optionsBuilder.ConfigureMediaFinderDatabase(databaseName));
         }
 
 
