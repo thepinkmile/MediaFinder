@@ -35,7 +35,7 @@
     <PackageVersion Include="MaterialDesignExtensions" Version="3.3.0" />
     <PackageVersion Include="MaterialDesignThemes" Version="4.9.0" />
     <PackageVersion Include="MetadataExtractor" Version="2.8.1" />
-    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.0">
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.1">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
