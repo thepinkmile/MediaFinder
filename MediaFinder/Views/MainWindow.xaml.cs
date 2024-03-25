@@ -28,10 +28,7 @@ public partial class MainWindow
         {
             if (DataContext is MainWindowViewModel viewModel)
             {
-
-#pragma warning disable CRR0039
                 await viewModel.DiscoveryViewModel.CleanupAsync().ConfigureAwait(true);
-#pragma warning restore CRR0039
                 viewModel.ExportViewModel.Cleanup();
             }
             base.OnClosing(e);

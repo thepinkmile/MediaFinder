@@ -1,0 +1,92 @@
+name: Build MediaFinder
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+  workflow_dispatch:
+
+defaults:
+  run:
+    shell: pwsh
+  
+jobs:
+  git_version:
+    name: Get Git Version
+    uses: ./.github/workflows/git_version.yml
+
+  build:
+    name: Build
+    needs: [git_version]
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+  
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: dotnet build
+        run: dotnet build --configuration Release -p:AssemblyVersion="${{ needs.git_version.outputs.assemblySemVer }}" -p:FileVersion="${{ needs.git_version.outputs.assemblySemFileVer }}" -p:InformationalVersion="${{ needs.git_version.outputs.informationalVersion }}" -p:Version="${{ needs.git_version.outputs.majorMinorPatch }}"
+
+      - name: dotnet test
+        run: dotnet test --configuration Release --no-build --collect:"XPlat Code Coverage" --results-directory ${{github.workspace}}/.build/coverage
+        
+      - name: ReportGenerator
+        uses: danielpalme/ReportGenerator-GitHub-Action@5.2.3
+        with:
+          reports: ${{github.workspace}}/.build/coverage/**/coverage.cobertura.xml
+          targetdir: ${{github.workspace}}/.build/coveragereport/
+          reporttypes: Html;MarkdownSummaryGithub
+          title: 'Code Coverage'
+
+      - name: Write PR Number
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          New-Item -Type File -Value "${{ github.event.number }}" -Force -Path "${{github.workspace}}/.build/coveragereport/PullRequestNumber"
+
+      - name: Upload Code Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: CodeCoverage
+          path: ${{github.workspace}}/.build/coveragereport/
+          if-no-files-found: error
+        
+      - name: dotnet publish
+        if: ${{ github.event_name != 'pull_request' }}
+        run: dotnet publish --configuration Release --no-build -p:AssemblyVersion="${{ needs.git_version.outputs.assemblySemVer }}" -p:FileVersion="${{ needs.git_version.outputs.assemblySemFileVer }}" -p:InformationalVersion="${{ needs.git_version.outputs.informationalVersion }}" -p:Version="${{ needs.git_version.outputs.majorMinorPatch }}" -p:PublishDir=${{github.workspace}}/.build/publish
+
+      - name: Upload artifact for deployment job
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: MediaFinderApp
+          path: ${{github.workspace}}/.build/publish
+
+  # This will automatically mark PRs from dependabot with auto merge.
+  # This allows them to automatically complete if they pass the rest of the CI
+  auto-merge:
+    if: ${{ github.event_name == 'pull_request' }}
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+      contents: write
+
+    steps:
+      - uses: fastify/github-action-merge-dependabot@v3.10.1
+        with:
+          # For GitHub Auto Merge to work it must be enabled on the repo.
+          # This can be done with the script here:
+          # https://github.com/Keboo/DotnetTemplates/blob/main/SetupRepo.ps1
+          # See documentation here:
+          # https://docs.github.com/pull-requests/collaborating-with-pull-requests/incorporating-changes-from-a-pull-request/automatically-merging-a-pull-request
+          use-github-auto-merge: true

@@ -1,0 +1,132 @@
+name: Production Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      milestone:
+        description: 'The milestone to generate a release for (without the "v" prefix)'
+        required: true
+        type: string
+
+env:
+  # Needed for GitHub CLI
+  GH_TOKEN: ${{ github.token }}
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  git_version:
+    name: Get Git Version
+    uses: ./.github/workflows/git_version.yml
+
+  version_number_check:
+    needs: [git_version]
+    runs-on: ubuntu-latest
+    name: Version matches milestone
+
+    steps:
+      - name: Check versions
+        run: |
+          if ('${{ inputs.milestone }}' -ne '${{ needs.git_version.outputs.majorMinorPatch }}') {
+              Write-Error "Milestone ${{ inputs.milestone }} does not match GitVersion ${{ needs.git_version.outputs.majorMinorPatch }}"
+              exit 1
+          } else {
+              Write-Host "Versions match"
+          }
+
+  build_release_notes:
+    runs-on: ubuntu-latest
+    name: Generate Release Notes
+
+    steps:
+      - name: Get Contributors
+        id: get-contribs
+        uses: Keboo/GitHubHelper@master
+        with:
+          milestone: '${{ inputs.milestone }}'
+          repository: 'MediaFinder'
+          repository-owner: 'thepinkmile'
+          token: ${{ github.token }}
+
+      - name: Generate Release Notes
+        run: |
+          $response = gh api --method POST -H "Accept: application/vnd.github+json" /repos/${{ github.repository }}/releases/generate-notes -f tag_name='v${{ inputs.milestone }}'
+          $json = $response | ConvertFrom-Json
+          $releaseNotes = $json.body
+          $contributors = "${{ steps.get-contribs.outputs.contributors }}"
+          $releaseNotes | Out-File -Append "ReleaseNotes.md"
+          "`n" | Out-File -Append "ReleaseNotes.md"
+          $contributors | Out-File -Append "ReleaseNotes.md"
+          cat "ReleaseNotes.md"
+
+      - name: Upload Release Notes
+        uses: actions/upload-artifact@v4
+        with:
+          name: ReleaseNotes
+          path: "ReleaseNotes.md"
+
+  build_artifacts:
+    name: Build artifacts
+    needs: [git_version]
+    uses: ./.github/workflows/build_artifacts.yml
+    with:
+      assembly-version: ${{ needs.git_version.outputs.assemblySemVer }}
+      assembly-file-version: ${{ needs.git_version.outputs.assemblySemFileVer }}
+      informational-version: ${{ needs.git_version.outputs.informationalVersion }}
+      version: ${{ needs.git_version.outputs.majorMinorPatch }}
+
+  create_release:
+    needs: [build_release_notes, build_artifacts, version_number_check]
+    runs-on: ubuntu-latest
+    name: Create Draft Release
+
+    steps:
+      - name: Download App Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: MediaFinderApp
+          path: app
+
+      - name: Zip App
+        run: zip -r MediaFinder.zip app/*
+
+      - name: Download Release Notes
+        uses: actions/download-artifact@v4
+        with:
+          name: ReleaseNotes
+
+      - name: Create Release
+        run: |
+          gh release create v${{ inputs.milestone }} --repo '${{ github.repository }}' --draft --latest --title "${{ inputs.milestone }}" --notes-file ReleaseNotes.md '${{ github.workspace }}/MediaFinder.zip'
+
+  publish_release:
+    needs: [create_release]
+    runs-on: ubuntu-latest
+    name: Publish Release
+    environment: production
+
+    steps:
+      - name: Publish Release
+        run: |
+          gh release edit v${{ inputs.milestone }} --repo '${{ github.repository }}' --draft=false
+
+  close_milestone:
+    needs: [create_release]
+    runs-on: ubuntu-latest
+    name: Close Milestone
+    environment: production
+
+    steps:
+      # Doing a checkout, until this issue is resolved.
+      # https://github.com/valeriobelli/gh-milestone/issues/15
+      - uses: actions/checkout@v4
+
+      - name: Close Milestone
+        run: |
+          gh extension install valeriobelli/gh-milestone
+          $milestones = $(gh milestone list --json number,title) | ConvertFrom-Json
+          $milestoneNumber = ($milestones | Where-Object { $_.title -eq "${{ inputs.milestone }}" }).number
+          gh milestone edit $milestoneNumber --state closed
+

@@ -11,6 +11,8 @@ using MediaFinder.Views.Discovery;
 using MediaFinder.Views.Export;
 using MediaFinder.Views.Status;
 
+using Microsoft.Extensions.DependencyInjection;
+
 namespace MediaFinder.Views;
 
 public partial class MainWindowViewModel : ObservableObject,
@@ -22,30 +24,27 @@ public partial class MainWindowViewModel : ObservableObject,
     IRecipient<CompleteProgressMessage>,
     IRecipient<FinishedMessage>
 {
+    private readonly IServiceProvider _serviceProvider;
     private readonly IMessenger _messenger;
 
     public MainWindowViewModel(
+        IServiceProvider serviceProvider,
         IMessenger messenger,
-        ISnackbarMessageQueue snackbarMessageQueue,
-        DiscoveryViewModel discoveryViewModel,
-        ExportViewModel exportViewModel,
-        ProcessCompletedViewModel statusViewModel)
+        ISnackbarMessageQueue snackbarMessageQueue)
     {
-        _messenger = messenger;
+        _serviceProvider = serviceProvider ?? throw new ArgumentNullException(nameof(serviceProvider));
+        _messenger = messenger ?? throw new ArgumentNullException(nameof(messenger));
         
         _messenger.RegisterAll(this);
 
-        MessageQueue = snackbarMessageQueue;
-        DiscoveryViewModel = discoveryViewModel;
-        ExportViewModel = exportViewModel;
-        StatusViewModel = statusViewModel;
+        MessageQueue = snackbarMessageQueue ?? throw new ArgumentNullException(nameof(snackbarMessageQueue));
     }
 
-    public DiscoveryViewModel DiscoveryViewModel { get; }
+    public DiscoveryViewModel DiscoveryViewModel => _serviceProvider.GetRequiredService<DiscoveryViewModel>();
 
-    public ExportViewModel ExportViewModel { get; }
+    public ExportViewModel ExportViewModel => _serviceProvider.GetRequiredService<ExportViewModel>();
 
-    public ProcessCompletedViewModel StatusViewModel { get; }
+    public ProcessCompletedViewModel StatusViewModel => _serviceProvider.GetRequiredService<ProcessCompletedViewModel>();
 
     #region Navigation
 

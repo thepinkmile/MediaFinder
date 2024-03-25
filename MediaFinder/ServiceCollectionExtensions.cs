@@ -27,7 +27,9 @@ namespace MediaFinder
             return services
                 .AddSingleton<MainWindow>()
                 .AddSingleton<MainWindowViewModel>()
-                .AddSingleton<AddSearchSettingViewModel>()
+                .AddTransient<AddSearchSettingView>()
+                .AddTransient<AddSearchSettingViewModel>()
+                .AddTransient<EditSearchSettingView>()
                 .AddSingleton<EditSearchSettingViewModel>()
                 .AddSingleton<DiscoveryViewModel>()
                 .AddSingleton<ExportViewModel>()
@@ -49,10 +51,7 @@ namespace MediaFinder
                     path: "logs/mediaFinder-.log",
                     rollingInterval: RollingInterval.Day,
                     retainedFileCountLimit: 15,
-#pragma warning disable CRRSP06
-                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}|{Level:u3}|{SourceContext}|{Message:lj}{NewLine}{Exception}")
-#pragma warning restore CRRSP06
-                ;
+                    outputTemplate: "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz}|{Level:u3}|{SourceContext}|{Message:lj}{NewLine}{Exception}");
         }
     }
 }

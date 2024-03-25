@@ -12,14 +12,14 @@ public class FormatKbSizeConverter : IValueConverter
     private static extern long StrFormatByteSizeW(long qdw, [MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszBuf,
         int cchBuf);
 
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
-        var number = System.Convert.ToInt64(value);
+        var number = System.Convert.ToInt64(value ?? 0);
         var sb = new StringBuilder(32);
         StrFormatByteSizeW(number, sb, sb.Capacity);
         return sb.ToString();
     }
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => DependencyProperty.UnsetValue;
 }

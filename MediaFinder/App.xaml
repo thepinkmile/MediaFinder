@@ -8,17 +8,15 @@
             <ResourceDictionary.MergedDictionaries>
                 <materialDesign:BundledTheme
                     BaseTheme="Inherit"
-                    ColorAdjustment="{materialDesign:ColorAdjustment}"
                     PrimaryColor="Purple"
                     SecondaryColor="LightGreen" />
 
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
-                <!--
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/Generic.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
+
+                <!--  Required for MaterialDesignExtensions to work  -->
                 <ResourceDictionary Source="pack://application:,,,/MaterialDesignExtensions;component/Themes/Generic.xaml" />
-                <ResourceDictionary Source="pack://application:,,,/MaterialDesignExtensions;component/Themes/MaterialDesignDarkTheme.xaml" />
-                -->
+
+                <!--  used for custom progress dialog  -->
                 <ResourceDictionary Source="pack://application:,,,/MediaFinder.Controls.Wpf;component/Themes/Generic.xaml" />
             </ResourceDictionary.MergedDictionaries>
 

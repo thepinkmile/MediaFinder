@@ -1,0 +1,55 @@
+name: Build Artifacts
+
+on:
+  workflow_call:
+    inputs:
+      build-configuration:
+        default: 'Release'
+        required: false
+        type: string
+      assembly-version:
+        required: true
+        type: string
+      assembly-file-version:
+        required: true
+        type: string
+      informational-version:
+        required: true
+        type: string
+      version:
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Build and Test
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.x'
+
+      - name: Restore dependencies
+        run: dotnet restore
+
+      - name: dotnet build
+        run: dotnet build --no-restore --configuration ${{ inputs.build-configuration }} -p:AssemblyVersion="${{ inputs.assembly-version }}" -p:FileVersion="${{ inputs.assembly-file-version }}" -p:InformationalVersion="${{ inputs.informational-version }}" -p:Version="${{ inputs.version }}"
+
+      - name: dotnet test
+        run: dotnet test --configuration ${{ inputs.build-configuration }} --no-build --blame-crash --logger GitHubActions
+        
+      - name: dotnet publish
+        if: ${{ github.event_name != 'pull_request' }}
+        run: dotnet publish --configuration ${{ inputs.build-configuration }} --no-build -p:AssemblyVersion="${{ inputs.assembly-version }}" -p:FileVersion="${{ inputs.assembly-file-version }}" -p:InformationalVersion="${{ inputs.informational-version }}" -p:Version="${{ inputs.version }}" -p:PublishDir=${{github.workspace}}/.build/publish
+
+      - name: Upload application artifact for deployment job
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: MediaFinderApp
+          path: ${{github.workspace}}/.build/publish

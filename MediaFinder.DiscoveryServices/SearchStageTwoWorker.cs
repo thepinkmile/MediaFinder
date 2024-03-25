@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 using CommunityToolkit.Mvvm.Messaging;
 
-using MediaFinder.DataAccessLayer.Models;
+using MediaFinder.Models;
 using MediaFinder.Helpers;
 using MediaFinder.Logging;
 using MediaFinder.Messages;
@@ -21,10 +21,9 @@ namespace MediaFinder.Services.Search;
 
 public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequest>
 {
-#pragma warning disable CRRSP06
     private const string YearDateFormatString = "yyyy";
 
-    private static readonly string[] IsoDateFormats = { 
+    private static readonly string[] IsoDateFormats = [ 
         // Basic formats
         "yyyyMMddTHHmmsszzz",
         "yyyyMMddTHHmmsszz",
@@ -71,8 +70,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
         "yyyy:MM:dd HH:mm:sszz",
         "yyyy:MM:dd HH:mm:ssZ",
         "yyyy:MM:dd HH:mm:ss"
-        };
-#pragma warning restore CRRSP06
+        ];
     private static readonly Enum[] MetadataTags = Enum.GetValues(typeof(TagLib.TagTypes)).Cast<Enum>().ToArray();
 
     internal const string FILENAME_DETAIL = "filename";
@@ -106,7 +104,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
     protected override void Execute(AnalyseRequest inputs, DoWorkEventArgs e)
     {
-        var files = new List<FileDetails>();
+        var files = new List<MediaFile>();
         var index = 0;
         foreach(var filepath in inputs.Files)
         {
@@ -116,9 +114,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             }
 
             ++index;
-#pragma warning disable CRRSP06
             ReportProgress($"Analysing file: {filepath}\nFile {index} of {inputs.Files.Count}");
-#pragma warning restore CRRSP06
             _logger.AnalysingFile(filepath);
 
             var details = new ConcurrentDictionary<string, string>();
@@ -131,7 +127,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             else
             {
                 var originalSearchDir = inputs.OriginalPaths.FirstOrDefault(op => filepath.StartsWith(op));
-                if (originalSearchDir is not null)
+                if (originalSearchDir is { })
                 {
                     details.AddOrUpdate(WAS_EXTRACTED_DETAIL, "false");
                     details.AddOrUpdate(RELATIVE_PATH_DETAIL, GetRelativePath(originalSearchDir, filepath));
@@ -200,27 +196,32 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
         return filepath[sourceDirectory.Length..];
     }
 
-    private bool TryDescribeFile(ConcurrentDictionary<string, string> details, out FileDetails? fileDetails)
+    private bool TryDescribeFile(ConcurrentDictionary<string, string> details, out MediaFile? fileDetails)
     {
         _logger.CompilingResults(details[FULLPATH_DETAIL]);
 
         try
         {
+            var fromArchive = details.GetValueOrDefault(WAS_EXTRACTED_DETAIL, "false").Equals("true", StringComparison.InvariantCultureIgnoreCase);
+
             fileDetails = new()
             {
                 FileName = details[FILENAME_DETAIL],
                 ParentPath = details[PARENTPATH_DETAIL],
-                Created = DateTimeOffset.TryParseExact(details[CREATEDDATE_DETAIL], IsoDateFormats, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var createdDate)
+                DateCreated = DateTimeOffset.TryParseExact(details[CREATEDDATE_DETAIL], IsoDateFormats, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var createdDate)
                         ? createdDate
                         : DateTimeOffset.UnixEpoch,
                 FileSize = long.Parse(details[FILESIZE_DETAIL]),
                 ShouldExport = true,
-                FileType = MultiMediaTypeExtensions.TryParse(details[MEDIATYPE_DETAIL], out var value, true, true) ? value : MultiMediaType.Unknown,
-                FileProperties = details.Select(x => new FileProperty() { Name = x.Key, Value = x.Value }).ToList(),
-                MD5_Hash = details.GetValueOrDefault(MD5_DETAIL),
-                SHA256_Hash = details.GetValueOrDefault(SHA256_DETAIL),
-                SHA512_Hash = details.GetValueOrDefault(SHA512_DETAIL),
-                Extracted = details.GetValueOrDefault(WAS_EXTRACTED_DETAIL, "false").Equals("true", StringComparison.InvariantCultureIgnoreCase),
+                MultiMediaType = MultiMediaTypeExtensions.TryParse(details[MEDIATYPE_DETAIL], out var value, true, true) ? value : MultiMediaType.Unknown,
+                Properties = details.ToDictionary(),
+                Md5Hash = details.GetValueOrDefault(MD5_DETAIL),
+                Sha256Hash = details.GetValueOrDefault(SHA256_DETAIL),
+                Sha512Hash = details.GetValueOrDefault(SHA512_DETAIL),
+                FromArchive = fromArchive,
+                //ParentArchive = fromArchive
+                //    ? ""
+                //    : null,
                 RelativePath = details.TryGetValue(RELATIVE_PATH_DETAIL, out var path)
                     ? path
                     : details[PARENTNAME_DETAIL]
@@ -238,13 +239,11 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
     #region Video Processing
 
-#pragma warning disable CRRSP06
-    private static readonly string[] KnownVideoExtensions = new[] {
+    private static readonly string[] KnownVideoExtensions = [
         "webm", "mkv", "flv", "vob", "ogv", "ogg", "rrc", "gifv", "mng", "mov",
         "avi", "qt", "wmv", "yuv", "rm", "asf", "amv", "mp4", "m4p", "m4v", "mpg",
         "mp2", "mpeg", "mpe", "mpv", "m4v", "svi", "3gp", "3g2", "mxf", "roq",
-        "nsv", "flv", "f4v", "f4p", "f4a", "f4b", "mod" };
-#pragma warning restore CRRSP06
+        "nsv", "flv", "f4v", "f4p", "f4a", "f4b", "mod" ];
 
     private Task GetVideoInfoAsync(string filepath, ConcurrentDictionary<string, string> details, bool performDeepAnalysis = false, CancellationToken cancellationToken = default)
     {
@@ -367,10 +366,7 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
     #region Image Processing
 
-#pragma warning disable CRRSP06
-    private static readonly string[] KnownImageExtensions = new[] { ".bmp", ".jpg", ".jpeg", ".jfif", ".png", ".tif", ".tiff", ".gif", ".svg" };
-#pragma warning restore CRRSP06
-
+    private static readonly string[] KnownImageExtensions = [".bmp", ".jpg", ".jpeg", ".jfif", ".png", ".tif", ".tiff", ".gif", ".svg"];
     private const string REGEX_GROUP_PIXELS = "pixels";
     [GeneratedRegex($"(?<{REGEX_GROUP_PIXELS}>(\\d+))( {REGEX_GROUP_PIXELS})?", RegexOptions.IgnoreCase | RegexOptions.ExplicitCapture | RegexOptions.Singleline | RegexOptions.CultureInvariant)]
     private static partial Regex PixelsRegex();
@@ -383,7 +379,8 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             if (KnownImageExtensions.Contains(details[EXTENSION_DETAIL]))
             {
                 _logger.ImageDetected(filepath);
-                if (details[MEDIATYPE_DETAIL] != MultiMediaType.Video.ToStringFast())
+                if (string.Compare(details[MEDIATYPE_DETAIL], MultiMediaType.Video.ToStringFast(), StringComparison.InvariantCultureIgnoreCase) != 0
+                    && string.Compare(details[MEDIATYPE_DETAIL], MultiMediaType.Audio.ToStringFast(), StringComparison.InvariantCultureIgnoreCase) != 0)
                 {
                     details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
                 }
@@ -423,7 +420,8 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            if (details[MEDIATYPE_DETAIL] != MultiMediaType.Video.ToStringFast())
+            if (string.Compare(details[MEDIATYPE_DETAIL], MultiMediaType.Video.ToStringFast(), StringComparison.InvariantCultureIgnoreCase) != 0
+                && string.Compare(details[MEDIATYPE_DETAIL], MultiMediaType.Audio.ToStringFast(), StringComparison.InvariantCultureIgnoreCase) != 0)
             {
                 details.AddOrUpdate(MEDIATYPE_DETAIL, MultiMediaType.Image.ToStringFast());
             }
@@ -437,9 +435,9 @@ public partial class SearchStageTwoWorker : ReactiveBackgroundWorker<AnalyseRequ
             ParseDimensionProperty(result, "Image Width", details, WIDTH_DETAIL);
             ParseDimensionProperty(result, "Image Height", details, HEIGHT_DETAIL);
 
-            if (result.ContainsKey("File Type_Expected File Name Extension"))
+            if (result.TryGetValue("File Type_Expected File Name Extension", out var value))
             {
-                details.AddOrUpdate(EXPECTED_EXTENSION_DETAIL, $".{result["File Type_Expected File Name Extension"]}");
+                details.AddOrUpdate(EXPECTED_EXTENSION_DETAIL, $".{value}");
             }
         }
         catch (OperationCanceledException)

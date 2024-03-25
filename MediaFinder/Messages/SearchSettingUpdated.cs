@@ -1,12 +1,14 @@
-﻿using MediaFinder.Models;
+﻿using MediaFinder.DataAccessLayer.Models;
+using MediaFinder.Helpers;
+using MediaFinder.Models;
 
 namespace MediaFinder.Messages;
 
-public record SearchSettingUpdated(SearchConfiguration SearchSetting)
+public record SearchSettingUpdated(DiscoveryOptions SearchSetting)
 {
-    public static SearchSettingUpdated Create(DataAccessLayer.Models.SearchSettings settings)
-        => Create(SearchConfiguration.Create(settings));
+    public static SearchSettingUpdated Create(SearchSettings settings)
+        => Create(settings.ToDiscoveryOptions());
 
-    public static SearchSettingUpdated Create(SearchConfiguration settings)
-        => new(settings);
+    public static SearchSettingUpdated Create(DiscoveryOptions options)
+        => new(options);
 }

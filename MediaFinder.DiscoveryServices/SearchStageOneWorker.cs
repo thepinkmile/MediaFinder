@@ -13,14 +13,12 @@ using SevenZipExtractor;
 
 namespace MediaFinder.Services.Search;
 
-public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
+public class SearchStageOneWorker(
+    ILogger<SearchStageOneWorker> logger,
+    IMessenger messenger)
+    : ReactiveBackgroundWorker<SearchRequest>(logger, messenger)
 {
-    private readonly IMessenger _messenger;
-    public SearchStageOneWorker(ILogger<SearchStageOneWorker> logger, IMessenger messenger)
-        : base(logger, messenger)
-    {
-        _messenger = messenger;
-    }
+    private readonly IMessenger _messenger = messenger;
 
     protected override void Execute(SearchRequest inputs, DoWorkEventArgs e)
     {
@@ -42,9 +40,7 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
             return;
         }
 
-#pragma warning disable CRRSP06
         SetProgress("Finalising Search Results...");
-#pragma warning restore CRRSP06
         e.Result = SearchResponse.Create(
             files
                 .Distinct()
@@ -56,6 +52,7 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
     {
         switch (e.UserState)
         {
+            case WorkingDirectoryCreated workingDirectoryCreatedMessage: _messenger.Send(workingDirectoryCreatedMessage); break;
             case FileExtracted extractedMessage: _messenger.Send(extractedMessage); break;
         }
         base.UpdateProgress(sender, e);
@@ -141,30 +138,28 @@ public class SearchStageOneWorker : ReactiveBackgroundWorker<SearchRequest>
             files.Add(file);
         }
 
-        return files.ToList();
+        return [..files];
     }
 
-    private DirectoryInfo GetExtractionPath(string rottDirectory, string archiveName)
+    private DirectoryInfo GetExtractionPath(string rootDirectory, string archiveName)
     {
         var nameWithoutExtension = Path.GetFileNameWithoutExtension(archiveName);
         var extractionPath = new DirectoryInfo(
-            Path.Combine(rottDirectory, $"Extracted_{nameWithoutExtension}")
+            Path.Combine(rootDirectory, $"Extracted_{nameWithoutExtension}")
             );
         var index = 0;
         while (extractionPath.Exists)
         {
             _logger.ExtractionPathExists(extractionPath.FullName);
             extractionPath = new DirectoryInfo(
-                Path.Combine(rottDirectory, $"Extracted_{nameWithoutExtension}({++index})")
+                Path.Combine(rootDirectory, $"Extracted_{nameWithoutExtension}({++index})")
                 );
         }
 
         return extractionPath;
     }
 
-#pragma warning disable CRRSP06
-    private static readonly string[] KnownNonArchiveExtensions = new[] { ".ipa", ".ibooks", ".epub" };
-#pragma warning restore CRRSP06
+    private static readonly string[] KnownNonArchiveExtensions = [".ipa", ".ibooks", ".epub"];
 
     private bool ExtractArchive(FileInfo filepath, DirectoryInfo destinationPath)
     {

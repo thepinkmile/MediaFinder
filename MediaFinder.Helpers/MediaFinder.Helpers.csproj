@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\MediaFinder.DataAccessLayer\MediaFinder.DataAccessLayer.csproj" />
+    <ProjectReference Include="..\MediaFinder.Models\MediaFinder.Models.csproj" />
   </ItemGroup>
 
 </Project>
