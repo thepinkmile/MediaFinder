@@ -54,7 +54,7 @@
       <ExcludeAssets>runtime;</ExcludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageVersion>
-    <PackageVersion Include="NReco.VideoInfo" Version="1.2.0" />
+    <PackageVersion Include="NReco.VideoInfo" Version="1.2.1" />
     <PackageVersion Include="Serilog" Version="4.2.0" />
     <PackageVersion Include="Serilog.Enrichers.AssemblyName" Version="1.0.9" />
     <PackageVersion Include="Serilog.Enrichers.Environment" Version="2.3.0" />
