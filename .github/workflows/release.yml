@@ -121,7 +121,7 @@ jobs:
     steps:
       # Doing a checkout, until this issue is resolved.
       # https://github.com/valeriobelli/gh-milestone/issues/15
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Close Milestone
         run: |
