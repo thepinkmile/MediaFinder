@@ -1,14 +1,9 @@
-﻿using System.Collections.Concurrent;
-using System.Globalization;
-using System.Security.Cryptography;
-using System.Text.RegularExpressions;
-
-using CommunityToolkit.Mvvm.Messaging;
-
+﻿
 using MediaFinder.DataAccessLayer;
 using MediaFinder.Helpers;
 using MediaFinder.Logging;
 using MediaFinder.Messages;
+
 using MediaFinder.Models;
 
 using MetadataExtractor;
@@ -18,6 +13,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 using NReco.VideoInfo;
+
+using System.Collections.Concurrent;
+using System.Globalization;
+using System.Security.Cryptography;
+
+using System.Text.RegularExpressions;
 
 namespace MediaFinder.DiscoveryServices;
 
