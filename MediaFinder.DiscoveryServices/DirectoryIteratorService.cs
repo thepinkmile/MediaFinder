@@ -60,7 +60,7 @@ public class DirectoryIteratorService
         bool extractArchive,
         int extractionDepth,
         string workingDirectory,
-        IProgress<object> progressUpdate, 
+        IProgress<object> progressUpdate,
         CancellationToken cancellationToken = default)
     {
         var files = new List<FileInfo>();
