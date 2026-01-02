@@ -262,7 +262,7 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
 
         try
         {
-            // TODO: update DiscoveryRunnerService to create new Db Tennant for run.
+            // TODO: update DiscoveryRunnerService to create new Db Tenant for run.
             await TruncateFileDetailStateAsync(_dbContext, cancellationToken).ConfigureAwait(true);
             cancellationToken.ThrowIfCancellationRequested();
 
@@ -274,7 +274,6 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
             // TODO: Add next steps
             cancellationToken.ThrowIfCancellationRequested();
 
-            SearchComplete = true;
             progressReporter.Report(SnackBarMessage.Create("Discovery process completed"));
             progressReporter.Report(DiscoveryCompletedMessage.Create());
         }
@@ -292,9 +291,10 @@ public partial class DiscoveryViewModel : ProgressableViewModel,
         }
         finally
         {
+            HideProgressIndicator();
+            SearchComplete = true;
             _discoveryTaskCancellationSource = null;
             DiscoveryTask = null;
-            HideProgressIndicator();
         }
     }
 
