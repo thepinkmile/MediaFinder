@@ -73,7 +73,7 @@ public partial class App : Application
             => services
                 .AddApplicationLogging(hostContext)
                 .AddMediaFinderDatabase()
-                .AddDiscoveryServices()
+                .AddDiscoveryServices(hostContext.Configuration)
                 .AddExportServices()
                 .AddApplicationViews()
                 .AddMessenger<WeakReferenceMessenger>()

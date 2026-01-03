@@ -1,0 +1,32 @@
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Build.targets" />
+    <File Path="Directory.Packages.props" />
+    <File Path="exclusions.dic" />
+    <File Path="NuGet.config" />
+    <File Path="README.md" />
+    <File Path="Settings.XamlStyler" />
+  </Folder>
+  <Folder Name="/Solution Items/.github/">
+    <File Path=".github/dependabot.yml" />
+    <File Path=".github/release.yml" />
+  </Folder>
+  <Folder Name="/Solution Items/.github/workflows/">
+    <File Path=".github/workflows/build_app.yml" />
+    <File Path=".github/workflows/build_artifacts.yml" />
+    <File Path=".github/workflows/code_coverage_comment.yml" />
+    <File Path=".github/workflows/generate_contributors.yml" />
+    <File Path=".github/workflows/git_version.yml" />
+    <File Path=".github/workflows/release.yml" />
+  </Folder>
+  <Project Path="MediaFinder.Controls.Wpf/MediaFinder.Controls.Wpf.csproj" />
+  <Project Path="MediaFinder.DataAccessLayer/MediaFinder.DataAccessLayer.csproj" />
+  <Project Path="MediaFinder.DiscoveryServices/MediaFinder.DiscoveryServices.csproj" />
+  <Project Path="MediaFinder.ExportServices/MediaFinder.ExportServices.csproj" />
+  <Project Path="MediaFinder.Helpers/MediaFinder.Helpers.csproj" />
+  <Project Path="MediaFinder.Models/MediaFinder.Models.csproj" />
+  <Project Path="MediaFinder.Tests/MediaFinder.Tests.csproj" />
+  <Project Path="MediaFinder/MediaFinder.csproj" />
+</Solution>

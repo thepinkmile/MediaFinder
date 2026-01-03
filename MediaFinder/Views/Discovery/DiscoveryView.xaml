@@ -27,6 +27,7 @@
     <materialDesign:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"
                                                  FalseValue="Collapsed"
                                                  TrueValue="Visible" />
+    <materialDesign:NotZeroToVisibilityConverter x:Key="NotZeroToVisibilityConverter" />
 
     <Style x:Key="DGCellStyle"
            TargetType="DataGridCell"
