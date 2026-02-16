@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Proxies" />
     <ProjectReference Include="..\MediaFinder.Helpers\MediaFinder.Helpers.csproj" />
     <ProjectReference Include="..\MediaFinder.Models\MediaFinder.Models.csproj" />
   </ItemGroup>
