@@ -9,8 +9,4 @@
     <PackageReference Include="NetEscapades.EnumGenerators" />
   </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\MediaFinder.DataAccessLayer\MediaFinder.DataAccessLayer.csproj" />
-  </ItemGroup>
-
 </Project>

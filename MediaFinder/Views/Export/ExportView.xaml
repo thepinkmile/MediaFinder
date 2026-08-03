@@ -1,616 +1,430 @@
-﻿<UserControl
-    x:Class="MediaFinder.Views.Export.ExportView"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converters="clr-namespace:MediaFinder.Controls.Wpf.Converters;assembly=MediaFinder.Controls.Wpf"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:dbmodels="clr-namespace:MediaFinder.DataAccessLayer.Models;assembly=MediaFinder.DataAccessLayer"
-    xmlns:helpers="clr-namespace:MediaFinder.Helpers;assembly=MediaFinder.Helpers"
-    xmlns:local="clr-namespace:MediaFinder.Views.Export"
-    xmlns:localHelpers="clr-namespace:MediaFinder.Helpers"
-    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:mde="clr-namespace:MaterialDesignExtensions.Controls;assembly=MaterialDesignExtensions"
-    xmlns:models="clr-namespace:MediaFinder.Models;assembly=MediaFinder.Models"
-    xmlns:system="clr-namespace:System;assembly=mscorlib"
-    d:DataContext="{d:DesignInstance Type=local:ExportViewModel,
-                                     IsDesignTimeCreatable=False}"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
-    mc:Ignorable="d">
-    <UserControl.Resources>
-        <converters:BooleanToStringConverter
-            x:Key="BooleanToStringConverter"
-            FalseValue="No"
-            TrueValue="Yes" />
-        <converters:FormatKbSizeConverter x:Key="FormatKbSizeConverter" />
-        <converters:DateTimeOffsetToStringConverter x:Key="DateTimeOffsetToStringConverter" DateFormat="d MMM yyyy H:m" />
-        <converters:PathToBitmapImageConverter x:Key="PathToBitmapImageConverter" DecodePixelWidth="400" />
-        <converters:PercentageConverter x:Key="FileDetailsDrawerWidthConverter" Percentage="50" />
-        <converters:MultiMediaTypeToVisibilityConverter x:Key="IsImageVisibleConverter" RequiredType="Image" />
-        <converters:MultiMediaTypeToVisibilityConverter x:Key="IsVideoVisibleConverter" RequiredType="PlayableMedia" />
-        <converters:MultiMediaTypeToVisibilityConverter x:Key="IsAudioVisibleConverter" RequiredType="Audio" />
-        <converters:MediaFileToIconConverter
-            x:Key="MediaFileToIconConverter"
-            ImageIcon="FileImageOutline"
-            VideoIcon="FileVideoOutline" />
-        <converters:MediaFilePropertyConverter x:Key="MediaFileWidthPropertyConverter" PropertyName="Width" />
-        <converters:MediaFilePropertyConverter x:Key="MediaFileHeightPropertyConverter" PropertyName="Height" />
-        <converters:MultiMediaTypeToStringConverter x:Key="MultiMediaTypeToStringConverter" />
-        <converters:ExportTypeToStringConverter x:Key="ExportTypeToStringConverter" />
-        <converters:TriStateBooleanToStringConverter x:Key="TriStateBooleanToStringConverter" />
-        <materialDesign:BooleanToVisibilityConverter
-            x:Key="InverseBooleanToVisibilityConverter"
-            FalseValue="Visible"
-            TrueValue="Collapsed" />
-        <materialDesign:BooleanToVisibilityConverter
-            x:Key="BooleanToVisibilityConverter"
-            FalseValue="Collapsed"
-            TrueValue="Visible" />
+﻿<UserControl x:Class="MediaFinder.Views.Export.ExportView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:MediaFinder.Controls.Wpf.Converters;assembly=MediaFinder.Controls.Wpf"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:helpers="clr-namespace:MediaFinder.Helpers;assembly=MediaFinder.Helpers"
+             xmlns:local="clr-namespace:MediaFinder.Views.Export"
+             xmlns:localHelpers="clr-namespace:MediaFinder.Helpers"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mde="clr-namespace:MaterialDesignExtensions.Controls;assembly=MaterialDesignExtensions"
+             xmlns:models="clr-namespace:MediaFinder.Models;assembly=MediaFinder.Models"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             d:DataContext="{d:DesignInstance Type=local:ExportViewModel,
+                                              IsDesignTimeCreatable=False}"
+             d:DesignHeight="450"
+             d:DesignWidth="800"
+             mc:Ignorable="d">
+  <UserControl.Resources>
+    <converters:BooleanToStringConverter x:Key="BooleanToStringConverter"
+                                         FalseValue="No"
+                                         TrueValue="Yes" />
+    <converters:FormatKbSizeConverter x:Key="FormatKbSizeConverter" />
+    <converters:DateTimeOffsetToStringConverter x:Key="DateTimeOffsetToStringConverter" DateFormat="d MMM yyyy H:m" />
+    <converters:PathToBitmapImageConverter x:Key="PathToBitmapImageConverter" DecodePixelWidth="400" />
+    <converters:PercentageConverter x:Key="FileDetailsDrawerWidthConverter" Percentage="50" />
+    <converters:MultiMediaTypeToVisibilityConverter x:Key="IsImageVisibleConverter" RequiredType="Image" />
+    <converters:MultiMediaTypeToVisibilityConverter x:Key="IsVideoVisibleConverter" RequiredType="PlayableMedia" />
+    <converters:MediaFileToIconConverter x:Key="MediaFileToIconConverter"
+                                         ImageIcon="FileImageOutline"
+                                         VideoIcon="FileVideoOutline" />
+    <converters:MultiMediaTypeToStringConverter x:Key="MultiMediaTypeToStringConverter" />
+    <converters:ExportTypeToStringConverter x:Key="ExportTypeToStringConverter" />
+    <converters:TriStateBooleanToStringConverter x:Key="TriStateBooleanToStringConverter" />
+    <materialDesign:BooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"
+                                                 FalseValue="Visible"
+                                                 TrueValue="Collapsed" />
+    <materialDesign:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"
+                                                 FalseValue="Collapsed"
+                                                 TrueValue="Visible" />
 
-        <system:Double x:Key="IconSize">24</system:Double>
-        <system:Double x:Key="HeaderIconSize">32</system:Double>
-        <system:Double x:Key="DrawerFieldLabelSize">110</system:Double>
-        <system:Double x:Key="DrawerFieldValueSize">290</system:Double>
+    <system:Double x:Key="IconSize">24</system:Double>
+    <system:Double x:Key="HeaderIconSize">32</system:Double>
+    <system:Double x:Key="DrawerFieldLabelSize">110</system:Double>
+    <system:Double x:Key="DrawerFieldValueSize">290</system:Double>
 
-        <Style
-            x:Key="DGCellStyle"
-            BasedOn="{StaticResource MaterialDesignDataGridCell}"
-            TargetType="DataGridCell">
-            <Setter Property="Focusable" Value="False" />
-            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-            <Setter Property="IsTabStop" Value="False" />
-        </Style>
+    <Style x:Key="DGCellStyle"
+           TargetType="DataGridCell"
+           BasedOn="{StaticResource MaterialDesignDataGridCell}">
+      <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+      <Setter Property="Focusable" Value="False" />
+      <Setter Property="IsTabStop" Value="False" />
+    </Style>
 
-        <Style
-            x:Key="ClearableDatePicker"
-            BasedOn="{StaticResource MaterialDesignFloatingHintDatePicker}"
-            TargetType="{x:Type DatePicker}">
-            <Setter Property="materialDesign:TextFieldAssist.HasClearButton" Value="True" />
-        </Style>
-    </UserControl.Resources>
-    <materialDesign:DrawerHost
-        x:Name="DrawerHost"
-        DrawerClosing="DrawerHost_DrawerClosing"
-        DrawerOpened="DrawerHost_DrawerOpened"
-        OpenMode="Modal"
-        OverlayBackground="{DynamicResource PrimaryHueMidBrush}">
-        <materialDesign:DrawerHost.RightDrawerContent>
-            <GroupBox
-                MaxWidth="500"
-                Margin="16"
+    <Style x:Key="ClearableDatePicker"
+           TargetType="{x:Type DatePicker}"
+           BasedOn="{StaticResource MaterialDesignFloatingHintDatePicker}">
+      <Setter Property="materialDesign:TextFieldAssist.HasClearButton" Value="True" />
+    </Style>
+  </UserControl.Resources>
+  <materialDesign:DrawerHost x:Name="DrawerHost"
+                             DrawerClosing="DrawerHost_DrawerClosing"
+                             DrawerOpened="DrawerHost_DrawerOpened"
+                             IsRightDrawerOpen="{Binding FileDetailsDrawerIsOpen}"
+                             OpenMode="Modal"
+                             OverlayBackground="{DynamicResource PrimaryHueMidBrush}">
+    <materialDesign:DrawerHost.RightDrawerContent>
+      <GroupBox MaxWidth="500"
+                Margin="8"
+                Padding="8"
                 materialDesign:ColorZoneAssist.Mode="PrimaryMid"
                 Foreground="{DynamicResource MaterialDesignBody}"
                 Header="{Binding SelectedExportFile}"
                 Style="{StaticResource MaterialDesignCardGroupBox}">
-                <GroupBox.HeaderTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon
-                                Width="{StaticResource HeaderIconSize}"
-                                Height="{StaticResource HeaderIconSize}"
-                                VerticalAlignment="Center"
-                                Kind="{Binding Path=., Converter={StaticResource MediaFileToIconConverter}}" />
-                            <TextBlock
-                                Margin="8,0,0,0"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                                Text="{Binding FileName}" />
-                        </StackPanel>
-                    </DataTemplate>
-                </GroupBox.HeaderTemplate>
-                <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="16">
-                        <Image
-                            MaxWidth="400"
-                            MaxHeight="700"
-                            Margin="0,8,0,8"
-                            Source="{Binding SelectedExportFile.FilePath, Converter={StaticResource PathToBitmapImageConverter}}"
-                            Stretch="Uniform"
-                            Visibility="{Binding SelectedExportFile.MultiMediaType, Converter={StaticResource IsImageVisibleConverter}}" />
+        <GroupBox.HeaderTemplate>
+          <DataTemplate DataType="{x:Type models:MediaFile}">
+            <DockPanel>
+              <materialDesign:PackIcon Width="{StaticResource HeaderIconSize}"
+                                       Height="{StaticResource HeaderIconSize}"
+                                       Margin="0,0,8,0"
+                                       VerticalAlignment="Center"
+                                       DockPanel.Dock="Left"
+                                       Kind="{Binding Path=., Mode=OneWay, Converter={StaticResource MediaFileToIconConverter}}" />
+              <TextBlock VerticalAlignment="Center"
+                         Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                         Text="{Binding FileName, Mode=OneWay}" />
+            </DockPanel>
+          </DataTemplate>
+        </GroupBox.HeaderTemplate>
+        <ScrollViewer HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Auto">
+          <StackPanel Margin="8" DataContext="{Binding SelectedExportFile}">
+            <local:ImageViewerView DataContext="{Binding .}" Visibility="{Binding MultiMediaType, Converter={StaticResource IsImageVisibleConverter}}" />
+            <local:MediaPlayerView x:Name="mediaPlayer"
+                                   DataContext="{Binding .}"
+                                   Visibility="{Binding MultiMediaType, Converter={StaticResource IsVideoVisibleConverter}}" />
 
-                        <StackPanel Visibility="{Binding SelectedExportFile.MultiMediaType, Converter={StaticResource IsVideoVisibleConverter}}">
-                            <MediaElement
-                                x:Name="fileVideoViewer"
-                                MaxWidth="400"
-                                Loaded="FileVideoViewer_Loaded"
-                                LoadedBehavior="Manual"
-                                MediaEnded="FileVideoViewer_MediaEnded"
-                                ScrubbingEnabled="True"
-                                Source="{Binding SelectedExportFile.FilePath}"
-                                Stretch="Uniform"
-                                UnloadedBehavior="Stop" />
-                            <StackPanel
-                                Margin="0,0,0,8"
-                                HorizontalAlignment="Center"
-                                Orientation="Horizontal">
+            <local:FileDetails DataContext="{Binding .}" />
 
-                                <!--  Play button.  -->
-                                <Button
-                                    Margin="5"
-                                    HorizontalAlignment="Center"
-                                    Click="PlayButton_Click"
-                                    Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                                    ToolTip="Play">
-                                    <materialDesign:PackIcon
-                                        Width="{StaticResource IconSize}"
-                                        Height="{StaticResource IconSize}"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Kind="PlayCircle" />
-                                </Button>
-
-                                <!--  Pause button.  -->
-                                <Button
-                                    Margin="5"
-                                    HorizontalAlignment="Center"
-                                    Click="PauseButton_Click"
-                                    Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                                    ToolTip="Pause">
-                                    <materialDesign:PackIcon
-                                        Width="{StaticResource IconSize}"
-                                        Height="{StaticResource IconSize}"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Kind="PauseCircle" />
-                                </Button>
-
-                                <!--  Stop button.  -->
-                                <Button
-                                    Margin="5"
-                                    HorizontalAlignment="Center"
-                                    Click="StopButton_Click"
-                                    Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                                    ToolTip="Stop">
-                                    <materialDesign:PackIcon
-                                        Width="{StaticResource IconSize}"
-                                        Height="{StaticResource IconSize}"
-                                        HorizontalAlignment="Center"
-                                        VerticalAlignment="Center"
-                                        Kind="StopCircle" />
-                                </Button>
-
-                                <!--  speed slider. This slider allows you to change the speed of the media playback.  -->
-                                <materialDesign:PackIcon
-                                    Width="{StaticResource IconSize}"
-                                    Height="{StaticResource IconSize}"
-                                    Margin="5"
-                                    VerticalAlignment="Center"
-                                    Kind="PlaySpeed" />
-                                <Slider
-                                    Name="speedRatioSlider"
-                                    MinWidth="180"
-                                    HorizontalAlignment="Stretch"
-                                    VerticalAlignment="Center"
-                                    IsSnapToTickEnabled="True"
-                                    Maximum="4"
-                                    Minimum="0.5"
-                                    TickFrequency="0.5"
-                                    TickPlacement="BottomRight"
-                                    Value="{Binding SpeedRatio, ElementName=fileVideoViewer, Mode=TwoWay}" />
-                            </StackPanel>
-                        </StackPanel>
-
-                        <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                            <TextBlock
-                                Width="{StaticResource DrawerFieldLabelSize}"
-                                Margin="0,0,8,0"
-                                FontWeight="Bold"
-                                Text="Full Path:" />
-                            <TextBlock
-                                MaxWidth="{StaticResource DrawerFieldValueSize}"
-                                Text="{Binding SelectedExportFile.FilePath}"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                            <TextBlock
-                                Width="{StaticResource DrawerFieldLabelSize}"
-                                Margin="0,0,8,0"
-                                FontWeight="Bold"
-                                Text="Size:" />
-                            <TextBlock
-                                MaxWidth="{StaticResource DrawerFieldValueSize}"
-                                Text="{Binding SelectedExportFile.FileSize, Converter={StaticResource FormatKbSizeConverter}}"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                            <TextBlock
-                                Width="{StaticResource DrawerFieldLabelSize}"
-                                Margin="0,0,8,0"
-                                FontWeight="Bold"
-                                Text="Created:" />
-                            <TextBlock
-                                MaxWidth="{StaticResource DrawerFieldValueSize}"
-                                Text="{Binding SelectedExportFile.DateCreated, Converter={StaticResource DateTimeOffsetToStringConverter}}"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-                        <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
-                            <TextBlock
-                                Width="{StaticResource DrawerFieldLabelSize}"
-                                Margin="0,0,8,0"
-                                FontWeight="Bold"
-                                Text="MD5 Checksum:" />
-                            <TextBlock
-                                MaxWidth="{StaticResource DrawerFieldValueSize}"
-                                Text="{Binding SelectedExportFile.Md5Hash}"
-                                TextWrapping="Wrap" />
-                        </StackPanel>
-
-                        <Button
-                            Margin="4"
-                            HorizontalAlignment="Center"
-                            Command="{x:Static materialDesign:DrawerHost.CloseDrawerCommand}"
-                            CommandParameter="{x:Static Dock.Right}">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon
-                                    Width="15"
-                                    Height="15"
-                                    Margin="0,1,8,0"
-                                    Kind="Close" />
-                                <TextBlock Text="Close" />
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                </ScrollViewer>
-            </GroupBox>
-        </materialDesign:DrawerHost.RightDrawerContent>
+            <Button Margin="4"
+                    HorizontalAlignment="Center"
+                    Command="{x:Static materialDesign:DrawerHost.CloseDrawerCommand}"
+                    CommandParameter="{x:Static Dock.Right}">
+              <StackPanel Orientation="Horizontal">
+                <materialDesign:PackIcon Width="15"
+                                         Height="15"
+                                         Margin="0,1,8,0"
+                                         Kind="Close" />
+                <TextBlock Text="Close" />
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </ScrollViewer>
+      </GroupBox>
+    </materialDesign:DrawerHost.RightDrawerContent>
+    <Grid>
+      <Grid.RowDefinitions>
+        <RowDefinition Height="Auto" />
+        <RowDefinition Height="*" />
+        <RowDefinition Height="Auto" />
+      </Grid.RowDefinitions>
+      <StackPanel>
+        <TextBlock Text="Review discovered files and select a directory to export selected files to." />
+        <DockPanel>
+          <StackPanel Margin="24,8,0,0"
+                      DockPanel.Dock="Right"
+                      Orientation="Horizontal">
+            <TextBlock Margin="0,0,8,0"
+                       VerticalAlignment="Center"
+                       Text="Export Format" />
+            <ComboBox MinWidth="150"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      ItemsSource="{Binding Source={localHelpers:EnumBindingSource {x:Type models:ExportType}}}"
+                      SelectedItem="{Binding ExportType}">
+              <ComboBox.ItemTemplate>
+                <DataTemplate>
+                  <TextBlock Text="{Binding Converter={StaticResource ExportTypeToStringConverter}}" />
+                </DataTemplate>
+              </ComboBox.ItemTemplate>
+            </ComboBox>
+          </StackPanel>
+          <CheckBox Margin="24,8,0,0"
+                    VerticalAlignment="Center"
+                    Content="Correct Extensions"
+                    DockPanel.Dock="Right"
+                    IsChecked="{Binding ExportRename}" />
+          <mde:TextBoxOpenDirectory Margin="0,8,0,0"
+                                    DialogHostName="DialogHost"
+                                    Directory="{Binding ExportDirectory, Mode=TwoWay}">
+            <mde:TextBoxOpenDirectory.TextBoxStyle>
+              <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
+                <Setter Property="materialDesign:HintAssist.Hint" Value="Choose an export directory" />
+              </Style>
+            </mde:TextBoxOpenDirectory.TextBoxStyle>
+          </mde:TextBoxOpenDirectory>
+        </DockPanel>
+      </StackPanel>
+      <Border Grid.Row="1"
+              Margin="0,8,0,0"
+              HorizontalAlignment="Stretch"
+              BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+              BorderThickness="1"
+              ClipToBounds="True"
+              CornerRadius="8,8,0,0">
         <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <StackPanel>
-                <TextBlock Text="Review discovered files and select a directory to export selected files to." />
-                <DockPanel>
-                    <StackPanel
-                        Margin="24,8,0,0"
-                        DockPanel.Dock="Right"
-                        Orientation="Horizontal">
-                        <TextBlock
-                            Margin="0,0,8,0"
-                            VerticalAlignment="Center"
-                            Text="Export Format" />
-                        <ComboBox
-                            MinWidth="150"
-                            HorizontalAlignment="Center"
-                            VerticalAlignment="Center"
-                            ItemsSource="{Binding Source={localHelpers:EnumBindingSource {x:Type models:ExportType}}}"
-                            SelectedItem="{Binding ExportType}">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Converter={StaticResource ExportTypeToStringConverter}}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                    </StackPanel>
-                    <CheckBox
-                        Margin="24,8,0,0"
-                        VerticalAlignment="Center"
-                        Content="Correct Extensions"
-                        DockPanel.Dock="Right"
-                        IsChecked="{Binding ExportRename}" />
-                    <mde:TextBoxOpenDirectory
-                        Margin="0,8,0,0"
-                        DialogHostName="DialogHost"
-                        Directory="{Binding ExportDirectory, Mode=TwoWay}">
-                        <mde:TextBoxOpenDirectory.TextBoxStyle>
-                            <Style BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}" TargetType="TextBox">
-                                <Setter Property="materialDesign:HintAssist.Hint" Value="Choose an export directory" />
-                            </Style>
-                        </mde:TextBoxOpenDirectory.TextBoxStyle>
-                    </mde:TextBoxOpenDirectory>
-                </DockPanel>
-            </StackPanel>
-            <Border
-                Grid.Row="1"
-                Margin="0,8,0,0"
-                HorizontalAlignment="Stretch"
-                BorderBrush="{DynamicResource PrimaryHueMidBrush}"
-                BorderThickness="1"
-                ClipToBounds="True"
-                CornerRadius="8,8,0,0">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <materialDesign:ColorZone
-                        Grid.Row="0"
-                        CornerRadius="8,8,0,0"
-                        Effect="{DynamicResource MaterialDesignShadowDepth5}"
-                        Mode="PrimaryMid">
-                        <TextBlock Margin="16" Text="Detected Files" />
-                    </materialDesign:ColorZone>
-                    <StackPanel
-                        Grid.Row="0"
-                        Margin="0,0,4,0"
-                        HorizontalAlignment="Right"
-                        Orientation="Horizontal">
-                        <Border
-                            Margin="4,8"
-                            Padding="4"
-                            Background="{DynamicResource SecondaryHueMidBrush}"
-                            BorderBrush="{DynamicResource SecondaryHueMidBrush}"
-                            BorderThickness="1"
-                            ClipToBounds="True"
-                            CornerRadius="8">
-                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                                <TextBlock
-                                    Margin="0,0,8,0"
-                                    Foreground="{DynamicResource SecondaryHueMidForegroundBrush}"
-                                    Text="Exporting" />
-                                <TextBlock Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" Text="{Binding MediaFilesViewCount}" />
-                            </StackPanel>
-                        </Border>
-                        <Border
-                            Margin="4,8"
-                            Padding="4"
-                            Background="{DynamicResource PrimaryHueLightBrush}"
-                            BorderBrush="{DynamicResource PrimaryHueLightBrush}"
-                            BorderThickness="1"
-                            ClipToBounds="True"
-                            CornerRadius="8">
-                            <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
-                                <TextBlock
-                                    Margin="0,0,8,0"
-                                    Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"
-                                    Text="Total" />
-                                <TextBlock Foreground="{DynamicResource PrimaryHueLightForegroundBrush}" Text="{Binding MediaFilesTotalCount}" />
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
-                    <DataGrid
-                        x:Name="MediaExportGrid"
-                        Grid.Row="1"
-                        AutoGenerateColumns="False"
-                        CanUserAddRows="False"
-                        CanUserDeleteRows="False"
-                        CanUserSortColumns="True"
-                        CellStyle="{StaticResource DGCellStyle}"
-                        ItemsSource="{Binding MediaFilesView}"
-                        SelectedItem="{Binding SelectedExportFile}"
-                        SelectionUnit="FullRow">
-                        <DataGrid.Resources>
-                            <Style
-                                x:Key="DataTextBlock"
-                                BasedOn="{StaticResource {x:Type TextBlock}}"
-                                TargetType="{x:Type TextBlock}">
-                                <Setter Property="VerticalAlignment" Value="Center" />
-                            </Style>
-                            <Style
-                                x:Key="DataHeaderStyle"
-                                BasedOn="{StaticResource {x:Type DataGridColumnHeader}}"
-                                TargetType="{x:Type DataGridColumnHeader}">
-                                <Setter Property="VerticalContentAlignment" Value="Top" />
-                            </Style>
-                        </DataGrid.Resources>
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn
-                                MinWidth="130"
-                                CanUserResize="False"
-                                HeaderStyle="{StaticResource DataHeaderStyle}">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate DataType="{x:Type models:MediaFile}">
-                                        <Button
-                                            Command="{Binding DataContext.ShowFileDetailsCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}"
-                                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type materialDesign:DrawerHost}}}"
-                                            Style="{StaticResource MaterialDesignRaisedButton}">
-                                            <StackPanel Orientation="Horizontal">
-                                                <materialDesign:PackIcon Kind="EyeArrowRightOutline" />
-                                                <TextBlock Margin="8,0,0,0" Text="Details" />
-                                            </StackPanel>
-                                        </Button>
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTemplateColumn
-                                MinWidth="90"
-                                CanUserResize="False"
-                                HeaderStyle="{StaticResource DataHeaderStyle}">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate DataType="{x:Type models:MediaFile}">
-                                        <ToggleButton
-                                            materialDesign:ToggleButtonAssist.OnContent="{materialDesign:PackIcon Kind=Tick}"
-                                            Command="{Binding DataContext.ToggleExportFlagCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}"
-                                            CommandParameter="{Binding .}"
-                                            Content="{materialDesign:PackIcon Kind=Close}"
-                                            IsChecked="{Binding ShouldExport, Mode=OneWay}"
-                                            Style="{StaticResource MaterialDesignActionToggleButton}"
-                                            ToolTip="Should this media file be exported?" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                                <DataGridTemplateColumn.Header>
-                                    <StackPanel>
-                                        <TextBlock Text="Export" />
-                                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
-                                            <materialDesign:PackIcon
-                                                Margin="0,0,8,0"
-                                                VerticalAlignment="Center"
-                                                Kind="Filter" />
-                                            <ComboBox
-                                                Width="Auto"
-                                                VerticalAlignment="Center"
-                                                VerticalContentAlignment="Center"
-                                                IsSynchronizedWithCurrentItem="True"
-                                                ItemsSource="{Binding Source={localHelpers:EnumBindingSource {x:Type helpers:TriStateBoolean}}}"
-                                                SelectedItem="{Binding DataContext.ExportingFilter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                                <ComboBox.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <TextBlock Text="{Binding Converter={StaticResource TriStateBooleanToStringConverter}}" />
-                                                    </DataTemplate>
-                                                </ComboBox.ItemTemplate>
-                                            </ComboBox>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </DataGridTemplateColumn.Header>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn
-                                MinWidth="150"
-                                Binding="{Binding FileName}"
-                                ElementStyle="{StaticResource DataTextBlock}"
-                                Header="Name"
-                                HeaderStyle="{StaticResource DataHeaderStyle}"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                MinWidth="80"
-                                Binding="{Binding FileSize, Converter={StaticResource FormatKbSizeConverter}}"
-                                ElementStyle="{StaticResource DataTextBlock}"
-                                Header="Size"
-                                HeaderStyle="{StaticResource DataHeaderStyle}"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                MinWidth="200"
-                                Binding="{Binding DateCreated, Converter={StaticResource DateTimeOffsetToStringConverter}}"
-                                ElementStyle="{StaticResource DataTextBlock}"
-                                HeaderStyle="{StaticResource DataHeaderStyle}"
-                                IsReadOnly="True">
-                                <DataGridTextColumn.Header>
-                                    <StackPanel>
-                                        <TextBlock Text="Created" />
-                                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
-                                            <materialDesign:PackIcon
-                                                Margin="0,0,8,0"
-                                                VerticalAlignment="Center"
-                                                Kind="Filter" />
-                                            <DatePicker
-                                                Width="140"
-                                                materialDesign:HintAssist.Hint="After"
-                                                DisplayDateEnd="{x:Static system:DateTime.Today}"
-                                                SelectedDate="{Binding DataContext.CreatedAfterFilter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                Style="{StaticResource ClearableDatePicker}" />
-                                        </StackPanel>
-                                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
-                                            <materialDesign:PackIcon
-                                                Margin="0,0,8,0"
-                                                VerticalAlignment="Center"
-                                                Kind="Filter" />
-                                            <DatePicker
-                                                Width="140"
-                                                materialDesign:HintAssist.Hint="Before"
-                                                DisplayDateEnd="{x:Static system:DateTime.Today}"
-                                                SelectedDate="{Binding DataContext.CreatedBeforeFilter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                                                Style="{StaticResource ClearableDatePicker}" />
-                                        </StackPanel>
-                                    </StackPanel>
-                                </DataGridTextColumn.Header>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn
-                                MinWidth="90"
-                                Binding="{Binding MultiMediaType, Converter={StaticResource MultiMediaTypeToStringConverter}}"
-                                ElementStyle="{StaticResource DataTextBlock}"
-                                HeaderStyle="{StaticResource DataHeaderStyle}"
-                                IsReadOnly="True">
-                                <DataGridTextColumn.Header>
-                                    <StackPanel VerticalAlignment="Top">
-                                        <TextBlock Text="Media Type" />
-                                        <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
-                                            <materialDesign:PackIcon
-                                                Margin="0,0,8,0"
-                                                VerticalAlignment="Center"
-                                                Kind="Filter" />
-                                            <ComboBox
-                                                Width="Auto"
-                                                VerticalAlignment="Center"
-                                                VerticalContentAlignment="Center"
-                                                IsSynchronizedWithCurrentItem="True"
-                                                ItemsSource="{Binding Source={localHelpers:EnumBindingSource {x:Type dbmodels:MultiMediaType}}}"
-                                                SelectedItem="{Binding DataContext.TypeFilter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
-                                                <ComboBox.ItemTemplate>
-                                                    <DataTemplate>
-                                                        <TextBlock Text="{Binding Converter={StaticResource MultiMediaTypeToStringConverter}}" />
-                                                    </DataTemplate>
-                                                </ComboBox.ItemTemplate>
-                                            </ComboBox>
-                                        </StackPanel>
-                                    </StackPanel>
-                                </DataGridTextColumn.Header>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn
-                                MinWidth="100"
-                                Binding="{Binding ., Converter={StaticResource MediaFileHeightPropertyConverter}, Mode=OneWay}"
-                                ElementStyle="{StaticResource DataTextBlock}"
-                                Header="Height"
-                                HeaderStyle="{StaticResource DataHeaderStyle}"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                MinWidth="100"
-                                Binding="{Binding ., Converter={StaticResource MediaFileWidthPropertyConverter}, Mode=OneWay}"
-                                ElementStyle="{StaticResource DataTextBlock}"
-                                Header="Width"
-                                HeaderStyle="{StaticResource DataHeaderStyle}"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                MinWidth="280"
-                                Binding="{Binding Md5Hash}"
-                                ElementStyle="{StaticResource DataTextBlock}"
-                                Header="Checksum"
-                                HeaderStyle="{StaticResource DataHeaderStyle}"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn Width="*" IsReadOnly="True" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <TextBlock
-                        Grid.Row="1"
-                        Margin="8"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Text="No Files To Show For Current Filters."
-                        Visibility="{Binding Items.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=MediaExportGrid}" />
-                </Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <materialDesign:ColorZone Grid.Row="0"
+                                    materialDesign:ElevationAssist.Elevation="Dp24"
+                                    CornerRadius="8,8,0,0"
+                                    Mode="PrimaryMid">
+            <TextBlock Margin="16" Text="Detected Files" />
+          </materialDesign:ColorZone>
+          <StackPanel Grid.Row="0"
+                      Margin="0,0,4,0"
+                      HorizontalAlignment="Right"
+                      Orientation="Horizontal">
+            <Border Margin="4,8"
+                    Padding="4"
+                    Background="{DynamicResource SecondaryHueMidBrush}"
+                    BorderBrush="{DynamicResource SecondaryHueMidBrush}"
+                    BorderThickness="1"
+                    ClipToBounds="True"
+                    CornerRadius="8">
+              <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                <TextBlock Margin="0,0,8,0"
+                           Foreground="{DynamicResource SecondaryHueMidForegroundBrush}"
+                           Text="Exporting" />
+                <TextBlock Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" Text="{Binding MediaFilesViewCount}" />
+              </StackPanel>
             </Border>
-            <StackPanel
-                Grid.Row="2"
-                Margin="0,8,0,0"
-                HorizontalAlignment="Right"
-                Orientation="Horizontal">
-                <Button Margin="0,0,8,0" Command="{Binding NavigateBackCommand}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon
-                            Width="15"
-                            Height="15"
-                            Margin="0,0,8,0"
-                            Kind="ArrowLeftBoldOutline" />
-                        <TextBlock Text="Back" />
+            <Border Margin="4,8"
+                    Padding="4"
+                    Background="{DynamicResource PrimaryHueLightBrush}"
+                    BorderBrush="{DynamicResource PrimaryHueLightBrush}"
+                    BorderThickness="1"
+                    ClipToBounds="True"
+                    CornerRadius="8">
+              <StackPanel VerticalAlignment="Center" Orientation="Horizontal">
+                <TextBlock Margin="0,0,8,0"
+                           Foreground="{DynamicResource PrimaryHueLightForegroundBrush}"
+                           Text="Total" />
+                <TextBlock Foreground="{DynamicResource PrimaryHueLightForegroundBrush}" Text="{Binding MediaFilesTotalCount, Mode=OneTime}" />
+              </StackPanel>
+            </Border>
+          </StackPanel>
+          <DataGrid x:Name="MediaExportGrid"
+                    Grid.Row="1"
+                    AutoGenerateColumns="False"
+                    CanUserAddRows="False"
+                    CanUserDeleteRows="False"
+                    CanUserSortColumns="True"
+                    CellStyle="{StaticResource DGCellStyle}"
+                    ItemsSource="{Binding MediaFilesView}"
+                    SelectedItem="{Binding SelectedExportFile}"
+                    SelectionUnit="FullRow">
+            <DataGrid.Resources>
+              <Style x:Key="DataTextBlock"
+                     TargetType="{x:Type TextBlock}"
+                     BasedOn="{StaticResource {x:Type TextBlock}}">
+                <Setter Property="VerticalAlignment" Value="Center" />
+              </Style>
+              <Style x:Key="DataHeaderStyle"
+                     TargetType="{x:Type DataGridColumnHeader}"
+                     BasedOn="{StaticResource {x:Type DataGridColumnHeader}}">
+                <Setter Property="VerticalContentAlignment" Value="Top" />
+              </Style>
+            </DataGrid.Resources>
+            <DataGrid.Columns>
+              <DataGridTemplateColumn MinWidth="130"
+                                      CanUserResize="False"
+                                      HeaderStyle="{StaticResource DataHeaderStyle}">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate DataType="{x:Type models:MediaFile}">
+                    <Button Command="{Binding DataContext.ShowFileDetailsCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}" Style="{StaticResource MaterialDesignRaisedButton}">
+                      <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="EyeArrowRightOutline" />
+                        <TextBlock Margin="8,0,0,0" Text="Details" />
+                      </StackPanel>
+                    </Button>
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTemplateColumn MinWidth="90"
+                                      CanUserResize="False"
+                                      HeaderStyle="{StaticResource DataHeaderStyle}">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate DataType="{x:Type models:MediaFile}">
+                    <ToggleButton materialDesign:ToggleButtonAssist.OnContent="{materialDesign:PackIcon Kind=Tick}"
+                                  Command="{Binding DataContext.ToggleExportFlagCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}"
+                                  CommandParameter="{Binding .}"
+                                  Content="{materialDesign:PackIcon Kind=Close}"
+                                  IsChecked="{Binding ShouldExport, Mode=OneWay}"
+                                  Style="{StaticResource MaterialDesignActionToggleButton}"
+                                  ToolTip="Should this media file be exported?" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+                <DataGridTemplateColumn.Header>
+                  <StackPanel>
+                    <TextBlock Text="Export" />
+                    <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                      <materialDesign:PackIcon Margin="0,0,8,0"
+                                               VerticalAlignment="Center"
+                                               Kind="Filter" />
+                      <ComboBox Width="Auto"
+                                VerticalAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                IsSynchronizedWithCurrentItem="True"
+                                ItemsSource="{Binding Source={localHelpers:EnumBindingSource {x:Type helpers:TriStateBoolean}}}"
+                                SelectedItem="{Binding DataContext.ExportingFilter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <ComboBox.ItemTemplate>
+                          <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource TriStateBooleanToStringConverter}}" />
+                          </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                      </ComboBox>
                     </StackPanel>
-                </Button>
-                <Button
-                    Margin="0,0,8,0"
-                    Command="{Binding ExportFilesCommand}"
-                    Visibility="{Binding ExportComplete, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon
-                            Width="15"
-                            Height="15"
-                            Margin="0,1,8,0"
-                            Kind="Export" />
-                        <TextBlock Text="Export" />
+                  </StackPanel>
+                </DataGridTemplateColumn.Header>
+              </DataGridTemplateColumn>
+              <DataGridTextColumn MinWidth="150"
+                                  Binding="{Binding FileName}"
+                                  ElementStyle="{StaticResource DataTextBlock}"
+                                  Header="Name"
+                                  HeaderStyle="{StaticResource DataHeaderStyle}"
+                                  IsReadOnly="True" />
+              <DataGridTextColumn MinWidth="80"
+                                  Binding="{Binding FileSize, Converter={StaticResource FormatKbSizeConverter}}"
+                                  ElementStyle="{StaticResource DataTextBlock}"
+                                  Header="Size"
+                                  HeaderStyle="{StaticResource DataHeaderStyle}"
+                                  IsReadOnly="True" />
+              <DataGridTextColumn MinWidth="200"
+                                  Binding="{Binding DateCreated, Converter={StaticResource DateTimeOffsetToStringConverter}}"
+                                  ElementStyle="{StaticResource DataTextBlock}"
+                                  HeaderStyle="{StaticResource DataHeaderStyle}"
+                                  IsReadOnly="True">
+                <DataGridTextColumn.Header>
+                  <StackPanel>
+                    <TextBlock Text="Created" />
+                    <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                      <materialDesign:PackIcon Margin="0,0,8,0"
+                                               VerticalAlignment="Center"
+                                               Kind="Filter" />
+                      <DatePicker Width="140"
+                                  materialDesign:HintAssist.Hint="After"
+                                  DisplayDateEnd="{x:Static system:DateTime.Today}"
+                                  SelectedDate="{Binding DataContext.CreatedAfterFilter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource ClearableDatePicker}" />
                     </StackPanel>
-                </Button>
-                <Button
-                    Margin="0,0,8,0"
-                    Command="{Binding NavigateNextCommand}"
-                    Visibility="{Binding ExportComplete, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon
-                            Width="15"
-                            Height="15"
-                            Margin="0,0,8,0"
-                            Kind="ArrowrightBoldOutline" />
-                        <TextBlock Text="Next" />
+                    <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                      <materialDesign:PackIcon Margin="0,0,8,0"
+                                               VerticalAlignment="Center"
+                                               Kind="Filter" />
+                      <DatePicker Width="140"
+                                  materialDesign:HintAssist.Hint="Before"
+                                  DisplayDateEnd="{x:Static system:DateTime.Today}"
+                                  SelectedDate="{Binding DataContext.CreatedBeforeFilter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                  Style="{StaticResource ClearableDatePicker}" />
                     </StackPanel>
-                </Button>
-                <Button Command="{Binding FinishCommand}">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon
-                            Width="15"
-                            Height="15"
-                            Margin="0,2,8,0"
-                            Kind="TickCircleOutline" />
-                        <TextBlock Text="Finish" />
+                  </StackPanel>
+                </DataGridTextColumn.Header>
+              </DataGridTextColumn>
+              <DataGridTextColumn MinWidth="90"
+                                  Binding="{Binding MultiMediaType, Converter={StaticResource MultiMediaTypeToStringConverter}}"
+                                  ElementStyle="{StaticResource DataTextBlock}"
+                                  HeaderStyle="{StaticResource DataHeaderStyle}"
+                                  IsReadOnly="True">
+                <DataGridTextColumn.Header>
+                  <StackPanel VerticalAlignment="Top">
+                    <TextBlock Text="Media Type" />
+                    <StackPanel Margin="0,8,0,0" Orientation="Horizontal">
+                      <materialDesign:PackIcon Margin="0,0,8,0"
+                                               VerticalAlignment="Center"
+                                               Kind="Filter" />
+                      <ComboBox Width="Auto"
+                                VerticalAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                IsSynchronizedWithCurrentItem="True"
+                                ItemsSource="{Binding Source={localHelpers:EnumBindingSource {x:Type models:MultiMediaType}}}"
+                                SelectedItem="{Binding DataContext.TypeFilter, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}">
+                        <ComboBox.ItemTemplate>
+                          <DataTemplate>
+                            <TextBlock Text="{Binding Converter={StaticResource MultiMediaTypeToStringConverter}}" />
+                          </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                      </ComboBox>
                     </StackPanel>
-                </Button>
-            </StackPanel>
+                  </StackPanel>
+                </DataGridTextColumn.Header>
+              </DataGridTextColumn>
+              <DataGridTextColumn MinWidth="100"
+                                  Binding="{Binding Width, Mode=OneWay}"
+                                  ElementStyle="{StaticResource DataTextBlock}"
+                                  Header="Height"
+                                  HeaderStyle="{StaticResource DataHeaderStyle}"
+                                  IsReadOnly="True" />
+              <DataGridTextColumn MinWidth="100"
+                                  Binding="{Binding Height, Mode=OneWay}"
+                                  ElementStyle="{StaticResource DataTextBlock}"
+                                  Header="Width"
+                                  HeaderStyle="{StaticResource DataHeaderStyle}"
+                                  IsReadOnly="True" />
+              <DataGridTextColumn MinWidth="280"
+                                  Binding="{Binding Md5Hash}"
+                                  ElementStyle="{StaticResource DataTextBlock}"
+                                  Header="Checksum"
+                                  HeaderStyle="{StaticResource DataHeaderStyle}"
+                                  IsReadOnly="True" />
+              <DataGridTextColumn Width="*" IsReadOnly="True" />
+            </DataGrid.Columns>
+          </DataGrid>
+          <TextBlock Grid.Row="1"
+                     Margin="8"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     Text="No Files To Show For Current Filters."
+                     Visibility="{Binding Items.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=MediaExportGrid}" />
         </Grid>
-    </materialDesign:DrawerHost>
+      </Border>
+      <StackPanel Grid.Row="2"
+                  Margin="0,8,0,0"
+                  HorizontalAlignment="Right"
+                  Orientation="Horizontal">
+        <Button Margin="0,0,8,0" Command="{Binding NavigateBackCommand}">
+          <StackPanel Orientation="Horizontal">
+            <materialDesign:PackIcon Width="15"
+                                     Height="15"
+                                     Margin="0,0,8,0"
+                                     Kind="ArrowLeftBoldOutline" />
+            <TextBlock Text="Back" />
+          </StackPanel>
+        </Button>
+        <Button Margin="0,0,8,0"
+                Command="{Binding ExportFilesCommand}"
+                Visibility="{Binding ExportComplete, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+          <StackPanel Orientation="Horizontal">
+            <materialDesign:PackIcon Width="15"
+                                     Height="15"
+                                     Margin="0,1,8,0"
+                                     Kind="Export" />
+            <TextBlock Text="Export" />
+          </StackPanel>
+        </Button>
+        <Button Margin="0,0,8,0"
+                Command="{Binding NavigateNextCommand}"
+                Visibility="{Binding ExportComplete, Converter={StaticResource BooleanToVisibilityConverter}}">
+          <StackPanel Orientation="Horizontal">
+            <materialDesign:PackIcon Width="15"
+                                     Height="15"
+                                     Margin="0,0,8,0"
+                                     Kind="ArrowrightBoldOutline" />
+            <TextBlock Text="Next" />
+          </StackPanel>
+        </Button>
+        <Button Command="{Binding FinishCommand}">
+          <StackPanel Orientation="Horizontal">
+            <materialDesign:PackIcon Width="15"
+                                     Height="15"
+                                     Margin="0,2,8,0"
+                                     Kind="TickCircleOutline" />
+            <TextBlock Text="Finish" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </Grid>
+  </materialDesign:DrawerHost>
 </UserControl>

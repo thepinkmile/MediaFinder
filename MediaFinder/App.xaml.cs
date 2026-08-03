@@ -28,18 +28,18 @@ public partial class App : Application
     [STAThread]
     private static void Main(string[] args)
     {
-        MainAsync(args).GetAwaiter().GetResult();
+        MainAsync(args, CancellationToken.None).GetAwaiter().GetResult();
     }
 
-    private static async Task MainAsync(string[] args)
+    private static async Task MainAsync(string[] args, CancellationToken cancellationToken = default)
     {
-        // ensure we get some logs for start-up in case CreatHostBuilder fails
+        // ensure we get some logs for start-up in case CreateHostBuilder fails
         Log.Logger = ServiceCollectionExtensions.StartupLogger();
 
         try
         {
             using IHost host = CreateHostBuilder(args).Build();
-            await host.StartAsync().ConfigureAwait(true);
+            await host.StartAsync(cancellationToken).ConfigureAwait(true);
 
             var logger = host.Services.GetRequiredService<ILogger<App>>();
             AppDomain.CurrentDomain.UnhandledException += (sender, args) => logger.UnhandledException(args.ExceptionObject as Exception);
@@ -53,7 +53,7 @@ public partial class App : Application
             app.MainWindow.Visibility = Visibility.Visible;
             app.Run();
 
-            await host.StopAsync().ConfigureAwait(true);
+            await host.StopAsync(cancellationToken).ConfigureAwait(true);
         }
         catch (Exception ex)
         {
@@ -77,5 +77,5 @@ public partial class App : Application
                 .AddExportServices()
                 .AddApplicationViews()
                 .AddMessenger<WeakReferenceMessenger>()
-                .AddSnackBarMessaging(Current));
+                .AddSnackBarMessaging());
 }

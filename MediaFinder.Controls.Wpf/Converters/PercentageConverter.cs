@@ -11,13 +11,13 @@ public class PercentageConverter : IValueConverter
 
     private double ActualPercentage => (double)Percentage / 100;
 
-    public object? Convert(object? value, Type targetType, object parameter, CultureInfo culture)
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         => value is null
-            ? null
+            ? Binding.DoNothing
             : (double?)value * ActualPercentage;
 
-    public object? ConvertBack(object? value, Type targetType, object parameter, CultureInfo culture)
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => value is null
-            ? null
+            ? Binding.DoNothing
             : (double?)value / ActualPercentage;
 }

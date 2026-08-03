@@ -6,7 +6,7 @@
 
     <UseWPF>true</UseWPF>
     <StartupObject>MediaFinder.App</StartupObject>
-    <RootNamespace>MediaFinder</RootNamespace>
+    <ApplicationIcon>Resources\AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <!--
@@ -26,21 +26,17 @@
     <SelfContained>true</SelfContained>
     <PublishDir>bin\Publish\$(Configuration)\$(TargetFramework)</PublishDir>
     <SatelliteResourceLanguages>en-US</SatelliteResourceLanguages>
-    <ApplicationIcon>app.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
     <ApplicationDefinition Remove="App.xaml" />
-    <None Remove="appsettings.json" />
-    <Content Include="app.ico" />
-    <Content Include="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="Resources\AppIcon.ico" />
     <Page Include="App.xaml" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CommunityToolkit.Mvvm" />
+    <PackageReference Include="JetBrains.Annotations" />
     <PackageReference Include="MaterialDesignExtensions" />
     <PackageReference Include="MaterialDesignThemes" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
@@ -86,6 +82,13 @@
     <Compile Update="**\MainWindowViewModel.cs">
       <DependentUpon>$([System.String]::Copy(%(Filename)).Replace('ViewModel', '.xaml'))</DependentUpon>
     </Compile>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Remove="appsettings.json" />
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <None Update="appsettings.*.json">
       <DependentUpon>appsettings.json</DependentUpon>
     </None>
