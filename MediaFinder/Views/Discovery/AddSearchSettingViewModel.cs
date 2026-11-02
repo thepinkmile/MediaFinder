@@ -64,7 +64,7 @@ public partial class AddSearchSettingViewModel : ObservableObject
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(SubmitCommand))]
-    private ObservableCollection<string> _settingsDirectories = new();
+    private ObservableCollection<string> _settingsDirectories = [];
 
     [ObservableProperty]
     [NotifyCanExecuteChangedFor(nameof(RemoveSearchDirectoryCommand))]
@@ -77,11 +77,7 @@ public partial class AddSearchSettingViewModel : ObservableObject
     }
 
     [RelayCommand]
-#pragma warning disable CRR0034
-#pragma warning disable CRR0035
     private async Task OnAddSearchDirectory()
-#pragma warning restore CRR0035
-#pragma warning restore CRR0034
     {
         var dialogResult = await OpenDirectoryDialog.ShowDialogAsync("DialogHost", new OpenDirectoryDialogArguments
         {
@@ -106,11 +102,7 @@ public partial class AddSearchSettingViewModel : ObservableObject
         => !string.IsNullOrEmpty(SelectedDirectory);
 
     [RelayCommand(CanExecute = nameof(CanSubmit))]
-#pragma warning disable CRR0034
-#pragma warning disable CRR0035
     private async Task OnSubmit()
-#pragma warning restore CRR0035
-#pragma warning restore CRR0034
     {
         var newSettings = new SearchSettings()
         {
@@ -127,10 +119,7 @@ public partial class AddSearchSettingViewModel : ObservableObject
             MinVideoHeight = VideoSizesDefined ? MinVideoHeight : null
         };
         _dbContext.SearchSettings.Add(newSettings);
-#pragma warning disable CRR0039
         await _dbContext.SaveChangesAsync().ConfigureAwait(true);
-#pragma warning restore CRR0039
-
         ClearFormCommand.Execute(null);
         _messenger.Send(SnackBarMessage.Create("New search configuration saved"));
         _messenger.Send(SearchSettingUpdated.Create(newSettings));

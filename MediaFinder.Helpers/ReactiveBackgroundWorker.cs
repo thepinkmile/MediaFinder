@@ -16,7 +16,7 @@ public abstract class ReactiveBackgroundWorker<T> : BackgroundWorker
 
     private readonly IMessenger _messenger;
 
-    private object _progressToken = null!;
+    private object? _progressToken;
 
     protected ReactiveBackgroundWorker(ILogger logger, IMessenger messenger)
     {
@@ -51,7 +51,7 @@ public abstract class ReactiveBackgroundWorker<T> : BackgroundWorker
 
     protected void SetProgress(string message, LogLevel logLevel = LogLevel.Debug)
     {
-        ReportProgress(UpdateProgressMessage.Create(_progressToken, message));
+        ReportProgress(UpdateProgressMessage.Create(_progressToken!, message));
         _logger.Message(message, logLevel);
     }
 
@@ -65,7 +65,7 @@ public abstract class ReactiveBackgroundWorker<T> : BackgroundWorker
     {
         switch (e.UserState)
         {
-            case string stateMessage: _messenger.Send(UpdateProgressMessage.Create(_progressToken, stateMessage)); break;
+            case string stateMessage: _messenger.Send(UpdateProgressMessage.Create(_progressToken!, stateMessage)); break;
             case UpdateProgressMessage updateStatusMessage: _messenger.Send(updateStatusMessage); break;
             default:
                 if (e.UserState is not null)

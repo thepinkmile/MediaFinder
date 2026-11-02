@@ -18,5 +18,9 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" />
     <PackageReference Include="NetEscapades.EnumGenerators" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\MediaFinder.Models\MediaFinder.Models.csproj" />
+  </ItemGroup>
   
 </Project>

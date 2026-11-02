@@ -1,7 +1,6 @@
 ﻿using System.Windows.Automation.Provider;
 using System.Windows.Markup;
 
-using MediaFinder.DataAccessLayer.Models;
 using MediaFinder.Messages;
 using MediaFinder.Models;
 

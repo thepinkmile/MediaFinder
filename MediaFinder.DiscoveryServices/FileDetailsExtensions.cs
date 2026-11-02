@@ -1,6 +1,4 @@
-﻿using System.IO;
-
-using MediaFinder.DataAccessLayer.Models;
+﻿using MediaFinder.DataAccessLayer.Models;
 using MediaFinder.Services.Search;
 
 namespace MediaFinder.DataAccessLayer;

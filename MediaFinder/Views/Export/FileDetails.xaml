@@ -1,0 +1,90 @@
+﻿<UserControl x:Class="MediaFinder.Views.Export.FileDetails"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:MediaFinder.Controls.Wpf.Converters;assembly=MediaFinder.Controls.Wpf"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:models="clr-namespace:MediaFinder.Models;assembly=MediaFinder.Models"
+             xmlns:system="clr-namespace:System;assembly=mscorlib"
+             d:DataContext="{d:DesignInstance Type=models:MediaFile,
+                                              IsDesignTimeCreatable=False}"
+             d:DesignHeight="450"
+             d:DesignWidth="800"
+             mc:Ignorable="d">
+  <UserControl.Resources>
+    <converters:FormatKbSizeConverter x:Key="FormatKbSizeConverter" />
+    <converters:DateTimeOffsetToStringConverter x:Key="DateTimeOffsetToStringConverter" DateFormat="d MMM yyyy H:m" />
+
+    <system:Double x:Key="DrawerFieldLabelSize">110</system:Double>
+    <system:Double x:Key="DrawerFieldValueSize">290</system:Double>
+  </UserControl.Resources>
+  <StackPanel>
+    <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
+      <TextBlock Width="{StaticResource DrawerFieldLabelSize}"
+                 Margin="0,0,8,0"
+                 FontWeight="Bold"
+                 Text="Full Path:" />
+      <TextBlock MaxWidth="{StaticResource DrawerFieldValueSize}"
+                 Text="{Binding FilePath}"
+                 TextWrapping="Wrap" />
+    </StackPanel>
+    <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
+      <TextBlock Width="{StaticResource DrawerFieldLabelSize}"
+                 Margin="0,0,8,0"
+                 FontWeight="Bold"
+                 Text="Relative Path:" />
+      <TextBlock MaxWidth="{StaticResource DrawerFieldValueSize}"
+                 Text="{Binding RelativePath}"
+                 TextWrapping="Wrap" />
+    </StackPanel>
+    <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
+      <TextBlock Width="{StaticResource DrawerFieldLabelSize}"
+                 Margin="0,0,8,0"
+                 FontWeight="Bold"
+                 Text="Size:" />
+      <TextBlock MaxWidth="{StaticResource DrawerFieldValueSize}"
+                 Text="{Binding FileSize, Converter={StaticResource FormatKbSizeConverter}}"
+                 TextWrapping="Wrap" />
+    </StackPanel>
+    <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
+      <TextBlock Width="{StaticResource DrawerFieldLabelSize}"
+                 Margin="0,0,8,0"
+                 FontWeight="Bold"
+                 Text="Created:" />
+      <TextBlock MaxWidth="{StaticResource DrawerFieldValueSize}"
+                 Text="{Binding DateCreated, Converter={StaticResource DateTimeOffsetToStringConverter}}"
+                 TextWrapping="Wrap" />
+    </StackPanel>
+    <StackPanel Margin="0,0,0,8"
+                Orientation="Horizontal"
+                Visibility="{Binding Width, Converter={StaticResource NullableToVisibilityConverter}}">
+      <TextBlock Width="{StaticResource DrawerFieldLabelSize}"
+                 Margin="0,0,8,0"
+                 FontWeight="Bold"
+                 Text="Width:" />
+      <TextBlock MaxWidth="{StaticResource DrawerFieldValueSize}"
+                 Text="{Binding Width}"
+                 TextWrapping="Wrap" />
+    </StackPanel>
+    <StackPanel Margin="0,0,0,8"
+                Orientation="Horizontal"
+                Visibility="{Binding Height, Converter={StaticResource NullableToVisibilityConverter}}">
+      <TextBlock Width="{StaticResource DrawerFieldLabelSize}"
+                 Margin="0,0,8,0"
+                 FontWeight="Bold"
+                 Text="Height:" />
+      <TextBlock MaxWidth="{StaticResource DrawerFieldValueSize}"
+                 Text="{Binding Height}"
+                 TextWrapping="Wrap" />
+    </StackPanel>
+    <StackPanel Margin="0,0,0,8" Orientation="Horizontal">
+      <TextBlock Width="{StaticResource DrawerFieldLabelSize}"
+                 Margin="0,0,8,0"
+                 FontWeight="Bold"
+                 Text="MD5 Checksum:" />
+      <TextBlock MaxWidth="{StaticResource DrawerFieldValueSize}"
+                 Text="{Binding Md5Hash}"
+                 TextWrapping="Wrap" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>

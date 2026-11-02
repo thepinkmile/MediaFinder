@@ -1,5 +1,4 @@
-﻿using MediaFinder.DataAccessLayer.Models;
-using MediaFinder.Helpers;
+﻿using MediaFinder.Helpers;
 
 using System.Globalization;
 using System.Windows.Data;
@@ -12,17 +11,17 @@ public class TriStateBooleanToStringConverter : IValueConverter
        => TriStateBooleanExtensions.GetValues()
            .ToDictionary(x => x.ToStringFast(), x => x);
 
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         => value is not TriStateBoolean mediaType
             ? Binding.DoNothing
             : mediaType.ToStringFast();
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     => value is string name
             ? TriStateBooleanExtensions.TryParse(name, out var newValue, true, true)
                 ? newValue
-                : DisplayNameMapper.ContainsKey(name)
-                    ? DisplayNameMapper[name]
+                : DisplayNameMapper.TryGetValue(name, out var triValue)
+                    ? triValue
                     : Binding.DoNothing
             : Binding.DoNothing;
 }

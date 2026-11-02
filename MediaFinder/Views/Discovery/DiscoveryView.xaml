@@ -1,314 +1,231 @@
-﻿<UserControl
-    x:Class="MediaFinder.Views.Discovery.DiscoveryView"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converters="clr-namespace:MediaFinder.Controls.Wpf.Converters;assembly=MediaFinder.Controls.Wpf"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:MediaFinder.Views.Discovery"
-    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:mde="clr-namespace:MaterialDesignExtensions.Controls;assembly=MaterialDesignExtensions"
-    xmlns:models="clr-namespace:MediaFinder.Models;assembly=MediaFinder.Models"
-    x:Name="discoveryPage"
-    d:DataContext="{d:DesignInstance Type=local:DiscoveryViewModel,
-                                     IsDesignTimeCreatable=False}"
-    d:DesignHeight="450"
-    d:DesignWidth="800"
-    Loaded="UserControl_Loaded"
-    mc:Ignorable="d">
-    <UserControl.Resources>
-        <converters:BooleanToStringConverter
-            x:Key="BooleanToStringConverter"
-            FalseValue="No"
-            TrueValue="Yes" />
-        <converters:StringsToContentConverter x:Key="ListToStringConverter" Delimeter="\n" />
-        <converters:FormatKbSizeConverter x:Key="FormatKbSizeConverter" />
-        <materialDesign:BooleanToVisibilityConverter
-            x:Key="InverseBooleanToVisibilityConverter"
-            FalseValue="Visible"
-            TrueValue="Collapsed" />
-        <materialDesign:BooleanToVisibilityConverter
-            x:Key="BooleanToVisibilityConverter"
-            FalseValue="Collapsed"
-            TrueValue="Visible" />
+﻿<UserControl x:Class="MediaFinder.Views.Discovery.DiscoveryView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:MediaFinder.Controls.Wpf.Converters;assembly=MediaFinder.Controls.Wpf"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:MediaFinder.Views.Discovery"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:mde="clr-namespace:MaterialDesignExtensions.Controls;assembly=MaterialDesignExtensions"
+             xmlns:models="clr-namespace:MediaFinder.Models;assembly=MediaFinder.Models"
+             x:Name="discoveryPage"
+             d:DataContext="{d:DesignInstance Type=local:DiscoveryViewModel,
+                                              IsDesignTimeCreatable=False}"
+             d:DesignHeight="450"
+             d:DesignWidth="800"
+             Loaded="UserControl_Loaded"
+             mc:Ignorable="d">
+  <UserControl.Resources>
+    <converters:BooleanToStringConverter x:Key="BooleanToStringConverter"
+                                         FalseValue="No"
+                                         TrueValue="Yes" />
+    <converters:StringsToContentConverter x:Key="ListToStringConverter" Delimeter="\n" />
+    <converters:FormatKbSizeConverter x:Key="FormatKbSizeConverter" />
+    <materialDesign:BooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"
+                                                 FalseValue="Visible"
+                                                 TrueValue="Collapsed" />
+    <materialDesign:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"
+                                                 FalseValue="Collapsed"
+                                                 TrueValue="Visible" />
 
-        <Style
-            x:Key="DGCellStyle"
-            BasedOn="{StaticResource MaterialDesignDataGridCell}"
-            TargetType="DataGridCell">
-            <Setter Property="Focusable" Value="False" />
-            <Setter Property="FocusVisualStyle" Value="{x:Null}" />
-        </Style>
-    </UserControl.Resources>
-    <materialDesign:DrawerHost
-        x:Name="DrawerHost"
-        OpenMode="Modal"
-        OverlayBackground="{DynamicResource PrimaryHueMidBrush}">
-        <materialDesign:DrawerHost.RightDrawerContent>
-            <ScrollViewer
-                HorizontalAlignment="Center"
-                VerticalAlignment="Top"
-                VerticalScrollBarVisibility="Auto">
-                <StackPanel>
-                    <GroupBox
-                        MaxWidth="450"
-                        Margin="16"
-                        materialDesign:ColorZoneAssist.Mode="PrimaryMid"
-                        Foreground="{DynamicResource MaterialDesignBody}"
-                        Header="Add Search Configuration"
-                        Style="{StaticResource MaterialDesignCardGroupBox}"
-                        Visibility="{Binding DrawEntityIsNew, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <GroupBox.HeaderTemplate>
-                            <DataTemplate>
-                                <TextBlock
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                                    Text="{Binding .}" />
-                            </DataTemplate>
-                        </GroupBox.HeaderTemplate>
-                        <local:AddSearchSetting DataContext="{Binding SearchConfigViewModel, Mode=TwoWay}" />
-                    </GroupBox>
-                    <GroupBox
-                        MaxWidth="450"
-                        Margin="16"
-                        materialDesign:ColorZoneAssist.Mode="PrimaryMid"
-                        Foreground="{DynamicResource MaterialDesignBody}"
-                        Header="Edit Search Configuration"
-                        Style="{StaticResource MaterialDesignCardGroupBox}"
-                        Visibility="{Binding DrawEntityIsNew, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                        <GroupBox.HeaderTemplate>
-                            <DataTemplate>
-                                <TextBlock
-                                    HorizontalAlignment="Center"
-                                    VerticalAlignment="Center"
-                                    Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
-                                    Text="{Binding .}" />
-                            </DataTemplate>
-                        </GroupBox.HeaderTemplate>
-                        <local:EditSearchSetting DataContext="{Binding EditSearchConfigViewModel, Mode=TwoWay}" />
-                    </GroupBox>
-                </StackPanel>
-            </ScrollViewer>
-        </materialDesign:DrawerHost.RightDrawerContent>
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <TextBlock Grid.Row="0" Text="Select a working directory and configuration for the search." />
-            <mde:TextBoxOpenDirectory
-                Grid.Row="1"
-                DialogHostName="DialogHost"
-                Directory="{Binding WorkingDirectory, Mode=TwoWay}">
-                <mde:TextBoxOpenDirectory.TextBoxStyle>
-                    <Style BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}" TargetType="TextBox">
-                        <Setter Property="materialDesign:HintAssist.Hint" Value="Choose a directory" />
-                    </Style>
-                </mde:TextBoxOpenDirectory.TextBoxStyle>
-            </mde:TextBoxOpenDirectory>
-            <Border
-                Grid.Row="2"
-                Margin="0,8"
-                HorizontalAlignment="Stretch"
-                BorderBrush="{DynamicResource PrimaryHueMidBrush}"
-                BorderThickness="1"
-                ClipToBounds="True"
-                CornerRadius="8,8,0,0">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <materialDesign:ColorZone
-                        Grid.Row="0"
-                        CornerRadius="8,8,0,0"
-                        Effect="{DynamicResource MaterialDesignShadowDepth5}"
-                        Mode="PrimaryMid">
-                        <TextBlock Margin="16" Text="Configurations" />
-                    </materialDesign:ColorZone>
-                    <StackPanel
-                        Grid.Row="0"
-                        HorizontalAlignment="Right"
-                        Orientation="Horizontal">
-                        <Button
-                            Grid.Row="0"
-                            Margin="0,0,14,0"
-                            VerticalAlignment="Center"
-                            Command="{Binding AddSearchSettingCommand}"
-                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type materialDesign:DrawerHost}}}"
-                            Content="{materialDesign:PackIcon Kind=Plus,
-                                                              Size=22}"
-                            Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}" />
-                        <Button
-                            Grid.Row="0"
-                            Margin="0,0,14,0"
-                            VerticalAlignment="Center"
-                            Command="{Binding RemoveSearchSettingCommand}"
-                            Content="{materialDesign:PackIcon Kind=Minus,
-                                                              Size=22}"
-                            Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}" />
-                    </StackPanel>
-                    <DataGrid
-                        x:Name="ConfigurationsGrid"
-                        Grid.Row="1"
-                        AutoGenerateColumns="False"
-                        CanUserAddRows="False"
-                        CanUserDeleteRows="False"
-                        HorizontalScrollBarVisibility="Auto"
-                        IsReadOnly="True"
-                        ItemsSource="{Binding Configurations}"
-                        SelectedItem="{Binding SelectedConfig}"
-                        SelectionUnit="FullRow"
-                        VerticalScrollBarVisibility="Auto">
-                        <DataGrid.Columns>
-                            <DataGridTemplateColumn
-                                Width="100"
-                                MinWidth="100"
-                                CanUserResize="False">
-                                <DataGridTemplateColumn.CellTemplate>
-                                    <DataTemplate DataType="{x:Type models:SearchConfiguration}">
-                                        <Button
-                                            Command="{Binding DataContext.EditSearchSettingCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}"
-                                            CommandParameter="{Binding RelativeSource={RelativeSource AncestorType={x:Type materialDesign:DrawerHost}}}"
-                                            Content="{materialDesign:PackIcon Kind=PencilOutline}"
-                                            Style="{StaticResource MaterialDesignRaisedButton}" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellTemplate>
-                            </DataGridTemplateColumn>
-                            <DataGridTextColumn
-                                MinWidth="100"
-                                Binding="{Binding Name}"
-                                CellStyle="{StaticResource DGCellStyle}"
-                                Header="Name"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                Binding="{Binding Description}"
-                                CanUserSort="False"
-                                CellStyle="{StaticResource DGCellStyle}"
-                                Header="Description"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                Binding="{Binding Recursive, Converter={StaticResource BooleanToStringConverter}}"
-                                CanUserSort="False"
-                                CellStyle="{StaticResource DGCellStyle}"
-                                Header="Recursive"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                Binding="{Binding ExtractArchives, Converter={StaticResource BooleanToStringConverter}}"
-                                CanUserSort="False"
-                                CellStyle="{StaticResource DGCellStyle}"
-                                Header="Extract Archives"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                Binding="{Binding PerformDeepAnalysis, Converter={StaticResource BooleanToStringConverter}}"
-                                CanUserSort="False"
-                                CellStyle="{StaticResource DGCellStyle}"
-                                Header="Perform Deep Analysis"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                Binding="{Binding MinImageWidth}"
-                                CanUserSort="False"
-                                CellStyle="{StaticResource DGCellStyle}"
-                                Header="Min Image Width"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                Binding="{Binding MinImageHeight}"
-                                CanUserSort="False"
-                                CellStyle="{StaticResource DGCellStyle}"
-                                Header="Min Image Height"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                Binding="{Binding MinVideoWidth}"
-                                CanUserSort="False"
-                                CellStyle="{StaticResource DGCellStyle}"
-                                Header="Min Video Width"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                Binding="{Binding MinVideoHeight}"
-                                CanUserSort="False"
-                                CellStyle="{StaticResource DGCellStyle}"
-                                Header="Min Video Height"
-                                IsReadOnly="True" />
-                            <DataGridTextColumn
-                                Width="*"
-                                Binding="{Binding Directories, Converter={StaticResource ListToStringConverter}}"
-                                CanUserSort="False"
-                                CellStyle="{StaticResource DGCellStyle}"
-                                Header="Directories"
-                                IsReadOnly="True" />
-                        </DataGrid.Columns>
-                    </DataGrid>
-                    <TextBlock
-                        Grid.Row="1"
-                        Margin="8"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Text="No Discovery Configurations Available"
-                        Visibility="{Binding Items.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=ConfigurationsGrid}" />
-                </Grid>
-            </Border>
-            <DockPanel
-                Grid.Row="3"
-                Margin="0,8,0,0"
-                LastChildFill="False">
-                <StackPanel
-                    DockPanel.Dock="Left"
+    <Style x:Key="DGCellStyle"
+           TargetType="DataGridCell"
+           BasedOn="{StaticResource MaterialDesignDataGridCell}">
+      <Setter Property="FocusVisualStyle" Value="{x:Null}" />
+      <Setter Property="Focusable" Value="False" />
+    </Style>
+  </UserControl.Resources>
+  <materialDesign:DrawerHost x:Name="DrawerHost"
+                             OpenMode="Modal"
+                             OverlayBackground="{DynamicResource PrimaryHueMidBrush}"
+                             IsRightDrawerOpen="{Binding EditorVisible}">
+    <materialDesign:DrawerHost.RightDrawerContent>
+      <ContentControl Content="{Binding DrawContent}" />
+    </materialDesign:DrawerHost.RightDrawerContent>
+    <DockPanel>
+      <DockPanel Margin="0,8,0,0"
+                 DockPanel.Dock="Bottom"
+                 LastChildFill="False">
+        <StackPanel DockPanel.Dock="Left"
                     Orientation="Horizontal"
                     Visibility="{Binding WorkingDirectorySize, Converter={StaticResource NotZeroToVisibilityConverter}}">
-                    <TextBlock
-                        Margin="0,0,8,0"
-                        VerticalAlignment="Center"
-                        Text="Working Directory Size:" />
-                    <TextBlock
-                        Margin="0,0,8,0"
-                        VerticalAlignment="Center"
-                        Text="{Binding WorkingDirectorySize, Converter={StaticResource FormatKbSizeConverter}}" />
-                </StackPanel>
-                <StackPanel
-                    HorizontalAlignment="Right"
+          <TextBlock Margin="0,0,8,0"
+                     VerticalAlignment="Center"
+                     Text="Working Directory Size:" />
+          <TextBlock Margin="0,0,8,0"
+                     VerticalAlignment="Center"
+                     Text="{Binding WorkingDirectorySize, Converter={StaticResource FormatKbSizeConverter}}" />
+        </StackPanel>
+        <StackPanel HorizontalAlignment="Right"
                     DockPanel.Dock="Right"
                     Orientation="Horizontal">
-                    <Button
-                        Margin="0,0,8,0"
-                        Command="{Binding PerformSearchCommand}"
-                        Visibility="{Binding SearchComplete, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon
-                                Width="15"
-                                Height="15"
-                                Margin="0,0,8,0"
-                                Kind="RunFast" />
-                            <TextBlock Text="Run" />
-                        </StackPanel>
-                    </Button>
-                    <Button
-                        Margin="0,0,8,0"
-                        Command="{Binding MoveToReviewCommand}"
-                        Visibility="{Binding SearchComplete, Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon
-                                Width="15"
-                                Height="15"
-                                Margin="0,0,8,0"
-                                Kind="ArrowrightBoldOutline" />
-                            <TextBlock Text="Next" />
-                        </StackPanel>
-                    </Button>
-                    <Button Command="{Binding FinishSearchCommand}">
-                        <StackPanel Orientation="Horizontal">
-                            <materialDesign:PackIcon
-                                Width="15"
-                                Height="15"
-                                Margin="0,2,8,0"
-                                Kind="TickCircleOutline" />
-                            <TextBlock Text="Finish" />
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-            </DockPanel>
+          <Button Margin="0,0,8,0"
+                  Command="{Binding PerformSearchCommand}"
+                  Visibility="{Binding SearchComplete, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+            <StackPanel Orientation="Horizontal">
+              <materialDesign:PackIcon Width="15"
+                                       Height="15"
+                                       Margin="0,0,8,0"
+                                       Kind="RunFast" />
+              <TextBlock Text="Run" />
+            </StackPanel>
+          </Button>
+          <Button Margin="0,0,8,0"
+                  Command="{Binding MoveToReviewCommand}"
+                  Visibility="{Binding SearchComplete, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel Orientation="Horizontal">
+              <materialDesign:PackIcon Width="15"
+                                       Height="15"
+                                       Margin="0,0,8,0"
+                                       Kind="ArrowrightBoldOutline" />
+              <TextBlock Text="Next" />
+            </StackPanel>
+          </Button>
+          <Button Command="{Binding FinishSearchCommand}">
+            <StackPanel Orientation="Horizontal">
+              <materialDesign:PackIcon Width="15"
+                                       Height="15"
+                                       Margin="0,2,8,0"
+                                       Kind="TickCircleOutline" />
+              <TextBlock Text="Finish" />
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </DockPanel>
+
+      <StackPanel DockPanel.Dock="Top">
+        <TextBlock Style="{StaticResource MaterialDesignHeadline6TextBlock}" Text="Select a working directory and configuration for the search." />
+        <mde:TextBoxOpenDirectory Margin="0,8"
+                                  DialogHostName="DialogHost"
+                                  Directory="{Binding WorkingDirectory, Mode=TwoWay}">
+          <mde:TextBoxOpenDirectory.TextBoxStyle>
+            <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignFloatingHintTextBox}">
+              <Setter Property="materialDesign:HintAssist.Hint" Value="Choose a directory" />
+            </Style>
+          </mde:TextBoxOpenDirectory.TextBoxStyle>
+        </mde:TextBoxOpenDirectory>
+        <TextBlock Style="{StaticResource MaterialDesignBodySmallTextBlock}" Text="NOTE: The directory selected here will be used to extract any archives to for deep inspection to locate media files." />
+      </StackPanel>
+
+      <Border Margin="0,8"
+              HorizontalAlignment="Stretch"
+              BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+              BorderThickness="1"
+              ClipToBounds="True"
+              CornerRadius="8,8,0,0">
+        <Grid>
+          <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+          </Grid.RowDefinitions>
+          <materialDesign:ColorZone Grid.Row="0"
+                                    materialDesign:ElevationAssist.Elevation="Dp24"
+                                    CornerRadius="8,8,0,0"
+                                    Mode="PrimaryMid">
+            <TextBlock Margin="16" Text="Configurations" />
+          </materialDesign:ColorZone>
+          <StackPanel Grid.Row="0"
+                      HorizontalAlignment="Right"
+                      Orientation="Horizontal">
+            <Button Grid.Row="0"
+                    Margin="0,0,14,0"
+                    VerticalAlignment="Center"
+                    Command="{Binding AddSearchSettingCommand}"
+                    Content="{materialDesign:PackIcon Kind=Plus,
+                                                      Size=22}"
+                    Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}" />
+            <Button Grid.Row="0"
+                    Margin="0,0,14,0"
+                    VerticalAlignment="Center"
+                    Command="{Binding RemoveSearchSettingCommand}"
+                    Content="{materialDesign:PackIcon Kind=Minus,
+                                                      Size=22}"
+                    Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}" />
+          </StackPanel>
+          <TextBlock Grid.Row="1"
+                     Margin="8"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     Text="No Discovery Configurations Available"
+                     Visibility="{Binding Items.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=ConfigurationsGrid}" />
+          <DataGrid x:Name="ConfigurationsGrid"
+                    Grid.Row="1"
+                    AutoGenerateColumns="False"
+                    CanUserAddRows="False"
+                    CanUserDeleteRows="False"
+                    HorizontalScrollBarVisibility="Auto"
+                    IsReadOnly="True"
+                    ItemsSource="{Binding Configurations}"
+                    SelectedItem="{Binding SelectedConfig}"
+                    SelectionUnit="FullRow"
+                    VerticalScrollBarVisibility="Auto">
+            <DataGrid.Columns>
+              <DataGridTemplateColumn Width="100"
+                                      MinWidth="100"
+                                      CanUserResize="False">
+                <DataGridTemplateColumn.CellTemplate>
+                  <DataTemplate DataType="{x:Type models:DiscoveryOptions}">
+                    <Button Command="{Binding DataContext.EditSearchSettingCommand, RelativeSource={RelativeSource Mode=FindAncestor, AncestorLevel=1, AncestorType=UserControl}}"
+                            Content="{materialDesign:PackIcon Kind=PencilOutline}"
+                            Style="{StaticResource MaterialDesignRaisedButton}" />
+                  </DataTemplate>
+                </DataGridTemplateColumn.CellTemplate>
+              </DataGridTemplateColumn>
+              <DataGridTextColumn MinWidth="100"
+                                  Binding="{Binding Name}"
+                                  CellStyle="{StaticResource DGCellStyle}"
+                                  Header="Name"
+                                  IsReadOnly="True" />
+              <DataGridTextColumn Binding="{Binding Description}"
+                                  CanUserSort="False"
+                                  CellStyle="{StaticResource DGCellStyle}"
+                                  Header="Description"
+                                  IsReadOnly="True" />
+              <DataGridTextColumn Binding="{Binding Recursive, Converter={StaticResource BooleanToStringConverter}}"
+                                  CanUserSort="False"
+                                  CellStyle="{StaticResource DGCellStyle}"
+                                  Header="Recursive"
+                                  IsReadOnly="True" />
+              <DataGridTextColumn Binding="{Binding ExtractArchives, Converter={StaticResource BooleanToStringConverter}}"
+                                  CanUserSort="False"
+                                  CellStyle="{StaticResource DGCellStyle}"
+                                  Header="Extract Archives"
+                                  IsReadOnly="True" />
+              <DataGridTextColumn Binding="{Binding PerformDeepAnalysis, Converter={StaticResource BooleanToStringConverter}}"
+                                  CanUserSort="False"
+                                  CellStyle="{StaticResource DGCellStyle}"
+                                  Header="Perform Deep Analysis"
+                                  IsReadOnly="True" />
+              <DataGridTextColumn Binding="{Binding MinImageWidth}"
+                                  CanUserSort="False"
+                                  CellStyle="{StaticResource DGCellStyle}"
+                                  Header="Min Image Width"
+                                  IsReadOnly="True" />
+              <DataGridTextColumn Binding="{Binding MinImageHeight}"
+                                  CanUserSort="False"
+                                  CellStyle="{StaticResource DGCellStyle}"
+                                  Header="Min Image Height"
+                                  IsReadOnly="True" />
+              <DataGridTextColumn Binding="{Binding MinVideoWidth}"
+                                  CanUserSort="False"
+                                  CellStyle="{StaticResource DGCellStyle}"
+                                  Header="Min Video Width"
+                                  IsReadOnly="True" />
+              <DataGridTextColumn Binding="{Binding MinVideoHeight}"
+                                  CanUserSort="False"
+                                  CellStyle="{StaticResource DGCellStyle}"
+                                  Header="Min Video Height"
+                                  IsReadOnly="True" />
+              <DataGridTextColumn Width="*"
+                                  Binding="{Binding Directories, Converter={StaticResource ListToStringConverter}}"
+                                  CanUserSort="False"
+                                  CellStyle="{StaticResource DGCellStyle}"
+                                  Header="Directories"
+                                  IsReadOnly="True" />
+            </DataGrid.Columns>
+          </DataGrid>
         </Grid>
-    </materialDesign:DrawerHost>
+      </Border>
+    </DockPanel>
+  </materialDesign:DrawerHost>
 </UserControl>

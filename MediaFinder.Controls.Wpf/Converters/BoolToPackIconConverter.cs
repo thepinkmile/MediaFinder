@@ -11,13 +11,13 @@ public class BoolToPackIconConverter : IValueConverter
 
     public PackIconKind FalseValue { get; set; } = PackIconKind.CheckboxBlank;
 
-    public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
-        => value is not bool bVal
-            ? Binding.DoNothing
-            : bVal
+    public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        => value is bool bVal
+            ? bVal
                 ? TrueValue
-                : FalseValue;
+                : FalseValue
+            : Binding.DoNothing;
 
-    public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)
+    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         => Binding.DoNothing;
 }

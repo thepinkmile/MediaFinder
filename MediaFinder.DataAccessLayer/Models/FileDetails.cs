@@ -1,5 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
+using MediaFinder.Models;
+
 namespace MediaFinder.DataAccessLayer.Models;
 
 public class FileDetails

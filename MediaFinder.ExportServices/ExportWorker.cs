@@ -1,6 +1,5 @@
 ﻿using System.ComponentModel;
 using System.Globalization;
-using System.IO;
 
 using CommunityToolkit.Mvvm.Messaging;
 
@@ -55,7 +54,7 @@ public class ExportWorker : ReactiveBackgroundWorker<ExportRequest>
                 cts.Cancel();
             }
         }
-        Task.WaitAll(exportTasks.ToArray());
+        Task.WaitAll([..exportTasks]);
 
         if (CancellationPending)
         {
