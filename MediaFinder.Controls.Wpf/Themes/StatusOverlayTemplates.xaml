@@ -1,0 +1,110 @@
+<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:controls="clr-namespace:MediaFinder.Controls.Wpf.Controls"
+                    xmlns:converters="clr-namespace:MediaFinder.Controls.Wpf.Converters"
+                    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+  <ResourceDictionary.MergedDictionaries>
+    <ResourceDictionary Source="pack://application:,,,/MediaFinder.Controls.Wpf;component/Themes/OverlayControlTemplates.xaml" />
+    <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.ProgressBar.xaml" />
+  </ResourceDictionary.MergedDictionaries>
+
+  <Style x:Key="CircularProgressBar"
+         TargetType="{x:Type ProgressBar}"
+         BasedOn="{StaticResource MaterialDesignCircularProgressBar}">
+    <Setter Property="Foreground" Value="{DynamicResource PrimaryHueDarkForegroundBrush}" />
+  </Style>
+
+  <Style x:Key="LinearProgressBar"
+         TargetType="{x:Type ProgressBar}"
+         BasedOn="{StaticResource MaterialDesignLinearProgressBar}">
+    <Setter Property="Foreground" Value="{DynamicResource PrimaryHueDarkForegroundBrush}" />
+  </Style>
+
+  <materialDesign:NullableToVisibilityConverter x:Key="NullToVisibilityConverter"
+                                                NotNullValue="Visible"
+                                                NullValue="Collapsed" />
+
+  <converters:ZeroToBoolConverter x:Key="IsZeroConverter"
+                                  FalseValue="False"
+                                  TrueValue="True" />
+
+  <converters:StatusOverlayTypeToStyleConverter x:Key="StatusOverlayTypeToStyleConverter"
+                                                CircularStyle="{StaticResource CircularProgressBar}"
+                                                LinearStyle="{StaticResource LinearProgressBar}" />
+
+  <converters:StatusOverlayTypeToDockConverter x:Key="StatusOverlayTypeToDockConverter"
+                                               CircularPosition="Left"
+                                               LinearPosition="Bottom" />
+
+  <converters:StatusOverlayTypeToSizeConverter x:Key="StatusOverlayTypeToWidthConverter"
+                                               CircularSize="32"
+                                               LinearSize="{x:Null}" />
+  <converters:StatusOverlayTypeToSizeConverter x:Key="StatusOverlayTypeToHeightConverter"
+                                               CircularSize="32"
+                                               LinearSize="16" />
+
+  <converters:PercentageConverter x:Key="ProgressMaxSizeConverter" Percentage="60" />
+
+  <Style x:Key="MediaFinderStatusOverlay" TargetType="{x:Type controls:StatusOverlay}">
+    <Setter Property="Background" Value="{DynamicResource MaterialDesignCardBackground}" />
+    <Setter Property="Foreground" Value="{DynamicResource PrimaryHueForegroundBrush}" />
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="OverlayBackground" Value="{DynamicResource PrimaryHueMidBrush}" />
+    <Setter Property="SnapsToDevicePixels" Value="True" />
+    <Setter Property="Template">
+      <Setter.Value>
+        <ControlTemplate TargetType="{x:Type controls:StatusOverlay}">
+          <controls:OverlayControl HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                                   VerticalAlignment="{TemplateBinding VerticalAlignment}"
+                                   Background="{TemplateBinding Background}"
+                                   Foreground="{TemplateBinding Foreground}"
+                                   SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}">
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+              <DockPanel HorizontalAlignment="Center" VerticalAlignment="Center">
+                <ProgressBar Width="{TemplateBinding OverlayType, Converter={StaticResource StatusOverlayTypeToWidthConverter}}"
+                             Height="{TemplateBinding OverlayType, Converter={StaticResource StatusOverlayTypeToHeightConverter}}"
+                             Margin="0,0,8,0"
+                             VerticalAlignment="Center"
+                             DockPanel.Dock="{TemplateBinding OverlayType, Converter={StaticResource StatusOverlayTypeToDockConverter}}"
+                             Foreground="{TemplateBinding Foreground}"
+                             IsIndeterminate="{TemplateBinding Progress, Converter={StaticResource IsZeroConverter}}"
+                             Style="{TemplateBinding OverlayType, Converter={StaticResource StatusOverlayTypeToStyleConverter}}"
+                             Value="{TemplateBinding Progress}" />
+
+                <ContentPresenter Margin="0,0,0,8"
+                                  Content="{TemplateBinding Content}"
+                                  ContentStringFormat="{TemplateBinding ContentStringFormat}"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  ContentTemplateSelector="{TemplateBinding ContentTemplateSelector}" />
+              </DockPanel>
+
+              <Button Margin="0,8,0,0"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      Command="{TemplateBinding CancelCommand}"
+                      Style="{StaticResource MaterialDesignRaisedButton}"
+                      Visibility="{TemplateBinding CancelCommand, Converter={StaticResource NullToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal">
+                  <materialDesign:PackIcon Width="15"
+                                           Height="15"
+                                           Margin="0,0,8,0"
+                                           VerticalAlignment="Center"
+                                           Kind="Cancel" />
+                  <TextBlock FontFamily="{TemplateBinding FontFamily}"
+                             FontSize="{TemplateBinding FontSize}"
+                             FontStretch="{TemplateBinding FontStretch}"
+                             FontStyle="{TemplateBinding FontStyle}"
+                             FontWeight="{TemplateBinding FontWeight}"
+                             Text="Cancel" />
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </controls:OverlayControl>
+        </ControlTemplate>
+      </Setter.Value>
+    </Setter>
+    <Setter Property="VerticalAlignment" Value="Stretch" />
+  </Style>
+
+  <Style TargetType="{x:Type controls:StatusOverlay}" BasedOn="{StaticResource MediaFinderStatusOverlay}" />
+</ResourceDictionary>

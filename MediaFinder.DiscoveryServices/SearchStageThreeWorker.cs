@@ -3,7 +3,7 @@
 using CommunityToolkit.Mvvm.Messaging;
 
 using MediaFinder.DataAccessLayer;
-using MediaFinder.DataAccessLayer.Models;
+using MediaFinder.Models;
 using MediaFinder.Helpers;
 using MediaFinder.Logging;
 using MediaFinder.Messages;
@@ -17,8 +17,10 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
 {
     private readonly MediaFinderDbContext _dbContext;
 
-    public SearchStageThreeWorker(ILogger<SearchStageTwoWorker> logger,
-        IMessenger messenger, MediaFinderDbContext dbContext)
+    public SearchStageThreeWorker(
+        ILogger<SearchStageTwoWorker> logger,
+        IMessenger messenger,
+        MediaFinderDbContext dbContext)
         : base(logger, messenger)
     {
         _dbContext = dbContext;
@@ -26,10 +28,7 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
 
     protected override void Execute(FilterRequest inputs, DoWorkEventArgs e)
     {
-#pragma warning disable CRRSP06
         SetProgress($"Finalising Analysis Results...");
-#pragma warning restore CRRSP06
-
         _dbContext.FileDetails
             .Where(fd => fd.FileType == MultiMediaType.Unknown)
             .ExecuteUpdate(s => s.SetProperty(fd => fd.ShouldExport, false));
@@ -42,7 +41,6 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
             .Distinct();
         foreach(var group in hashGroups)
         {
-#pragma warning disable CRR0050
             var files = _dbContext.FileDetails
                 .Where(fd => fd.MD5_Hash == group.MD5
                         && fd.SHA256_Hash == group.SHA256
@@ -52,8 +50,7 @@ public class SearchStageThreeWorker : ReactiveBackgroundWorker<FilterRequest>
                 .ThenBy(fd => fd.Created)
                 .Skip(1)
                 .ToList();
-#pragma warning restore CRR0050
-            if (files.Any())
+            if (files.Count != 0)
             {
                 _logger.DuplicateChecksum(group.MD5, group.SHA256, group.SHA512, files.Count);
                 foreach (var file in files)

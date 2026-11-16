@@ -32,7 +32,7 @@ public class SearchRequest : ReactiveBackgroundWorkerContextBase
 
     public int? ExtractionDepth { get; }
 
-    public static SearchRequest Create(object progressToken, string workingDirectory, SearchConfiguration settings)
-        => new(progressToken, workingDirectory, settings.Directories,
-            settings.Recursive, settings.ExtractArchives, settings.ExtractionDepth);
+    public static SearchRequest Create(object progressToken, string workingDirectory, DiscoveryOptions options)
+        => new(progressToken, workingDirectory, options.Directories,
+            options.Recursive, options.ExtractArchives, options.ExtractionDepth);
 }

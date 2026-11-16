@@ -1,76 +1,82 @@
-﻿<UserControl
-    x:Class="MediaFinder.Views.Discovery.AddSearchSetting"
-    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:converters="clr-namespace:MediaFinder.Controls.Wpf.Converters;assembly=MediaFinder.Controls.Wpf"
-    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:MediaFinder.Views.Discovery"
-    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    d:DataContext="{d:DesignInstance Type=local:AddSearchSettingViewModel,
-                                     IsDesignTimeCreatable=False}"
-    d:DesignWidth="800"
-    Loaded="UserControl_Loaded"
-    mc:Ignorable="d">
-    <UserControl.Resources>
-        <materialDesign:BooleanToVisibilityConverter
-            x:Key="InverseBooleanToVisibilityConverter"
-            FalseValue="Visible"
-            TrueValue="Collapsed" />
-        <materialDesign:BooleanToVisibilityConverter
-            x:Key="BooleanToVisibilityConverter"
-            FalseValue="Collapsed"
-            TrueValue="Visible" />
-        <converters:NullableLongToStringConverter x:Key="NullableLongToStringConverter" />
-    </UserControl.Resources>
-    <Grid HorizontalAlignment="Center" VerticalAlignment="Top">
+﻿<UserControl x:Class="MediaFinder.Views.Discovery.AddSearchSettingView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:converters="clr-namespace:MediaFinder.Controls.Wpf.Converters;assembly=MediaFinder.Controls.Wpf"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:MediaFinder.Views.Discovery"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DataContext="{d:DesignInstance Type=local:AddSearchSettingViewModel,
+                                              IsDesignTimeCreatable=False}"
+             d:DesignWidth="800"
+             Loaded="UserControl_Loaded"
+             mc:Ignorable="d">
+  <UserControl.Resources>
+    <materialDesign:BooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"
+                                                 FalseValue="Visible"
+                                                 TrueValue="Collapsed" />
+    <materialDesign:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"
+                                                 FalseValue="Collapsed"
+                                                 TrueValue="Visible" />
+    <converters:NullableLongToStringConverter x:Key="NullableLongToStringConverter" />
+  </UserControl.Resources>
+  <ScrollViewer HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                VerticalScrollBarVisibility="Auto">
+    <GroupBox MaxWidth="450"
+              Margin="16"
+              materialDesign:ColorZoneAssist.Mode="PrimaryMid"
+              Foreground="{DynamicResource MaterialDesignBody}"
+              Header="Add Search Setting"
+              Style="{StaticResource MaterialDesignCardGroupBox}">
+      <GroupBox.HeaderTemplate>
+        <DataTemplate>
+          <TextBlock HorizontalAlignment="Center"
+                     VerticalAlignment="Center"
+                     Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                     Text="{Binding .}" />
+        </DataTemplate>
+      </GroupBox.HeaderTemplate>
+      <Grid HorizontalAlignment="Center" VerticalAlignment="Top">
         <StackPanel Margin="4">
-            <TextBox
-                Height="60"
-                Margin="4"
-                VerticalAlignment="Top"
-                materialDesign:HintAssist.Hint="Configuration Name"
-                materialDesign:TextFieldAssist.HasClearButton="True"
-                SpellCheck.IsEnabled="True"
-                Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                Text="{Binding SettingName, UpdateSourceTrigger=PropertyChanged}"
-                TextWrapping="Wrap" />
-            <TextBox
-                Height="120"
-                Margin="4"
-                VerticalAlignment="Top"
-                materialDesign:HintAssist.Hint="Configuration Description"
-                materialDesign:TextFieldAssist.HasClearButton="True"
-                AcceptsReturn="True"
-                SpellCheck.IsEnabled="True"
-                Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                Text="{Binding SettingDescription, UpdateSourceTrigger=PropertyChanged}"
-                TextWrapping="Wrap"
-                VerticalScrollBarVisibility="Auto" />
-            <CheckBox
-                Margin="4"
-                Content="Recursive Search"
-                IsChecked="{Binding SettingRecursive, UpdateSourceTrigger=PropertyChanged}" />
-            <CheckBox
-                Margin="4"
-                Content="Extract Archives"
-                IsChecked="{Binding SettingExtractArchives, UpdateSourceTrigger=PropertyChanged}" />
-            <DockPanel Margin="6,0,6,0" VerticalAlignment="Center">
-                <TextBlock
-                    VerticalAlignment="Center"
-                    DockPanel.Dock="Left"
-                    Text="Extraction Depth" />
-                <TextBox
-                    Width="40"
-                    VerticalAlignment="Center"
-                    DockPanel.Dock="Right"
-                    Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                    Text="{Binding ElementName=ExtractDepth, Path=Value, UpdateSourceTrigger=PropertyChanged}"
-                    TextAlignment="Right"
-                    TextWrapping="NoWrap" />
-                <Slider
-                    x:Name="ExtractDepth"
-                    Width="{Binding ActualWidth, RelativeSource={RelativeSource AncestorType=StackPanel}}"
+          <TextBox Margin="4,4,4,8"
+                   VerticalAlignment="Top"
+                   materialDesign:HintAssist.Hint="Configuration Name"
+                   materialDesign:TextFieldAssist.HasClearButton="True"
+                   SpellCheck.IsEnabled="True"
+                   Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                   Text="{Binding SettingName, UpdateSourceTrigger=PropertyChanged}"
+                   TextWrapping="Wrap" />
+          <TextBox Height="120"
+                   Margin="4"
+                   VerticalAlignment="Top"
+                   materialDesign:HintAssist.Hint="Configuration Description"
+                   materialDesign:TextFieldAssist.HasClearButton="True"
+                   AcceptsReturn="True"
+                   SpellCheck.IsEnabled="True"
+                   Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                   Text="{Binding SettingDescription, UpdateSourceTrigger=PropertyChanged}"
+                   TextWrapping="Wrap"
+                   VerticalScrollBarVisibility="Auto" />
+          <CheckBox Margin="4"
+                    Content="Recursive Search"
+                    IsChecked="{Binding SettingRecursive, UpdateSourceTrigger=PropertyChanged}" />
+          <CheckBox Margin="4"
+                    Content="Extract Archives"
+                    IsChecked="{Binding SettingExtractArchives, UpdateSourceTrigger=PropertyChanged}" />
+          <DockPanel Margin="6,0,6,0" VerticalAlignment="Center">
+            <TextBlock VerticalAlignment="Center"
+                       DockPanel.Dock="Left"
+                       Text="Extraction Depth" />
+            <TextBox MinWidth="40"
+                     VerticalAlignment="Center"
+                     DockPanel.Dock="Right"
+                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                     Text="{Binding ElementName=ExtractDepth, Path=Value, UpdateSourceTrigger=PropertyChanged}"
+                     TextAlignment="Right"
+                     TextWrapping="NoWrap" />
+            <Slider x:Name="ExtractDepth"
+                    MinWidth="225"
                     Margin="8,0,8,0"
                     VerticalAlignment="Center"
                     IsEnabled="{Binding SettingExtractArchives}"
@@ -80,161 +86,149 @@
                     Style="{StaticResource MaterialDesignDiscreteSlider}"
                     TickPlacement="BottomRight"
                     Value="{Binding SettingExtractionDepth}" />
-            </DockPanel>
-            <CheckBox
-                Margin="4"
-                Content="Perform Deep Analysis"
-                IsChecked="{Binding SettingPerformDeepAnalysis, UpdateSourceTrigger=PropertyChanged}" />
-            <Grid Margin="4">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="Auto" />
-                </Grid.RowDefinitions>
+          </DockPanel>
+          <CheckBox Margin="4"
+                    Content="Perform Deep Analysis"
+                    IsChecked="{Binding SettingPerformDeepAnalysis, UpdateSourceTrigger=PropertyChanged}" />
+          <Grid Margin="4">
+            <Grid.ColumnDefinitions>
+              <ColumnDefinition Width="*" />
+              <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+              <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
 
-                <CheckBox
-                    Grid.Row="0"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="2"
-                    Margin="0,4"
-                    Content="Specify Image Size Checks"
-                    IsChecked="{Binding ImageSizesDefined, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBox
-                    Grid.Row="1"
-                    Grid.Column="0"
-                    Margin="4"
-                    VerticalAlignment="Top"
-                    materialDesign:HintAssist.Hint="Minimum Width"
-                    materialDesign:TextFieldAssist.HasClearButton="True"
-                    DataObject.Pasting="TextBox_Pasting_NumericOnly"
-                    PreviewTextInput="TextBox_PreviewTextInput_NumericOnly"
-                    SpellCheck.IsEnabled="True"
-                    Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                    Text="{Binding MinImageWidth, Converter={StaticResource NullableLongToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
-                    TextWrapping="Wrap"
-                    Visibility="{Binding ImageSizesDefined, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                <TextBox
-                    Grid.Row="1"
-                    Grid.Column="1"
-                    Margin="4"
-                    VerticalAlignment="Top"
-                    materialDesign:HintAssist.Hint="Minimum Height"
-                    materialDesign:TextFieldAssist.HasClearButton="True"
-                    DataObject.Pasting="TextBox_Pasting_NumericOnly"
-                    PreviewTextInput="TextBox_PreviewTextInput_NumericOnly"
-                    SpellCheck.IsEnabled="True"
-                    Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                    Text="{Binding MinImageHeight, Converter={StaticResource NullableLongToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
-                    TextWrapping="Wrap"
-                    Visibility="{Binding ImageSizesDefined, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                <CheckBox
-                    Grid.Row="2"
-                    Grid.Column="0"
-                    Grid.ColumnSpan="2"
-                    Margin="0,4"
-                    Content="Specify Video Size Checks"
-                    IsChecked="{Binding VideoSizesDefined, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <TextBox
-                    Grid.Row="3"
-                    Grid.Column="0"
-                    Margin="4"
-                    VerticalAlignment="Top"
-                    materialDesign:HintAssist.Hint="Minimum Width"
-                    materialDesign:TextFieldAssist.HasClearButton="True"
-                    DataObject.Pasting="TextBox_Pasting_NumericOnly"
-                    PreviewTextInput="TextBox_PreviewTextInput_NumericOnly"
-                    SpellCheck.IsEnabled="True"
-                    Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                    Text="{Binding MinVideoWidth, Converter={StaticResource NullableLongToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
-                    TextWrapping="Wrap"
-                    Visibility="{Binding VideoSizesDefined, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                <TextBox
-                    Grid.Row="3"
-                    Grid.Column="1"
-                    Margin="4"
-                    VerticalAlignment="Top"
-                    materialDesign:HintAssist.Hint="Minimum Height"
-                    materialDesign:TextFieldAssist.HasClearButton="True"
-                    DataObject.Pasting="TextBox_Pasting_NumericOnly"
-                    PreviewTextInput="TextBox_PreviewTextInput_NumericOnly"
-                    SpellCheck.IsEnabled="True"
-                    Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                    Text="{Binding MinVideoHeight, Converter={StaticResource NullableLongToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
-                    TextWrapping="Wrap"
-                    Visibility="{Binding VideoSizesDefined, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <CheckBox Grid.Row="0"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="2"
+                      Margin="0,4"
+                      Content="Specify Image Size Checks"
+                      IsChecked="{Binding ImageSizesDefined, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Row="1"
+                     Grid.Column="0"
+                     Margin="4"
+                     VerticalAlignment="Top"
+                     materialDesign:HintAssist.Hint="Minimum Width"
+                     materialDesign:TextFieldAssist.HasClearButton="True"
+                     DataObject.Pasting="TextBox_Pasting_NumericOnly"
+                     PreviewTextInput="TextBox_PreviewTextInput_NumericOnly"
+                     SpellCheck.IsEnabled="True"
+                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                     Text="{Binding MinImageWidth, Converter={StaticResource NullableLongToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                     TextWrapping="Wrap"
+                     Visibility="{Binding ImageSizesDefined, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBox Grid.Row="1"
+                     Grid.Column="1"
+                     Margin="4"
+                     VerticalAlignment="Top"
+                     materialDesign:HintAssist.Hint="Minimum Height"
+                     materialDesign:TextFieldAssist.HasClearButton="True"
+                     DataObject.Pasting="TextBox_Pasting_NumericOnly"
+                     PreviewTextInput="TextBox_PreviewTextInput_NumericOnly"
+                     SpellCheck.IsEnabled="True"
+                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                     Text="{Binding MinImageHeight, Converter={StaticResource NullableLongToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                     TextWrapping="Wrap"
+                     Visibility="{Binding ImageSizesDefined, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <CheckBox Grid.Row="2"
+                      Grid.Column="0"
+                      Grid.ColumnSpan="2"
+                      Margin="0,4"
+                      Content="Specify Video Size Checks"
+                      IsChecked="{Binding VideoSizesDefined, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+            <TextBox Grid.Row="3"
+                     Grid.Column="0"
+                     Margin="4"
+                     VerticalAlignment="Top"
+                     materialDesign:HintAssist.Hint="Minimum Width"
+                     materialDesign:TextFieldAssist.HasClearButton="True"
+                     DataObject.Pasting="TextBox_Pasting_NumericOnly"
+                     PreviewTextInput="TextBox_PreviewTextInput_NumericOnly"
+                     SpellCheck.IsEnabled="True"
+                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                     Text="{Binding MinVideoWidth, Converter={StaticResource NullableLongToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                     TextWrapping="Wrap"
+                     Visibility="{Binding VideoSizesDefined, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <TextBox Grid.Row="3"
+                     Grid.Column="1"
+                     Margin="4"
+                     VerticalAlignment="Top"
+                     materialDesign:HintAssist.Hint="Minimum Height"
+                     materialDesign:TextFieldAssist.HasClearButton="True"
+                     DataObject.Pasting="TextBox_Pasting_NumericOnly"
+                     PreviewTextInput="TextBox_PreviewTextInput_NumericOnly"
+                     SpellCheck.IsEnabled="True"
+                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                     Text="{Binding MinVideoHeight, Converter={StaticResource NullableLongToStringConverter}, UpdateSourceTrigger=PropertyChanged}"
+                     TextWrapping="Wrap"
+                     Visibility="{Binding VideoSizesDefined, Converter={StaticResource BooleanToVisibilityConverter}}" />
+          </Grid>
+          <Border HorizontalAlignment="Stretch"
+                  BorderBrush="{DynamicResource PrimaryHueMidBrush}"
+                  BorderThickness="1"
+                  ClipToBounds="True"
+                  CornerRadius="8,8,0,0">
+            <Grid>
+              <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+              </Grid.RowDefinitions>
+              <materialDesign:ColorZone materialDesign:ElevationAssist.Elevation="Dp12"
+                                        CornerRadius="8,8,0,0"
+                                        Mode="PrimaryMid">
+                <TextBlock Margin="16" Text="Directories" />
+              </materialDesign:ColorZone>
+              <Button Margin="0,0,80,0"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Center"
+                      Command="{Binding AddSearchDirectoryCommand}"
+                      Content="{materialDesign:PackIcon Kind=Plus,
+                                                        Size=22}"
+                      Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}" />
+              <Button Margin="0,0,20,0"
+                      HorizontalAlignment="Right"
+                      VerticalAlignment="Center"
+                      Command="{Binding RemoveSearchDirectoryCommand}"
+                      Content="{materialDesign:PackIcon Kind=Minus,
+                                                        Size=22}"
+                      Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}" />
+              <ListBox x:Name="DirectoriesList"
+                       Grid.Row="1"
+                       ItemsSource="{Binding SettingsDirectories, UpdateSourceTrigger=PropertyChanged}"
+                       SelectedItem="{Binding SelectedDirectory}" />
+              <TextBlock Grid.Row="1"
+                         Margin="8"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"
+                         Text="No Directories Selected"
+                         Visibility="{Binding Items.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=DirectoriesList}" />
             </Grid>
-            <Border
-                HorizontalAlignment="Stretch"
-                BorderBrush="{DynamicResource PrimaryHueMidBrush}"
-                BorderThickness="1"
-                ClipToBounds="True">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
-                    </Grid.RowDefinitions>
-                    <materialDesign:ColorZone Effect="{DynamicResource MaterialDesignShadowDepth5}" Mode="PrimaryMid">
-                        <TextBlock Margin="16" Text="Directories" />
-                    </materialDesign:ColorZone>
-                    <Button
-                        Grid.Row="0"
-                        Margin="0,0,80,0"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        Command="{Binding AddSearchDirectoryCommand}"
-                        Content="{materialDesign:PackIcon Kind=Plus,
-                                                          Size=22}"
-                        Style="{StaticResource MaterialDesignFloatingActionMiniSecondaryButton}" />
-                    <Button
-                        Grid.Row="0"
-                        Margin="0,0,20,0"
-                        HorizontalAlignment="Right"
-                        VerticalAlignment="Center"
-                        Command="{Binding RemoveSearchDirectoryCommand}"
-                        Content="{materialDesign:PackIcon Kind=Minus,
-                                                          Size=22}"
-                        Style="{StaticResource MaterialDesignFloatingActionMiniLightButton}" />
-                    <ListBox
-                        x:Name="DirectoriesList"
-                        Grid.Row="1"
-                        ItemsSource="{Binding SettingsDirectories, UpdateSourceTrigger=PropertyChanged}"
-                        SelectedItem="{Binding SelectedDirectory}" />
-                    <TextBlock
-                        Grid.Row="1"
-                        Margin="8"
-                        HorizontalAlignment="Center"
-                        VerticalAlignment="Center"
-                        Text="No Directories Selected"
-                        Visibility="{Binding Items.IsEmpty, Converter={StaticResource BooleanToVisibilityConverter}, ElementName=DirectoriesList}" />
-                </Grid>
-            </Border>
-            <DockPanel VerticalAlignment="Bottom" LastChildFill="False">
-                <Button
-                    Margin="5"
+          </Border>
+          <DockPanel VerticalAlignment="Bottom" LastChildFill="False">
+            <Button Margin="5"
                     Command="{Binding ClearFormCommand}"
                     Content="Clear"
                     DockPanel.Dock="Left"
                     Style="{StaticResource MaterialDesignRaisedSecondaryButton}" />
-                <Button
-                    Margin="5"
+            <Button Margin="5"
                     Command="{Binding CancelAddSearchSettingCommand}"
                     Content="_Cancel"
                     DockPanel.Dock="Right"
                     IsCancel="True"
                     Style="{StaticResource MaterialDesignRaisedDarkButton}" />
-                <Button
-                    Margin="5"
+            <Button Margin="5"
                     Command="{Binding SubmitCommand}"
                     Content="_Add"
                     DockPanel.Dock="Right"
                     IsDefault="True"
                     Style="{StaticResource MaterialDesignRaisedDarkButton}" />
-            </DockPanel>
+          </DockPanel>
         </StackPanel>
-    </Grid>
+      </Grid>
+    </GroupBox>
+  </ScrollViewer>
 </UserControl>
